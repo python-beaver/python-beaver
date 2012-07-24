@@ -1,18 +1,3 @@
-#!/usr/bin/env python
-
-"""
-Real time log files watcher supporting log rotation.
-
-Original Author: Giampaolo Rodola' <g.rodola [AT] gmail [DOT] com>
-http://code.activestate.com/recipes/577968-log-watcher-tail-f-log/
-
-License: MIT
-
-Other hacks (ZMQ, JSON, optparse, ...): lusis
-
-Redis, STDOUT support by Jose Gonzalez
-"""
-
 import datetime
 import errno
 import os
@@ -31,15 +16,15 @@ class Worker(object):
     >>> def callback(filename, lines):
     ...     print filename, lines
     ...
-    >>> l = LogWatcher("/var/log/", callback)
+    >>> l = Worker(args, callback, ["log", "txt"], tail_lines=0)
     >>> l.loop()
     """
 
     def __init__(self, args, callback, extensions=["log"], tail_lines=0):
         """Arguments:
 
-        (str) @folder:
-            the folder to watch
+        (str) @args:
+            set of arguments for the worker
 
         (callable) @callback:
             a function which is called every time a new line in a
