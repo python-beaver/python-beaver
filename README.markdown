@@ -1,6 +1,6 @@
 # Beaver
 
-python daemon that ingests logs and sends their contents to logstash
+python daemon that munches on logs and sends their contents to logstash
 
 ## Background
 
