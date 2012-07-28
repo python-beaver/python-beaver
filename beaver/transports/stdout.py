@@ -3,12 +3,13 @@ import socket
 
 from transport import *
 
-CURRENT_HOST = socket.gethostname()
-
 
 class StdoutTransport(Transport):
+
+    def __init__(self):
+        self.current_host = socket.gethostname()
 
     def callback(self, filename, lines):
         for line in lines:
             msg = line.rstrip(os.linesep)
-            print msg
+            print "[{0}] {1}".format(self.current_host, msg)

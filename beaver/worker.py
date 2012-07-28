@@ -4,6 +4,7 @@ import os
 import stat
 import sys
 import time
+from beaver.transports import *
 
 
 class Worker(object):
@@ -202,13 +203,10 @@ def run_worker(options):
         raise Exception('Invalid transport {0}'.format(options.transport))
 
     if options.transport == 'amqp':
-        from beaver.transports.amqp import AmqpTransport
         transport = AmqpTransport()
     if options.transport == 'redis':
-        from beaver.transports.redis import RedisTransport
         transport = RedisTransport()
     if options.transport == 'stdout':
-        from beaver.transports.stdout import StdoutTransport
         transport = StdoutTransport()
 
     try:
