@@ -1,7 +1,7 @@
 import os
 import socket
 
-from transport import *
+from transport import Transport
 
 
 class StdoutTransport(Transport):

@@ -3,7 +3,7 @@ import ujson as json
 import socket
 import zmq
 
-from transport import *
+from transport import Transport
 
 
 class AmqpTransport(Transport):

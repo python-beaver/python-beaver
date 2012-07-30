@@ -4,7 +4,7 @@ import ujson as json
 import socket
 import urlparse
 
-from transport import *
+from transport import Transport
 
 
 class RedisTransport(Transport):
