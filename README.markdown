@@ -4,13 +4,13 @@ python daemon that munches on logs and sends their contents to logstash
 
 ## Background
 
-Logstash shipper provides an lightweight method for shipping local log files to Logstash. It does this using either redis, stdin, zeromq as the transport. This means you'll need a redis, stdin, zeromq input somewhere down the road to get the events.
+Beaver provides an lightweight method for shipping local log files to Logstash. It does this using either redis, stdin, zeromq as the transport. This means you'll need a redis, stdin, zeromq input somewhere down the road to get the events.
 
 Events are sent in logstash's json_event format.
 
 Examples 1: Listening on port 5556 (all interfaces)
 
-    cli: ZEROMQ_ADDRESS="tcp://*:5556" logstash-shipper -m bind -p /var/log/
+    cli: ZEROMQ_ADDRESS="tcp://*:5556" python beaver.py -m bind -p /var/log/ -t amqp
     logstash config:
         input { zeromq {
             type => 'shipper-input'
@@ -22,7 +22,7 @@ Examples 1: Listening on port 5556 (all interfaces)
 
 Example 2: Connecting to remote port 5556 on indexer
 
-    cli: ZEROMQ_ADDRESS="tcp://indexer:5556" logstash-shipper -m connect -p /var/log/
+    cli: ZEROMQ_ADDRESS="tcp://indexer:5556" python beaver.py -m connect -p /var/log/ -t amqp
     logstash config:
         input { zeromq {
             type => 'shipper-input'
@@ -34,7 +34,7 @@ Example 2: Connecting to remote port 5556 on indexer
 
 Example 3: Sending messages to a redis list
 
-    cli: REDIS_URL="redis://localhost:6379/0" logstash-shipper -p /var/log/
+    cli: REDIS_URL="redis://localhost:6379/0" python beaver.py -p /var/log/ -t redis
 
 ## Credits
 Based on work from Giampaolo and Lusis:
