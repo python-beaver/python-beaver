@@ -1,6 +1,6 @@
 import os
 import redis
-import simplejson as json
+import ujson as json
 import socket
 import urlparse
 

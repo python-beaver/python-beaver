@@ -1,5 +1,5 @@
 import os
-import simplejson as json
+import ujson as json
 import socket
 import zmq
 
