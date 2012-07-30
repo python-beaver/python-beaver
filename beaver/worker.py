@@ -4,7 +4,9 @@ import os
 import stat
 import sys
 import time
-from beaver.transports import *
+from beaver.transports.amqp import AmqpTransport
+from beaver.transports.redis import RedisTransport
+from beaver.transports.stdout import StdoutTransport
 
 
 class Worker(object):
