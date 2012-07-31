@@ -36,7 +36,14 @@ Example 3: Sending messages to a redis list
 
     cli: REDIS_URL="redis://localhost:6379/0" python beaver.py -p /var/log/ -t redis
 
+## Todo
+
+- Use python threading + subprocess in order to support usage of `yield` across all operating systems
+- More transports
+- Ability to specify files, tags, and other  metadata within a configuration file
+
 ## Credits
+
 Based on work from Giampaolo and Lusis:
 
     Real time log files watcher supporting log rotation.
