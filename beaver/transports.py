@@ -1,9 +1,9 @@
-import zmq
 import os
 import redis
 import socket
 import ujson as json
 import urlparse
+import zmq
 
 from datetime import datetime
 
