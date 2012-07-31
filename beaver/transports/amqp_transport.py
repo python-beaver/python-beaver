@@ -2,6 +2,7 @@ import os
 import ujson as json
 import socket
 import zmq
+from datetime import datetime
 
 from transport import Transport
 
@@ -24,10 +25,14 @@ class AmqpTransport(Transport):
     def callback(self, filename, lines):
         for line in lines:
             json_msg = json.dumps({
-                '@source': "file://%s%s" % (self.current_host, filename),
+                '@source': "file://{0}{1}".format(self.current_host, filename),
+                '@type': "file",
+                '@tags': [],
+                '@fields': {},
+                '@timestamp': datetime.now().isoformat(),
                 '@source_host': self.current_host,
-                '@message': line.rstrip(os.linesep),
-                '@source_path': filename
+                '@source_path': filename,
+                '@message': line.strip(os.linesep),
             })
             self.pub.send(json_msg)
 

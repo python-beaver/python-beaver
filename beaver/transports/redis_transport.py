@@ -3,6 +3,7 @@ import redis
 import ujson as json
 import socket
 import urlparse
+from datetime import datetime
 
 from transport import Transport
 
@@ -15,14 +16,19 @@ class RedisTransport(Transport):
         _, _, _db = _url.path.rpartition("/")
         self.redis = redis.StrictRedis(_url.hostname, _url.port, int(_db))
         self.current_host = socket.gethostname()
-        self.namespace = os.environ.get("NAMESPACE", "logstash:beaver")
+        self.namespace = os.environ.get("REDIS_NAMESPACE", "logstash:beaver")
+        print "waiting"
 
     def callback(self, filename, lines):
         for line in lines:
             json_msg = json.dumps({
-                '@source': "file://%s%s" % (self.current_host, filename),
+                '@source': "file://{0}{1}".format(self.current_host, filename),
+                '@type': "file",
+                '@tags': [],
+                '@fields': {},
+                '@timestamp': datetime.now().isoformat(),
                 '@source_host': self.current_host,
-                '@message': line.rstrip(os.linesep),
-                '@source_path': filename
+                '@source_path': filename,
+                '@message': line.strip(os.linesep),
             })
             self.redis.lpush(self.namespace, json_msg)

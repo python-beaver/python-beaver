@@ -1,5 +1,6 @@
 import os
 import socket
+from datetime import datetime
 
 from transport import Transport
 
@@ -12,4 +13,4 @@ class StdoutTransport(Transport):
     def callback(self, filename, lines):
         for line in lines:
             msg = line.rstrip(os.linesep)
-            print "[{0}] {1}".format(self.current_host, msg)
+            print "[{0}] [{1}] {2}".format(self.current_host, datetime.now().isoformat(), msg)
