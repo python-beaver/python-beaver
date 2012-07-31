@@ -4,9 +4,7 @@ import os
 import stat
 import sys
 import time
-from beaver.transports.amqp_transport import AmqpTransport
-from beaver.transports.redis_transport import RedisTransport
-from beaver.transports.stdout_transport import StdoutTransport
+import beaver.transports as transports
 
 
 class Worker(object):
@@ -205,18 +203,19 @@ def run_worker(options):
         raise Exception('Invalid transport {0}'.format(options.transport))
 
     if options.transport == 'amqp':
-        transport = AmqpTransport()
+        transport = transports.AmqpTransport()
     if options.transport == 'redis':
-        transport = RedisTransport()
+        transport = transports.RedisTransport()
     if options.transport == 'stdout':
-        transport = StdoutTransport()
+        transport = transports.StdoutTransport()
 
     try:
         l = Worker(options, transport.callback)
         l.loop()
     except KeyboardInterrupt:
-        print("shutting down. please wait")
+        print("\nShutting down. Please wait.")
         transport.interrupt()
+        print("Shutdown complete.")
         sys.exit(0)
     except Exception, e:
         print("Unhandled Exception: %s" % str(e))
