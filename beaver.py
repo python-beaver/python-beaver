@@ -46,7 +46,7 @@ parser.add_argument('-r', '--run', help='run worker or interactive mode',
 parser.add_argument('-m', '--mode', help='bind or connect mode',
                     default='bind', choices=['bind', 'connect'])
 parser.add_argument('-p', '--path', help='path to log files', default="/var/log")
-parser.add_argument('-f', '--files', help='comma-separated filelist to watch. Overrides --path argument', default=None)
+parser.add_argument('-f', '--files', help='comma-separated filelist to watch. Overrides --path argument', default=None, nargs='+')
 parser.add_argument('-t', '--transport', help='log transport method', required=True)
 
 args = parser.parse_args()
