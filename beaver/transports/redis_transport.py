@@ -20,13 +20,14 @@ class RedisTransport(Transport):
         print "waiting"
 
     def callback(self, filename, lines):
+        timestamp = datetime.now().isoformat()
         for line in lines:
             json_msg = json.dumps({
                 '@source': "file://{0}{1}".format(self.current_host, filename),
                 '@type': "file",
                 '@tags': [],
                 '@fields': {},
-                '@timestamp': datetime.now().isoformat(),
+                '@timestamp': timestamp,
                 '@source_host': self.current_host,
                 '@source_path': filename,
                 '@message': line.strip(os.linesep),

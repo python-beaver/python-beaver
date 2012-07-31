@@ -11,6 +11,7 @@ class StdoutTransport(Transport):
         self.current_host = socket.gethostname()
 
     def callback(self, filename, lines):
+        timestamp = datetime.now().isoformat()
         for line in lines:
             msg = line.rstrip(os.linesep)
-            print "[{0}] [{1}] {2}".format(self.current_host, datetime.now().isoformat(), msg)
+            print "[{0}] [{1}] {2}".format(self.current_host, timestamp, msg)
