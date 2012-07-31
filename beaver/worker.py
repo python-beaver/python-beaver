@@ -75,7 +75,7 @@ class Worker(object):
 
     def log(self, line):
         """Log when a file is un/watched"""
-        print line
+        print "[{0}] {1}".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%i:%s'), line)
 
     def listdir(self):
         """List directory and filter files by extension.
@@ -175,7 +175,7 @@ class Worker(object):
             if err.errno != errno.ENOENT:
                 raise
         else:
-            self.log("[{0}] {1} - watching logfile {2}".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%i:%s'), fid, fname))
+            self.log("[{0}] - watching logfile {1}".format(fid, fname))
             self.files_map[fid] = file
 
     def unwatch(self, file, fid):
@@ -183,7 +183,7 @@ class Worker(object):
         # try to read it for the last time in case the
         # log rotator has written something in it.
         lines = self.readfile(file)
-        self.log("[{0}] {1} - un-watching logfile {2}".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%i:%s'), fid, file.name))
+        self.log("[{0}] - un-watching logfile {1}".format(fid, file.name))
         del self.files_map[fid]
         if lines:
             self.callback(file.name, lines)
@@ -210,14 +210,16 @@ def run_worker(options):
         transport = transports.StdoutTransport()
 
     try:
+        print "[{0}] Starting worker...".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%i:%s'))
         l = Worker(options, transport.callback)
+        print "[{0}] Working...".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%i:%s'))
         l.loop()
     except KeyboardInterrupt:
-        print("\nShutting down. Please wait.")
+        print "\n[{0}] Shutting down. Please wait.".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%i:%s'))
         transport.interrupt()
-        print("Shutdown complete.")
+        print "[{0}] Shutdown complete.".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%i:%s'))
         sys.exit(0)
     except Exception, e:
-        print("Unhandled Exception: %s" % str(e))
+        print "[{0}] Unhandled Exception: {1}".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%i:%s'), str(e))
         transport.unhandled()
         sys.exit(1)
