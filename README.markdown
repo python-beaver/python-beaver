@@ -18,8 +18,8 @@ optional arguments:
       -f FILES [FILES ...], --files FILES [FILES ...]
                             space-separated filelist to watch. Overrides --path
                             argument
-      -t TRANSPORT, --transport TRANSPORT
-                            log transport method
+      -t {amqp,redis,stdout}, --transport {amqp,redis,stdout}
+                        log transport method
 
 ## Background
 
