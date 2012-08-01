@@ -4,23 +4,22 @@ python daemon that munches on logs and sends their contents to logstash
 
 ## Usage
 
-usage: beaver.py [-h] [-r {worker,interactive}] [-m {bind,connect}] [-p PATH]
-                 [-f FILES [FILES ...]] [-t TRANSPORT]
-
-Beaver logfile shipper
+    usage: beaver.py [-h] [-r {worker,interactive}] [-m {bind,connect}] [-p PATH]
+                     [-f FILES [FILES ...]] [-t TRANSPORT]
 
 optional arguments:
-  -h, --help            show this help message and exit
-  -r {worker,interactive}, --run {worker,interactive}
-                        run worker or interactive mode
-  -m {bind,connect}, --mode {bind,connect}
-                        bind or connect mode
-  -p PATH, --path PATH  path to log files
-  -f FILES [FILES ...], --files FILES [FILES ...]
-                        space-separated filelist to watch. Overrides --path
-                        argument
-  -t TRANSPORT, --transport TRANSPORT
-                        log transport method
+
+      -h, --help            show this help message and exit
+      -r {worker,interactive}, --run {worker,interactive}
+                            run worker or interactive mode
+      -m {bind,connect}, --mode {bind,connect}
+                            bind or connect mode
+      -p PATH, --path PATH  path to log files
+      -f FILES [FILES ...], --files FILES [FILES ...]
+                            space-separated filelist to watch. Overrides --path
+                            argument
+      -t TRANSPORT, --transport TRANSPORT
+                            log transport method
 
 ## Background
 
