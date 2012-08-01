@@ -2,11 +2,33 @@
 
 python daemon that munches on logs and sends their contents to logstash
 
+## Usage
+
+usage: beaver.py [-h] [-r {worker,interactive}] [-m {bind,connect}] [-p PATH]
+                 [-f FILES [FILES ...]] [-t TRANSPORT]
+
+Beaver logfile shipper
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -r {worker,interactive}, --run {worker,interactive}
+                        run worker or interactive mode
+  -m {bind,connect}, --mode {bind,connect}
+                        bind or connect mode
+  -p PATH, --path PATH  path to log files
+  -f FILES [FILES ...], --files FILES [FILES ...]
+                        space-separated filelist to watch. Overrides --path
+                        argument
+  -t TRANSPORT, --transport TRANSPORT
+                        log transport method
+
 ## Background
 
 Beaver provides an lightweight method for shipping local log files to Logstash. It does this using either redis, stdin, zeromq as the transport. This means you'll need a redis, stdin, zeromq input somewhere down the road to get the events.
 
 Events are sent in logstash's json_event format. Options can also be set as environment variables.
+
+### Examples
 
 Example 1: Listen to all files in the default path of /var/log on standard out
 
