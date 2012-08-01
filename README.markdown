@@ -6,41 +6,52 @@ python daemon that munches on logs and sends their contents to logstash
 
 Beaver provides an lightweight method for shipping local log files to Logstash. It does this using either redis, stdin, zeromq as the transport. This means you'll need a redis, stdin, zeromq input somewhere down the road to get the events.
 
-Events are sent in logstash's json_event format.
+Events are sent in logstash's json_event format. Options can also be set as environment variables.
 
-Examples 1: Listening on port 5556 (all interfaces)
+Example 1: Listen to all files in the default path of /var/log on standard out
 
-    cli: ZEROMQ_ADDRESS="tcp://*:5556" python beaver.py -m bind -p /var/log/ -t amqp
-    logstash config:
-        input { zeromq {
-            type => 'shipper-input'
-            mode => 'client'
-            topology => 'pushpull'
-            address => 'tcp://shipperhost:5556'
-          } }
-        output { stdout { debug => true } }
+    python beaver.py
 
-Example 2: Connecting to remote port 5556 on indexer
+Example 2: Sending logs from /var/log files to a redis list
 
-    cli: ZEROMQ_ADDRESS="tcp://indexer:5556" python beaver.py -m connect -p /var/log/ -t amqp
-    logstash config:
-        input { zeromq {
-            type => 'shipper-input'
-            mode => 'server'
-            topology => 'pushpull'
-            address => 'tcp://*:5556'
-          }}
-        output { stdout { debug => true } }
+    REDIS_URL="redis://localhost:6379/0" python beaver.py -t redis
 
-Example 3: Sending messages to a redis list
+Example 3: Use environment variables to send logs from /var/log files to a redis list
 
-    cli: REDIS_URL="redis://localhost:6379/0" python beaver.py -p /var/log/ -t redis
+    REDIS_URL="redis://localhost:6379/0" BEAVER_PATH="/var/log" BEAVER_TRANSPORT=redis python beaver.py
+
+Example 4: Zeromq listening on port 5556 (all interfaces)
+
+    ZEROMQ_ADDRESS="tcp://*:5556" python beaver.py -m bind
+
+    # logstash config:
+    input { zeromq {
+        type => 'shipper-input'
+        mode => 'client'
+        topology => 'pushpull'
+        address => 'tcp://shipperhost:5556'
+      } }
+    output { stdout { debug => true } }
+
+Example 5: Zeromq connecting to remote port 5556 on indexer
+
+    ZEROMQ_ADDRESS="tcp://indexer:5556" python beaver.py -m connect
+
+    # logstash config:
+    input { zeromq {
+        type => 'shipper-input'
+        mode => 'server'
+        topology => 'pushpull'
+        address => 'tcp://*:5556'
+      }}
+    output { stdout { debug => true } }
 
 ## Todo
 
 - Use python threading + subprocess in order to support usage of `yield` across all operating systems
 - Fix usage on non-linux platforms - file.readline() does not work as expected on OS X. See above for potential solution
 - More transports
+- Separate tranports into different files so that individual transport requirements are not required on all installations (libzmq)
 - Ability to specify files, tags, and other  metadata within a configuration file
 
 ## Credits

@@ -1,53 +1,52 @@
 #!/usr/bin/env python
 
 import argparse
+import os
 
 import beaver
 
 epilog_example = """
-Logstash shipper provides an lightweight method for shipping local
-log files to Logstash.
-It does this using zeromq as the transport. This means you'll need
-a zeromq input somewhere down the road to get the events.
+Beaver provides an lightweight method for shipping local log
+files to Logstash. It does this using either redis, stdin,
+zeromq as the transport. This means you'll need a redis,
+stdin, zeromq input somewhere down the road to get the events.
 
-Events are sent in logstash's json_event format.
+Events are sent in logstash's json_event format. Options can
+also be set as environment variables.
 
-Examples 1: Listening on port 5556 (all interfaces)
-    cli: ZEROMQ_ADDRESS="tcp://*:5556" logstash-shipper -m bind -p /var/log/
-    logstash config:
-        input { zeromq {
-            type => 'shipper-input'
-            mode => 'client'
-            topology => 'pushpull'
-            address => 'tcp://shipperhost:5556'
-          } }
-        output { stdout { debug => true } }
+Example 1: Listen to all files in the default path of /var/log on standard out
+    cli: python beaver.py
 
-Example 2: Connecting to remote port 5556 on indexer
-    cli: ZEROMQ_ADDRESS="tcp://indexer:5556" logstash-shipper -m connect -p /var/log/
-    logstash config:
-        input { zeromq {
-            type => 'shipper-input'
-            mode => 'server'
-            topology => 'pushpull'
-            address => 'tcp://*:5556'
-          }}
-        output { stdout { debug => true } }
+Example 2: Sending logs from /var/log files to a redis list
+    cli: REDIS_URL="redis://localhost:6379/0" python beaver.py -t redis
 
-Example 3: Sending messages to a redis list
-    cli: REDIS_URL="redis://localhost:6379/0" logstash-shipper -p /var/log/
+Example 3: Use environment variables to send logs from /var/log files to a redis list
+    cli: REDIS_URL="redis://localhost:6379/0" BEAVER_PATH="/var/log" BEAVER_TRANSPORT=redis python beaver.py
 
+Example 4: Zeromq listening on port 5556 (all interfaces)
+
+    cli: ZEROMQ_ADDRESS="tcp://*:5556" python beaver.py -m bind
+
+Example 5: Zeromq connecting to remote port 5556 on indexer
+    cli: ZEROMQ_ADDRESS="tcp://indexer:5556" python beaver.py -m connect
 """
-parser = argparse.ArgumentParser(description='Logstash logfile shipper',
+parser = argparse.ArgumentParser(description='Beaver logfile shipper',
                                 epilog=epilog_example,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
-parser.add_argument('-r', '--run', help='run worker or interactive mode',
-                    default='worker', choices=['worker', 'interactive'])
-parser.add_argument('-m', '--mode', help='bind or connect mode',
-                    default='bind', choices=['bind', 'connect'])
-parser.add_argument('-p', '--path', help='path to log files', default="/var/log")
-parser.add_argument('-f', '--files', help='comma-separated filelist to watch. Overrides --path argument', default=None, nargs='+')
-parser.add_argument('-t', '--transport', help='log transport method', required=True)
+parser.add_argument('-r', '--run', help='run worker or interactive mode', choices=['worker', 'interactive'])
+parser.add_argument('-m', '--mode', help='bind or connect mode', choices=['bind', 'connect'])
+parser.add_argument('-p', '--path', help='path to log files')
+parser.add_argument('-f', '--files', help='space-separated filelist to watch. Overrides --path argument', nargs='+')
+parser.add_argument('-t', '--transport', help='log transport method')
+
+# Support env variable parsing as well
+parser.set_defaults(
+    run=os.environ.get("BEAVER_RUN", 'worker'),
+    mode=os.environ.get("BEAVER_MODE", 'bind'),
+    path=os.environ.get("BEAVER_PATH", '/var/log'),
+    files=os.environ.get("BEAVER_FILES", None),
+    transport=os.environ.get("BEAVER_TRANSPORT", 'stdout')
+)
 
 args = parser.parse_args()
 
