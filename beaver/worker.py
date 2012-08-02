@@ -199,11 +199,11 @@ class Worker(object):
 
 
 def run_worker(options):
-    if options.transport not in ['amqp', 'redis', 'stdout']:
+    if options.transport not in ['zmq', 'redis', 'stdout']:
         raise Exception('Invalid transport {0}'.format(options.transport))
 
-    if options.transport == 'amqp':
-        transport = transports.AmqpTransport()
+    if options.transport == 'zmq':
+        transport = transports.ZmqTransport()
     if options.transport == 'redis':
         transport = transports.RedisTransport()
     if options.transport == 'stdout':

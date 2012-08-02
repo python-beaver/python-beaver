@@ -20,7 +20,7 @@ class Transport(object):
         return True
 
 
-class AmqpTransport(Transport):
+class ZmqTransport(Transport):
 
     def __init__(self):
         zeromq_address = os.environ.get("ZEROMQ_ADDRESS", "tcp://localhost:2120")
