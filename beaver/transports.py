@@ -106,7 +106,7 @@ class RabbitmqTransport(Transport):
         rabbitmq_vhost   = os.environ.get("RABBITMQ_VHOST", "/")
         rabbitmq_user    = os.environ.get("RABBITMQ_USERNAME", 'guest')
         rabbitmq_pass    = os.environ.get("RABBITMQ_PASSWORD", 'guest')
-        self.rabbitmq_rk = os.environ.get("RABBITMQ_ROUTING_KEY", '')
+        self.rabbitmq_rk = os.environ.get("RABBITMQ_ROUTING_KEY", 'logstash')
         self.rabbitmq_queue = os.environ.get("RABBITMQ_ROUTING_QUEUE", 'logstash-queue')
 
 
@@ -140,7 +140,7 @@ class RabbitmqTransport(Transport):
                 '@source_path': filename,
                 '@message': line.strip(os.linesep),
             })
-            self.channel.basic_publish(exchange='',
+            self.channel.basic_publish(exchange=self.rabbitmq_queue,
                 routing_key=self.rabbitmq_rk,
                 body=json_msg,
                 properties=pika.BasicProperties(
