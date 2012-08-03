@@ -199,7 +199,7 @@ class Worker(object):
 
 
 def run_worker(options):
-    if options.transport not in ['zmq', 'redis', 'stdout']:
+    if options.transport not in ['zmq', 'redis', 'stdout', 'rabbitmq']:
         raise Exception('Invalid transport {0}'.format(options.transport))
 
     if options.transport == 'zmq':
