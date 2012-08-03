@@ -37,7 +37,7 @@ parser.add_argument('-r', '--run', help='run worker or interactive mode', choice
 parser.add_argument('-m', '--mode', help='bind or connect mode', choices=['bind', 'connect'])
 parser.add_argument('-p', '--path', help='path to log files')
 parser.add_argument('-f', '--files', help='space-separated filelist to watch. Overrides --path argument', nargs='+')
-parser.add_argument('-t', '--transport', help='log transport method', choices=['zmq', 'redis', 'stdout'])
+parser.add_argument('-t', '--transport', help='log transport method', choices=['zmq', 'rabbitmq','redis', 'stdout'])
 
 # Support env variable parsing as well
 parser.set_defaults(

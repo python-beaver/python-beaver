@@ -208,6 +208,8 @@ def run_worker(options):
         transport = transports.RedisTransport()
     if options.transport == 'stdout':
         transport = transports.StdoutTransport()
+    if options.transport == 'rabbitmq':
+        transport = transports.RabbitmqTransport()
 
     try:
         print "[{0}] Starting worker...".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%i:%s'))
