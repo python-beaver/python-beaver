@@ -143,7 +143,7 @@ class RabbitmqTransport(Transport):
             self.channel.basic_publish(exchange='',
                 routing_key=self.rabbitmq_rk,
                 body=json_msg,
-                properties=BasicProperties(
+                properties=pika.BasicProperties(
                     content_type="text/json",
                     delivery_mode=1
                 )
