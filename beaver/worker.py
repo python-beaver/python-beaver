@@ -199,15 +199,14 @@ class Worker(object):
 
 
 def run_worker(options):
-    if options.transport not in ['zmq', 'redis', 'stdout']:
-        raise Exception('Invalid transport {0}'.format(options.transport))
-
-    if options.transport == 'zmq':
-        transport = transports.ZmqTransport()
     if options.transport == 'redis':
         transport = transports.RedisTransport()
-    if options.transport == 'stdout':
+    elif options.transport == 'stdout':
         transport = transports.StdoutTransport()
+    elif options.transport == 'zmq':
+        transport = transports.ZmqTransport()
+    else:
+        raise Exception('Invalid transport {0}'.format(options.transport))
 
     try:
         print "[{0}] Starting worker...".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%i:%s'))
