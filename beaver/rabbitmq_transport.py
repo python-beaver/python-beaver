@@ -27,8 +27,8 @@ class RabbitmqTransport(Transport):
             port=rabbitmq_port,
             virtual_host=rabbitmq_vhost
         )
-        connection = pika.adapters.BlockingConnection(parameters)
-        self.channel = connection.channel()
+        self.connection = pika.adapters.BlockingConnection(parameters)
+        self.channel = self.connection.channel()
         self.channel.queue_declare(queue=self.rabbitmq_queue)
 
         self.current_host = socket.gethostname()
@@ -56,3 +56,11 @@ class RabbitmqTransport(Transport):
                     delivery_mode=1
                 )
             )
+
+
+    def interrupt(self):
+        self.connection.close()
+
+
+    def unhandled(self):
+        return True
