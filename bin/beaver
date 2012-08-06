@@ -2,8 +2,7 @@
 
 import argparse
 import os
-
-import beaver
+import beaver.worker
 
 epilog_example = """
 Beaver provides an lightweight method for shipping local log
@@ -33,7 +32,6 @@ Example 5: Zeromq connecting to remote port 5556 on indexer
 parser = argparse.ArgumentParser(description='Beaver logfile shipper',
                                 epilog=epilog_example,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
-parser.add_argument('-r', '--run', help='run worker or interactive mode', choices=['worker', 'interactive'])
 parser.add_argument('-m', '--mode', help='bind or connect mode', choices=['bind', 'connect'])
 parser.add_argument('-p', '--path', help='path to log files')
 parser.add_argument('-f', '--files', help='space-separated filelist to watch. Overrides --path argument', nargs='+')
@@ -41,13 +39,13 @@ parser.add_argument('-t', '--transport', help='log transport method', choices=['
 
 # Support env variable parsing as well
 parser.set_defaults(
-    run=os.environ.get("BEAVER_RUN", 'worker'),
     mode=os.environ.get("BEAVER_MODE", 'bind'),
     path=os.environ.get("BEAVER_PATH", '/var/log'),
     files=os.environ.get("BEAVER_FILES", None),
     transport=os.environ.get("BEAVER_TRANSPORT", 'stdout')
 )
 
+
 args = parser.parse_args()
 
-beaver.cli(args.run, args)
+beaver.worker.run_worker(args)
