@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>Beaver by josegonzalez</title>
+  </head>
+
+  <body>
+    <div id="container">
+      <div class="inner">
+
+        <header>
+          <h1>Beaver</h1>
+          <h2>python daemon that munches on logs and sends their contents to logstash</h2>
+        </header>
+
+        <section id="downloads" class="clearfix">
+          <a href="https://github.com/josegonzalez/beaver/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
+          <a href="https://github.com/josegonzalez/beaver/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
+          <a href="https://github.com/josegonzalez/beaver" id="view-on-github" class="button"><span>View on GitHub</span></a>
+        </section>
+
+        <hr>
+
+        <section id="main_content">
+          <h1>Requirements</h1>
+
+<ul>
+<li>Python 2.7 (untested on other versions)</li>
+<li>libzmq (<code>brew install zmq</code> or <code>apt-get install libzmq-dev</code>)</li>
+</ul><h1>Installation</h1>
+
+<p>Using PIP:</p>
+
+<p>From Github::</p>
+
+<pre><code>pip install git+git://github.com/josegonzalez/beaver.git#egg=beaver
+</code></pre>
+
+<p>From PyPI::</p>
+
+<pre><code>pip install beaver==1
+</code></pre>
+
+<h1>Usage</h1>
+
+<p>usage::</p>
+
+<pre><code>beaver [-h] [-r {worker,interactive}] [-m {bind,connect}] [-p PATH]
+                 [-f FILES [FILES ...]] [-t TRANSPORT]
+</code></pre>
+
+<p>optional arguments::</p>
+
+<pre><code>-h, --help            show this help message and exit
+-m {bind,connect}, --mode {bind,connect}
+                      bind or connect mode
+-p PATH, --path PATH  path to log files
+-f FILES [FILES ...], --files FILES [FILES ...]
+                      space-separated filelist to watch. Overrides --path
+                      argument
+-t {amqp,redis,stdout}, --transport {amqp,redis,stdout}
+                  log transport method
+</code></pre>
+
+<h1>Background</h1>
+
+<p>Beaver provides an lightweight method for shipping local log files to Logstash. It does this using either redis, stdin, zeromq as the transport. This means you'll need a redis, stdin, zeromq input somewhere down the road to get the events.</p>
+
+<p>Events are sent in logstash's <code>json_event</code> format. Options can also be set as environment variables.</p>
+
+<h2>Examples</h2>
+
+<p>Example 1: Listen to all files in the default path of /var/log on standard out::</p>
+
+<pre><code>beaver
+</code></pre>
+
+<p>Example 2: Sending logs from /var/log files to a redis list::</p>
+
+<pre><code>REDIS_URL="redis://localhost:6379/0" beaver -t redis
+</code></pre>
+
+<p>Example 3: Use environment variables to send logs from /var/log files to a redis list::</p>
+
+<pre><code>REDIS_URL="redis://localhost:6379/0" BEAVER_PATH="/var/log" BEAVER_TRANSPORT=redis beaver
+</code></pre>
+
+<p>Example 4: Zeromq listening on port 5556 (all interfaces)::</p>
+
+<pre><code>ZEROMQ_ADDRESS="tcp://*:5556" beaver -m bind
+
+# logstash config:
+input { zeromq {
+    type =&gt; 'shipper-input'
+    mode =&gt; 'client'
+    topology =&gt; 'pushpull'
+    address =&gt; 'tcp://shipperhost:5556'
+  } }
+output { stdout { debug =&gt; true } }
+</code></pre>
+
+<p>Example 5: Zeromq connecting to remote port 5556 on indexer::</p>
+
+<pre><code>ZEROMQ_ADDRESS="tcp://indexer:5556" beaver -m connect
+
+# logstash config:
+input { zeromq {
+    type =&gt; 'shipper-input'
+    mode =&gt; 'server'
+    topology =&gt; 'pushpull'
+    address =&gt; 'tcp://*:5556'
+  }}
+output { stdout { debug =&gt; true } }
+</code></pre>
+
+<p>Example 6: Real-world usage of Redis as a transport::</p>
+
+<pre><code># in /etc/hosts
+192.168.0.10 redis-internal
+
+# From the commandline
+REDIS_NAMESPACE='app:unmappable' REDIS_URL='redis://redis-internal:6379/0' beaver -f /var/log/unmappable.log -t redis
+
+# logstash indexer config:
+redis {
+    host =&gt; 'redis-internal' # this is in dns for work
+    data_type =&gt; 'list'
+    key =&gt; 'app:unmappable'
+    type =&gt; 'app:unmappable'
+}
+</code></pre>
+
+<p>As you can see, <code>beaver</code> is pretty flexible as to how you can use/abuse it in production.</p>
+
+<h1>Todo</h1>
+
+<ul>
+<li>Use python threading + subprocess in order to support usage of <code>yield</code> across all operating systems</li>
+<li>Fix usage on non-linux platforms - file.readline() does not work as expected on OS X. See above for potential solution</li>
+<li>More transports</li>
+<li>~Separate tranports into different files so that individual transport requirements are not required on all installations (libzmq)~</li>
+<li>~Create a python package~</li>
+<li>Ability to specify files, tags, and other  metadata within a configuration file</li>
+</ul><h1>Credits</h1>
+
+<p>Based on work from Giampaolo and Lusis::</p>
+
+<pre><code>Real time log files watcher supporting log rotation.
+
+Original Author: Giampaolo Rodola' &lt;g.rodola [AT] gmail [DOT] com&gt;
+http://code.activestate.com/recipes/577968-log-watcher-tail-f-log/
+
+License: MIT
+
+Other hacks (ZMQ, JSON, optparse, ...): lusis
+</code></pre>
+        </section>
+
+        <footer>
+          Beaver is maintained by <a href="https://github.com/josegonzalez">josegonzalez</a><br>
+          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="http://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+
+        
+      </div>
+    </div>
+  </body>
+</html>
