@@ -4,6 +4,12 @@ Beaver
 
 python daemon that munches on logs and sends their contents to logstash
 
+Requirements
+============
+
+* Python 2.7 (untested on other versions)
+* libzmq (``brew install zmq`` or ``apt-get install libzmq-dev``)
+
 Installation
 ============
 
