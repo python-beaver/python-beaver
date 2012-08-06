@@ -89,7 +89,8 @@ Todo
 * Use python threading + subprocess in order to support usage of ``yield`` across all operating systems
 * Fix usage on non-linux platforms - file.readline() does not work as expected on OS X. See above for potential solution
 * More transports
-* Separate tranports into different files so that individual transport requirements are not required on all installations (libzmq)
+* ~Separate tranports into different files so that individual transport requirements are not required on all installations (libzmq)~
+* ~Create a python package~
 * Ability to specify files, tags, and other  metadata within a configuration file
 
 Credits
