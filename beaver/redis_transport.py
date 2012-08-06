@@ -11,13 +11,12 @@ import beaver.transport
 class RedisTransport(beaver.transport.Transport):
 
     def __init__(self):
-        _r = os.environ.get("REDIS_URL", None)
-        print _r
-        _url = urlparse.urlparse(_r, scheme="redis")
+        REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
+        _url = urlparse.urlparse(REDIS_URL, scheme="redis")
         _, _, _db = _url.path.rpartition("/")
-        self.redis = redis.StrictRedis(_url.hostname, _url.port, int(_db))
+        self.redis = redis.StrictRedis(host=_url.hostname, port=_url.port, db=int(_db), socket_timeout=10)
         self.current_host = socket.gethostname()
-        self.namespace = os.environ.get("REDIS_NAMESPACE", "logstash:beaver")
+        self.redis_namespace = os.environ.get("REDIS_NAMESPACE", "logstash:beaver")
 
     def callback(self, filename, lines):
         timestamp = datetime.datetime.now().isoformat()
@@ -32,4 +31,4 @@ class RedisTransport(beaver.transport.Transport):
                 '@source_path': filename,
                 '@message': line.strip(os.linesep),
             })
-            self.redis.lpush(self.namespace, json_msg)
+            self.redis.lpush(self.redis_namespace, json_msg)
