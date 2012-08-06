@@ -28,8 +28,6 @@ usage::
 optional arguments::
 
     -h, --help            show this help message and exit
-    -r {worker,interactive}, --run {worker,interactive}
-                          run worker or interactive mode
     -m {bind,connect}, --mode {bind,connect}
                           bind or connect mode
     -p PATH, --path PATH  path to log files

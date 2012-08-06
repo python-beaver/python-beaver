@@ -39,7 +39,6 @@ parser.add_argument('-t', '--transport', help='log transport method', choices=['
 
 # Support env variable parsing as well
 parser.set_defaults(
-    run=os.environ.get("BEAVER_RUN", 'worker'),
     mode=os.environ.get("BEAVER_MODE", 'bind'),
     path=os.environ.get("BEAVER_PATH", '/var/log'),
     files=os.environ.get("BEAVER_FILES", None),
