@@ -204,6 +204,9 @@ def run_worker(options):
     elif options.transport == 'zmq':
         import beaver.zmq_transport
         transport = beaver.zmq_transport.ZmqTransport()
+    elif options.transport == 'rabbitmq':
+        import beaver.rabbitmq_transport
+        transport = beaver.rabbitmq_transport.ZmqTransport()
     else:
         raise Exception('Invalid transport {0}'.format(options.transport))
 
