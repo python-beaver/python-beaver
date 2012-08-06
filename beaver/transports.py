@@ -107,7 +107,7 @@ class RabbitmqTransport(Transport):
         rabbitmq_user    = os.environ.get("RABBITMQ_USERNAME", 'guest')
         rabbitmq_pass    = os.environ.get("RABBITMQ_PASSWORD", 'guest')
         self.rabbitmq_exchange = os.environ.get("RABBITMQ_EXCHANGE", '')
-        self.rabbitmq_queue = os.environ.get("RABBITMQ_QUEUE", 'logstash-queue')
+        self.rabbitmq_queue    = os.environ.get("RABBITMQ_QUEUE", 'logstash-queue')
 
 
         credentials = pika.PlainCredentials(
