@@ -4,6 +4,15 @@ Beaver
 
 python daemon that munches on logs and sends their contents to logstash
 
+Installation
+============
+
+Using PIP::
+
+    pip install git+git://github.com/josegonzalez/beaver.git#egg=beaver
+
+PyPI package forthcoming.
+
 Usage
 =====
 
