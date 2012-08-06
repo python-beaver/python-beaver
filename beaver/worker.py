@@ -1,10 +1,9 @@
-import datetime
 import errno
 import os
 import stat
 import sys
 import time
-import beaver.transports as transports
+import beaver.utils as utils
 
 
 class Worker(object):
@@ -72,10 +71,6 @@ class Worker(object):
             if async:
                 return
             time.sleep(interval)
-
-    def log(self, line):
-        """Log when a file is un/watched"""
-        print "[{0}] {1}".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%i:%s'), line)
 
     def listdir(self):
         """List directory and filter files by extension.
@@ -175,7 +170,7 @@ class Worker(object):
             if err.errno != errno.ENOENT:
                 raise
         else:
-            self.log("[{0}] - watching logfile {1}".format(fid, fname))
+            utils.log("[{0}] - watching logfile {1}".format(fid, fname))
             self.files_map[fid] = file
 
     def unwatch(self, file, fid):
@@ -183,7 +178,7 @@ class Worker(object):
         # try to read it for the last time in case the
         # log rotator has written something in it.
         lines = self.readfile(file)
-        self.log("[{0}] - un-watching logfile {1}".format(fid, file.name))
+        utils.log("[{0}] - un-watching logfile {1}".format(fid, file.name))
         del self.files_map[fid]
         if lines:
             self.callback(file.name, lines)
@@ -199,29 +194,33 @@ class Worker(object):
 
 
 def run_worker(options):
-    if options.transport not in ['zmq', 'redis', 'stdout', 'rabbitmq']:
+    utils.log("Logging using the {0} transport".format(options.transport))
+    if options.transport == 'redis':
+        import beaver.redis_transport
+        transport = beaver.redis_transport.RedisTransport()
+    elif options.transport == 'stdout':
+        import beaver.stdout_transport
+        transport = beaver.stdout_transport.StdoutTransport()
+    elif options.transport == 'zmq':
+        import beaver.zmq_transport
+        transport = beaver.zmq_transport.ZmqTransport()
+    elif options.transport == 'rabbitmq':
+        import beaver.rabbitmq_transport
+        transport = beaver.rabbitmq_transport.RabbitmqTransport()
+    else:
         raise Exception('Invalid transport {0}'.format(options.transport))
 
-    if options.transport == 'zmq':
-        transport = transports.ZmqTransport()
-    if options.transport == 'redis':
-        transport = transports.RedisTransport()
-    if options.transport == 'stdout':
-        transport = transports.StdoutTransport()
-    if options.transport == 'rabbitmq':
-        transport = transports.RabbitmqTransport()
-
     try:
-        print "[{0}] Starting worker...".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%i:%s'))
+        utils.log("Starting worker...")
         l = Worker(options, transport.callback)
-        print "[{0}] Working...".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%i:%s'))
+        utils.log("Working...")
         l.loop()
     except KeyboardInterrupt:
-        print "\n[{0}] Shutting down. Please wait.".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%i:%s'))
+        utils.log("Shutting down. Please wait.")
         transport.interrupt()
-        print "[{0}] Shutdown complete.".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%i:%s'))
+        utils.log("Shutdown complete.")
         sys.exit(0)
     except Exception, e:
-        print "[{0}] Unhandled Exception: {1}".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%i:%s'), str(e))
+        utils.log("Unhandled Exception: {0}".format(str(e)))
         transport.unhandled()
         sys.exit(1)
