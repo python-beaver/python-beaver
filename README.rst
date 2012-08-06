@@ -91,6 +91,24 @@ Example 5: Zeromq connecting to remote port 5556 on indexer::
       }}
     output { stdout { debug => true } }
 
+Example 6: Real-world usage of Redis as a transport::
+
+    # in /etc/hosts
+    192.168.0.10 redis-internal
+
+    # From the commandline
+    REDIS_NAMESPACE='app:unmappable' REDIS_URL='redis://redis-internal:6379/0' beaver -f /var/log/unmappable.log -t redis
+
+    # logstash indexer config:
+    redis {
+        host => 'redis-internal' # this is in dns for work
+        data_type => 'list'
+        key => 'app:unmappable'
+        type => 'app:unmappable'
+    }
+
+As you can see, ``beaver`` is pretty flexible as to how you can use/abuse it in production.
+
 Todo
 ====
 
