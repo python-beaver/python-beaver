@@ -213,7 +213,20 @@ class Worker(object):
 
 
 def run_worker(options):
-    if options.transport not in ['amqp', 'redis', 'stdout']:
+    utils.log("Logging using the {0} transport".format(options.transport))
+    if options.transport == 'redis':
+        import beaver.redis_transport
+        transport = beaver.redis_transport.RedisTransport()
+    elif options.transport == 'stdout':
+        import beaver.stdout_transport
+        transport = beaver.stdout_transport.StdoutTransport()
+    elif options.transport == 'zmq':
+        import beaver.zmq_transport
+        transport = beaver.zmq_transport.ZmqTransport()
+    elif options.transport == 'rabbitmq':
+        import beaver.rabbitmq_transport
+        transport = beaver.rabbitmq_transport.RabbitmqTransport()
+    else:
         raise Exception('Invalid transport {0}'.format(options.transport))
 
     if options.transport == 'amqp':
