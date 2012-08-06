@@ -5,7 +5,7 @@ import pika
 
 import beaver.transport
 
-class RabbitmqTransport(Transport):
+class RabbitmqTransport(beaver.transport.Transport):
 
     def __init__(self):
         # Create our connection object
