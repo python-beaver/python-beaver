@@ -31,14 +31,14 @@ class RabbitmqTransport(beaver.transport.Transport):
         # Setup RabbitMQ connection
         self.connection = pika.adapters.BlockingConnection(parameters)
         self.channel = self.connection.channel()
-        queue = self.channel.queue_declare(queue=rabbitmq_queue)
+        self.channel.queue_declare(queue=rabbitmq_queue)
         self.channel.exchange_declare(
             exchange=self.rabbitmq_exchange,
             type='fanout'
         )
         self.channel.queue_bind(
             exchange=self.rabbitmq_exchange,
-            queue=queue
+            queue=rabbitmq_queue
         )
 
         self.current_host = socket.gethostname()
