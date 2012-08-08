@@ -15,8 +15,8 @@ class RabbitmqTransport(beaver.transport.Transport):
         rabbitmq_vhost   = os.environ.get("RABBITMQ_VHOST", "/")
         rabbitmq_user    = os.environ.get("RABBITMQ_USERNAME", 'guest')
         rabbitmq_pass    = os.environ.get("RABBITMQ_PASSWORD", 'guest')
-        self.rabbitmq_exchange = os.environ.get("RABBITMQ_EXCHANGE", '')
-        self.rabbitmq_queue    = os.environ.get("RABBITMQ_QUEUE", 'logstash-queue')
+        self.rabbitmq_exchange = os.environ.get("RABBITMQ_EXCHANGE", 'logstash-exchange')
+        rabbitmq_queue    = os.environ.get("RABBITMQ_QUEUE", 'logstash-queue')
 
         credentials = pika.PlainCredentials(
             rabbitmq_user,
@@ -28,9 +28,18 @@ class RabbitmqTransport(beaver.transport.Transport):
             port=rabbitmq_port,
             virtual_host=rabbitmq_vhost
         )
+        # Setup RabbitMQ connection
         self.connection = pika.adapters.BlockingConnection(parameters)
         self.channel = self.connection.channel()
-        self.channel.queue_declare(queue=self.rabbitmq_queue)
+        queue = self.channel.queue_declare(queue=rabbitmq_queue)
+        self.channel.exchange_declare(
+            exchange=self.rabbitmq_exchange,
+            type='fanout'
+        )
+        self.channel.queue_bind(
+            exchange=self.rabbitmq_exchange,
+            queue=queue
+        )
 
         self.current_host = socket.gethostname()
 
@@ -50,7 +59,7 @@ class RabbitmqTransport(beaver.transport.Transport):
             })
             self.channel.basic_publish(
                 exchange=self.rabbitmq_exchange,
-                routing_key=self.rabbitmq_queue,
+                routing_key='',
                 body=json_msg,
                 properties=pika.BasicProperties(
                     content_type="text/json",
