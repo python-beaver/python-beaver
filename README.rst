@@ -4,6 +4,12 @@ Beaver
 
 python daemon that munches on logs and sends their contents to logstash
 
+Requirements
+============
+
+* Python 2.7 (untested on other versions)
+* libzmq (``brew install zmq`` or ``apt-get install libzmq-dev``)
+
 Installation
 ============
 
@@ -84,6 +90,24 @@ Example 5: Zeromq connecting to remote port 5556 on indexer::
         address => 'tcp://*:5556'
       }}
     output { stdout { debug => true } }
+
+Example 6: Real-world usage of Redis as a transport::
+
+    # in /etc/hosts
+    192.168.0.10 redis-internal
+
+    # From the commandline
+    REDIS_NAMESPACE='app:unmappable' REDIS_URL='redis://redis-internal:6379/0' beaver -f /var/log/unmappable.log -t redis
+
+    # logstash indexer config:
+    redis {
+        host => 'redis-internal' # this is in dns for work
+        data_type => 'list'
+        key => 'app:unmappable'
+        type => 'app:unmappable'
+    }
+
+As you can see, ``beaver`` is pretty flexible as to how you can use/abuse it in production.
 
 Todo
 ====
