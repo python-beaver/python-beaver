@@ -28,6 +28,9 @@ Example 4: Zeromq listening on port 5556 (all interfaces)
 
 Example 5: Zeromq connecting to remote port 5556 on indexer
     cli: ZEROMQ_ADDRESS="tcp://indexer:5556" python beaver.py -m connect
+
+Example 6: RabbitMQ connecting to defaults on remote broker
+    cli: RABBITMQ_ADDRESS="10.0.0.1" python beaver.py -t rabbitmq
 """
 parser = argparse.ArgumentParser(description='Beaver logfile shipper',
                                 epilog=epilog_example,

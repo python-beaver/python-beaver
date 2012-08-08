@@ -85,6 +85,24 @@ Example 5: Zeromq connecting to remote port 5556 on indexer::
       }}
     output { stdout { debug => true } }
 
+Example 6: RabbitMQ connecting to defaults on remote broker
+
+    RABBITMQ_ADDRESS="10.0.0.1" beaver -t rabbitmq
+
+    # logstash config:
+    input { amqp {
+        name => "logstash-queue"
+        type => "direct"
+        host => "10.0.0.1"
+        exchange => "logstash-exchange"
+        key => "logstash-key"
+        exclusive => false
+        durable => false
+        auto_delete => false
+      }}
+    output { stdout { debug => "true" }}
+
+
 Todo
 ====
 
