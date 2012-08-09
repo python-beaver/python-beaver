@@ -195,6 +195,7 @@ class Worker(object):
 
 def run_worker(options):
     utils.log("Logging using the {0} transport".format(options.transport))
+
     if options.transport == 'redis':
         import beaver.redis_transport
         transport = beaver.redis_transport.RedisTransport()
@@ -204,6 +205,9 @@ def run_worker(options):
     elif options.transport == 'zmq':
         import beaver.zmq_transport
         transport = beaver.zmq_transport.ZmqTransport()
+    elif options.transport == 'rabbitmq':
+        import beaver.rabbitmq_transport
+        transport = beaver.rabbitmq_transport.RabbitmqTransport()
     else:
         raise Exception('Invalid transport {0}'.format(options.transport))
 
