@@ -195,6 +195,7 @@ class Worker(object):
 
 def run_worker(options):
     utils.log("Logging using the {0} transport".format(options.transport))
+
     if options.transport == 'redis':
         import beaver.redis_transport
         transport = beaver.redis_transport.RedisTransport()
