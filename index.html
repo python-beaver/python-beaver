@@ -141,6 +141,24 @@ redis {
 
 <p>As you can see, <code>beaver</code> is pretty flexible as to how you can use/abuse it in production.</p>
 
+<p>Example 7: RabbitMQ connecting to defaults on remote broker</p>
+
+<pre><code>RABBITMQ_ADDRESS="10.0.0.1" beaver -t rabbitmq
+
+# logstash config:
+input { amqp {
+    name =&gt; "logstash-queue"
+    type =&gt; "direct"
+    host =&gt; "10.0.0.1"
+    exchange =&gt; "logstash-exchange"
+    key =&gt; "logstash-key"
+    exclusive =&gt; false
+    durable =&gt; false
+    auto_delete =&gt; false
+  }}
+output { stdout { debug =&gt; "true" }}
+</code></pre>
+
 <h1>Todo</h1>
 
 <ul>
