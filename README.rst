@@ -109,8 +109,9 @@ Example 6: Real-world usage of Redis as a transport::
 
 As you can see, ``beaver`` is pretty flexible as to how you can use/abuse it in production.
 
-Example 7: RabbitMQ connecting to defaults on remote broker
+Example 7: RabbitMQ connecting to defaults on remote broker::
 
+    # From the commandline
     RABBITMQ_ADDRESS="10.0.0.1" beaver -t rabbitmq
 
     # logstash config:
@@ -125,7 +126,6 @@ Example 7: RabbitMQ connecting to defaults on remote broker
         auto_delete => false
       }}
     output { stdout { debug => "true" }}
-
 
 Todo
 ====
