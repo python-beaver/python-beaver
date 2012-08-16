@@ -112,7 +112,7 @@ As you can see, ``beaver`` is pretty flexible as to how you can use/abuse it in 
 Example 7: RabbitMQ connecting to defaults on remote broker::
 
     # From the commandline
-    RABBITMQ_ADDRESS="10.0.0.1" beaver -t rabbitmq
+    RABBITMQ_HOST="10.0.0.1" beaver -t rabbitmq
 
     # logstash config:
     input { amqp {
