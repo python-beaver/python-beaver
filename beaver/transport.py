@@ -1,23 +1,30 @@
 import os
 import socket
 
-# priority: ujson > simplejson > jsonlib2 > json
-priority = ['ujson', 'simplejson', 'jsonlib2', 'json']
-for mod in priority:
-    try:
-        json = __import__(mod)
-    except ImportError:
-        pass
-    else:
-        break
-
 BEAVER_FORMAT = os.environ.get('BEAVER_FORMAT', 'json')
+
+if BEAVER_FORMAT == 'json':
+    # priority: ujson > simplejson > jsonlib2 > json
+    priority = ['ujson', 'simplejson', 'jsonlib2', 'json']
+    for mod in priority:
+        try:
+            json = __import__(mod)
+        except ImportError:
+            pass
+        else:
+            break
+elif BEAVER_FORMAT == 'msgpack':
+    import msgpack
+else:
+    BEAVER_FORMAT = None
 
 
 class Transport(object):
 
     def __init__(self):
         self.current_host = socket.gethostname()
+        if BEAVER_FORMAT == 'msgpack':
+            self.packer = msgpack.Packer()
 
     def callback(self, filename, lines):
         return True
@@ -31,6 +38,17 @@ class Transport(object):
     def format(self, filename, timestamp, line):
         if BEAVER_FORMAT == 'json':
             return json.dumps({
+                '@source': "file://{0}{1}".format(self.current_host, filename),
+                '@type': "file",
+                '@tags': [],
+                '@fields': {},
+                '@timestamp': timestamp,
+                '@source_host': self.current_host,
+                '@source_path': filename,
+                '@message': line.strip(os.linesep),
+            })
+        elif BEAVER_FORMAT == 'msgpack':
+            return self.packer.pack({
                 '@source': "file://{0}{1}".format(self.current_host, filename),
                 '@type': "file",
                 '@tags': [],
