@@ -41,10 +41,14 @@ parser.add_argument('-f', '--files', help='space-separated filelist to watch. Ov
 parser.add_argument('-t', '--transport', help='log transport method', dest='transport', choices=['rabbitmq', 'redis', 'stdout', 'zmq'])
 
 # Support env variable parsing as well
+files = os.environ.get("BEAVER_FILES", None)
+if files is not None:
+    files = files.split(',')
+
 parser.set_defaults(
     mode=os.environ.get("BEAVER_MODE", 'bind'),
     path=os.environ.get("BEAVER_PATH", '/var/log'),
-    files=os.environ.get("BEAVER_FILES", None),
+    files=files,
     transport=os.environ.get("BEAVER_TRANSPORT", 'stdout')
 )
 
