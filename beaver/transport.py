@@ -28,7 +28,7 @@ class Transport(object):
     def unhandled(self):
         return True
 
-    def format(self, current_host, filename, timestamp, line):
+    def format(self, filename, timestamp, line):
         if BEAVER_FORMAT == 'json':
             return json.dumps({
                 '@source': "file://{0}{1}".format(self.current_host, filename),
@@ -36,7 +36,7 @@ class Transport(object):
                 '@tags': [],
                 '@fields': {},
                 '@timestamp': timestamp,
-                '@source_host': current_host,
+                '@source_host': self.current_host,
                 '@source_path': filename,
                 '@message': line.strip(os.linesep),
             })
