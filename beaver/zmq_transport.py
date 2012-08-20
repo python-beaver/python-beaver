@@ -1,7 +1,5 @@
 import datetime
 import os
-import socket
-import ujson as json
 import zmq
 
 import beaver.transport
@@ -10,9 +8,10 @@ import beaver.transport
 class ZmqTransport(beaver.transport.Transport):
 
     def __init__(self):
+        super(ZmqTransport, self).__init__()
+
         zeromq_address = os.environ.get("ZEROMQ_ADDRESS", "tcp://localhost:2120")
         zeromq_bind = os.environ.get("BIND", False)
-        self.current_host = socket.gethostname()
 
         self.ctx = zmq.Context()
         self.pub = self.ctx.socket(zmq.PUSH)
@@ -25,17 +24,7 @@ class ZmqTransport(beaver.transport.Transport):
     def callback(self, filename, lines):
         timestamp = datetime.datetime.now().isoformat()
         for line in lines:
-            json_msg = json.dumps({
-                '@source': "file://{0}{1}".format(self.current_host, filename),
-                '@type': "file",
-                '@tags': [],
-                '@fields': {},
-                '@timestamp': timestamp,
-                '@source_host': self.current_host,
-                '@source_path': filename,
-                '@message': line.strip(os.linesep),
-            })
-            self.pub.send(json_msg)
+            self.pub.send(self.format(filename, timestamp, line))
 
     def interrupt(self):
         self.pub.close()

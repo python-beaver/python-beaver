@@ -1,4 +1,3 @@
+pika==0.9.5
 pyzmq==2.1.11
 redis==2.4.11
-ujson==1.9
-pika==0.9.5
