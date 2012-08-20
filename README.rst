@@ -53,19 +53,27 @@ Events are sent in logstash's ``json_event`` format. Options can also be set as 
 Examples
 --------
 
-Example 1: Listen to all files in the default path of /var/log on standard out::
+Example 1: Listen to all files in the default path of /var/log on standard out as json::
 
     beaver
 
-Example 2: Sending logs from /var/log files to a redis list::
+Example 2: Listen to all files in the default path of /var/log on standard out with msgpack::
+
+    BEAVER_FORMAT='msgpack' beaver
+
+Example 3: Listen to all files in the default path of /var/log on standard out as a string::
+
+    BEAVER_FORMAT='string' beaver
+
+Example 4: Sending logs from /var/log files to a redis list::
 
     REDIS_URL="redis://localhost:6379/0" beaver -t redis
 
-Example 3: Use environment variables to send logs from /var/log files to a redis list::
+Example 5: Use environment variables to send logs from /var/log files to a redis list::
 
     REDIS_URL="redis://localhost:6379/0" BEAVER_PATH="/var/log" BEAVER_TRANSPORT=redis beaver
 
-Example 4: Zeromq listening on port 5556 (all interfaces)::
+Example 6: Zeromq listening on port 5556 (all interfaces)::
 
     ZEROMQ_ADDRESS="tcp://*:5556" beaver -m bind
 
@@ -78,7 +86,7 @@ Example 4: Zeromq listening on port 5556 (all interfaces)::
       } }
     output { stdout { debug => true } }
 
-Example 5: Zeromq connecting to remote port 5556 on indexer::
+Example 7: Zeromq connecting to remote port 5556 on indexer::
 
     ZEROMQ_ADDRESS="tcp://indexer:5556" beaver -m connect
 
@@ -91,7 +99,7 @@ Example 5: Zeromq connecting to remote port 5556 on indexer::
       }}
     output { stdout { debug => true } }
 
-Example 6: Real-world usage of Redis as a transport::
+Example 8: Real-world usage of Redis as a transport::
 
     # in /etc/hosts
     192.168.0.10 redis-internal
@@ -100,16 +108,17 @@ Example 6: Real-world usage of Redis as a transport::
     REDIS_NAMESPACE='app:unmappable' REDIS_URL='redis://redis-internal:6379/0' beaver -f /var/log/unmappable.log -t redis
 
     # logstash indexer config:
-    redis {
+    input { redis {
         host => 'redis-internal' # this is in dns for work
         data_type => 'list'
         key => 'app:unmappable'
         type => 'app:unmappable'
-    }
+    }}
+    output { stdout { debug => "true" }}
 
 As you can see, ``beaver`` is pretty flexible as to how you can use/abuse it in production.
 
-Example 7: RabbitMQ connecting to defaults on remote broker::
+Example 9: RabbitMQ connecting to defaults on remote broker::
 
     # From the commandline
     RABBITMQ_HOST="10.0.0.1" beaver -t rabbitmq
