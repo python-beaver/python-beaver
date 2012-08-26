@@ -40,9 +40,10 @@ optional arguments::
     -f FILES [FILES ...], --files FILES [FILES ...]
                           space-separated filelist to watch. Overrides --path
                           argument
-    -t {amqp,redis,stdout}, --transport {amqp,redis,stdout}
-                      log transport method
-
+    -t {rabbitmq,redis,stdout,zmq}, --transport {rabbitmq,redis,stdout,zmq}
+                          log transport method
+    -c CONFIG, --configfile CONFIG
+                          ini config file path
 Background
 ==========
 
@@ -135,6 +136,21 @@ Example 9: RabbitMQ connecting to defaults on remote broker::
         auto_delete => false
       }}
     output { stdout { debug => "true" }}
+
+
+Example 10: Read config from config.ini and put to stdout::
+
+    # From the commandline
+    beaver -c config.ini -t stdout
+
+    # config.ini content:
+    [/tmp/somefile]
+    type: mytype
+    tags: tag1,tag2
+
+    [/var/log/*log]
+    type: syslog
+    tags: sys
 
 Todo
 ====
