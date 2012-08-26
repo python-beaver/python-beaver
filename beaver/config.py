@@ -55,6 +55,7 @@ class Config():
                 raise Exception('%s: missing mandatory config "type"'
                     % filename
                 )
+<<<<<<< HEAD
             globs = glob.glob(filename)
             if not globs:
                 raise Exception('%s is not a valid file path' % filename)
