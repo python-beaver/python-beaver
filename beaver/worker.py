@@ -194,20 +194,20 @@ class Worker(object):
         self.files_map.clear()
 
 
-def run_worker(options):
+def run_worker(options, fileconfig):
     utils.log("Logging using the {0} transport".format(options.transport))
     if options.transport == 'redis':
         import beaver.redis_transport
-        transport = beaver.redis_transport.RedisTransport()
+        transport = beaver.redis_transport.RedisTransport(fileconfig)
     elif options.transport == 'stdout':
         import beaver.stdout_transport
-        transport = beaver.stdout_transport.StdoutTransport()
+        transport = beaver.stdout_transport.StdoutTransport(fileconfig)
     elif options.transport == 'zmq':
         import beaver.zmq_transport
-        transport = beaver.zmq_transport.ZmqTransport()
+        transport = beaver.zmq_transport.ZmqTransport(fileconfig)
     elif options.transport == 'rabbitmq':
         import beaver.rabbitmq_transport
-        transport = beaver.rabbitmq_transport.RabbitmqTransport()
+        transport = beaver.rabbitmq_transport.RabbitmqTransport(fileconfig)
     else:
         raise Exception('Invalid transport {0}'.format(options.transport))
 
@@ -223,5 +223,6 @@ def run_worker(options):
         sys.exit(0)
     except Exception, e:
         utils.log("Unhandled Exception: {0}".format(str(e)))
+        print("Unhandled Exception: {0}".format(str(e)))
         transport.unhandled()
         sys.exit(1)
