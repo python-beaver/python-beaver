@@ -20,8 +20,9 @@ class RedisTransport(beaver.transport.Transport):
 
     def callback(self, filename, lines):
         timestamp = datetime.datetime.utcnow().isoformat()
+        eventtype = self.gettype(filename)
         for line in lines:
             self.redis.lpush(
                 self.redis_namespace,
-                self.format(filename, timestamp, line)
+                self.format(filename, timestamp, line, eventtype)
             )
