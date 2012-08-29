@@ -20,6 +20,7 @@ else:
 
 
 class Transport(object):
+    fields = None
 
     def __init__(self):
         self.current_host = socket.gethostname()
@@ -41,7 +42,7 @@ class Transport(object):
                 '@source': "file://{0}{1}".format(self.current_host, filename),
                 '@type': "file",
                 '@tags': [],
-                '@fields': {},
+                '@fields': self.fields or {},
                 '@timestamp': timestamp,
                 '@source_host': self.current_host,
                 '@source_path': filename,

@@ -38,6 +38,7 @@ parser = argparse.ArgumentParser(description='Beaver logfile shipper',
 parser.add_argument('-m', '--mode', help='bind or connect mode', dest='mode', choices=['bind', 'connect'])
 parser.add_argument('-p', '--path', help='path to log files', dest='path')
 parser.add_argument('-f', '--files', help='space-separated filelist to watch. Overrides --path argument', dest='files', nargs='+')
+parser.add_argument('-F', '--fields', help='space-separated key=value pairs to add to the @fields dictionary', dest='fields', nargs='+')
 parser.add_argument('-t', '--transport', help='log transport method', dest='transport', choices=['rabbitmq', 'redis', 'stdout', 'zmq'])
 
 # Support env variable parsing as well
