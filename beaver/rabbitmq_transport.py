@@ -50,7 +50,7 @@ class RabbitmqTransport(beaver.transport.Transport):
 
 
     def callback(self, filename, lines):
-        timestamp = datetime.datetime.now().isoformat()
+        timestamp = datetime.datetime.utcnow().isoformat()
         for line in lines:
             json_msg = json.dumps({
                 '@source': "file://{0}{1}".format(self.current_host, filename),
