@@ -22,7 +22,7 @@ class ZmqTransport(beaver.transport.Transport):
             self.pub.connect(zeromq_address)
 
     def callback(self, filename, lines):
-        timestamp = datetime.datetime.now().isoformat()
+        timestamp = datetime.datetime.utcnow().isoformat()
         for line in lines:
             self.pub.send(self.format(filename, timestamp, line))
 
