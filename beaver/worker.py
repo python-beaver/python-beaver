@@ -194,6 +194,9 @@ class Worker(object):
 
 
 def run_worker(options):
+    if options.fields:
+        options.fields = dict([f.split('=') for f in options.fields])
+        utils.log("@fields set to {0}".format(options.fields))
     utils.log("Logging using the {0} transport".format(options.transport))
     if options.transport == 'redis':
         import beaver.redis_transport
@@ -209,7 +212,8 @@ def run_worker(options):
         transport = beaver.rabbitmq_transport.RabbitmqTransport()
     else:
         raise Exception('Invalid transport {0}'.format(options.transport))
-
+    transport.fields = options.fields or {}
+    transport._type = options._type or 'file'
     try:
         utils.log("Starting worker...")
         l = Worker(options, transport.callback)

@@ -54,7 +54,7 @@ class RabbitmqTransport(beaver.transport.Transport):
         for line in lines:
             json_msg = json.dumps({
                 '@source': "file://{0}{1}".format(self.current_host, filename),
-                '@type': "file",
+                '@type': self._type or 'file',
                 '@tags': [],
                 '@fields': {},
                 '@timestamp': timestamp,
