@@ -21,6 +21,7 @@ else:
 
 class Transport(object):
     fields = None
+    _type = None
 
     def __init__(self):
         self.current_host = socket.gethostname()
@@ -40,7 +41,7 @@ class Transport(object):
         if BEAVER_FORMAT == 'json':
             return json.dumps({
                 '@source': "file://{0}{1}".format(self.current_host, filename),
-                '@type': "file",
+                '@type': self._type or "file",
                 '@tags': [],
                 '@fields': self.fields or {},
                 '@timestamp': timestamp,
@@ -51,7 +52,7 @@ class Transport(object):
         elif BEAVER_FORMAT == 'msgpack':
             return self.packer.pack({
                 '@source': "file://{0}{1}".format(self.current_host, filename),
-                '@type': "file",
+                '@type': self._type or "file",
                 '@tags': [],
                 '@fields': {},
                 '@timestamp': timestamp,
