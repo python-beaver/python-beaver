@@ -3,6 +3,7 @@ import os
 import stat
 import sys
 import time
+import glob
 import beaver.utils as utils
 
 
@@ -120,7 +121,7 @@ class Worker(object):
         files = []
         if self.config.files is not None:
             for name in self.config.files:
-                files.append(os.path.realpath(name))
+                files.extend([os.path.realpath(globbed) for globbed in glob.glob(name)])
         else:
             for name in self.listdir():
                 files.append(os.path.realpath(os.path.join(self.folder, name)))
