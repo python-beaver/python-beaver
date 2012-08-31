@@ -55,7 +55,6 @@ class Config():
                 raise Exception('%s: missing mandatory config "type"'
                     % filename
                 )
-<<<<<<< HEAD
             globs = glob.glob(filename)
             if not globs:
                 raise Exception('%s is not a valid file path' % filename)
@@ -93,4 +92,3 @@ class Config():
             return []
 
     #  TODO: add support for any file property
-    #  TODO: add support for symlinks
