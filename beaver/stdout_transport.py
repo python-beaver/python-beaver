@@ -9,4 +9,4 @@ class StdoutTransport(beaver.transport.Transport):
         timestamp = datetime.datetime.now().isoformat()
 
         for line in lines:
-            print self.format(filename, timestamp, line, self.gettype(filename))
+            print self.format(filename, timestamp, line)

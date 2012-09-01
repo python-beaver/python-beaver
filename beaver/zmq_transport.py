@@ -23,9 +23,8 @@ class ZmqTransport(beaver.transport.Transport):
 
     def callback(self, filename, lines):
         timestamp = datetime.datetime.utcnow().isoformat()
-        eventtype = self.gettype(filename)
         for line in lines:
-            self.pub.send(self.format(filename, timestamp, line, eventtype))
+            self.pub.send(self.format(filename, timestamp, line))
 
     def interrupt(self):
         self.pub.close()
