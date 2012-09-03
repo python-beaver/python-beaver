@@ -148,6 +148,7 @@ Example 10: Read config from config.ini and put to stdout::
     [/tmp/somefile]
     type: mytype
     tags: tag1,tag2
+    add_field: fieldname1,fieldvalue1[,fieldname2,fieldvalue2, ...]
 
     [/var/log/*log]
     type: syslog
