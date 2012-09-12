@@ -16,20 +16,23 @@ also be set as environment variables.
 Example 1: Listen to all files in the default path of /var/log on standard out
     cli: python beaver.py
 
-Example 2: Sending logs from /var/log files to a redis list
+Example 2: Listen to all .log files /var/log on standard out
+    cli: python beaver.py -f /var/log/*.log
+
+Example 3: Sending logs from /var/log files to a redis list
     cli: REDIS_URL="redis://localhost:6379/0" python beaver.py -t redis
 
-Example 3: Use environment variables to send logs from /var/log files to a redis list
+Example 4: Use environment variables to send logs from /var/log files to a redis list
     cli: REDIS_URL="redis://localhost:6379/0" BEAVER_PATH="/var/log" BEAVER_TRANSPORT=redis python beaver.py
 
-Example 4: Zeromq listening on port 5556 (all interfaces)
+Example 5: Zeromq listening on port 5556 (all interfaces)
 
     cli: ZEROMQ_ADDRESS="tcp://*:5556" python beaver.py -m bind
 
-Example 5: Zeromq connecting to remote port 5556 on indexer
+Example 6: Zeromq connecting to remote port 5556 on indexer
     cli: ZEROMQ_ADDRESS="tcp://indexer:5556" python beaver.py -m connect
 
-Example 6: RabbitMQ connecting to defaults on remote broker
+Example 7: RabbitMQ connecting to defaults on remote broker
     cli: RABBITMQ_HOST="10.0.0.1" python beaver.py -t rabbitmq
 """
 parser = argparse.ArgumentParser(description='Beaver logfile shipper',
@@ -37,7 +40,7 @@ parser = argparse.ArgumentParser(description='Beaver logfile shipper',
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
 parser.add_argument('-m', '--mode', help='bind or connect mode', dest='mode', choices=['bind', 'connect'])
 parser.add_argument('-p', '--path', help='path to log files', dest='path')
-parser.add_argument('-f', '--files', help='space-separated filelist to watch. Overrides --path argument', dest='files', nargs='+')
+parser.add_argument('-f', '--files', help='space-separated filelist to watch, can include globs (*.log). Overrides --path argument', dest='files', nargs='+')
 parser.add_argument('-t', '--transport', help='log transport method', dest='transport', choices=['rabbitmq', 'redis', 'stdout', 'zmq'])
 
 # Support env variable parsing as well
