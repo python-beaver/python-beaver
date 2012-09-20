@@ -45,6 +45,7 @@ optional arguments::
                       default is stdout
     -c CONFIG, --configfile CONFIG
                           ini config file path
+
 Background
 ==========
 
