@@ -67,8 +67,9 @@
 -f FILES [FILES ...], --files FILES [FILES ...]
                       space-separated filelist to watch. Overrides --path
                       argument
--t {amqp,redis,stdout}, --transport {amqp,redis,stdout}
-                  log transport method
+-t/--transport {rabbitmq,redis,stdout,zmq}
+                      log transport method
+                      default is stdout
 </code></pre>
 
 <h1>Background</h1>
@@ -96,7 +97,7 @@
 
 <p>Example 4: Zeromq listening on port 5556 (all interfaces)::</p>
 
-<pre><code>ZEROMQ_ADDRESS="tcp://*:5556" beaver -m bind
+<pre><code>ZEROMQ_ADDRESS="tcp://*:5556" beaver -m bind -t zmq
 
 # logstash config:
 input { zeromq {
@@ -110,7 +111,7 @@ output { stdout { debug =&gt; true } }
 
 <p>Example 5: Zeromq connecting to remote port 5556 on indexer::</p>
 
-<pre><code>ZEROMQ_ADDRESS="tcp://indexer:5556" beaver -m connect
+<pre><code>ZEROMQ_ADDRESS="tcp://indexer:5556" beaver -m connect -t zmq
 
 # logstash config:
 input { zeromq {
