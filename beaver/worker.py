@@ -119,7 +119,7 @@ class Worker(object):
     def update_files(self):
         ls = []
         files = []
-        if self.config.files is not None:
+        if len(self.config.files) > 0:
             for name in self.config.files:
                 files.extend([os.path.realpath(globbed) for globbed in glob.glob(name)])
         else:
