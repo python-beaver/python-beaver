@@ -90,6 +90,8 @@ class Config():
             return {}
         if (len(result) % 2) == 1:
             raise Exception('Wrong number of values for add_field')
-        return dict(zip(result[0::2], [result[1::2]]))
+        fieldkeys = result[0::2]
+        fieldvalues = [[x] for x in result[1::2]]
+        return dict(zip(fieldkeys, fieldvalues))
 
     #  TODO: add support for any file property
