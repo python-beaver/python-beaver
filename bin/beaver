@@ -55,7 +55,9 @@ parser.set_defaults(
     transport=os.environ.get("BEAVER_TRANSPORT", 'stdout')
 )
 
-
 args = parser.parse_args()
+
+if args.transport == 'stdout':
+    logging.getLogger().addHandler(logging.StreamHandler())
 
 beaver.worker.run_worker(args)
