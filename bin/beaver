@@ -65,7 +65,7 @@ parser.set_defaults(
 
 
 args = parser.parse_args()
-logger = utils.setup_custom_logger('beaver', args.debug)
+logger = beaver.utils.setup_custom_logger('beaver', args.debug)
 
 configfile = beaver.config.Config(args.config)
 try:
