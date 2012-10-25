@@ -234,8 +234,5 @@ def run_worker(options, fileconfig):
         utils.log("Unhandled Exception:")
         utils.log(exception_str)
 
-        print("Unhandled Exception:")
-        print exception_str
-
         transport.unhandled()
         sys.exit(1)
