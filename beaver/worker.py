@@ -1,9 +1,10 @@
 import errno
+import glob
+import logging
 import os
 import stat
 import sys
 import time
-import glob
 
 
 class Worker(object):
@@ -20,7 +21,7 @@ class Worker(object):
     >>> l.loop()
     """
 
-    def __init__(self, args, logger, callback, extensions=["log"], tail_lines=0):
+    def __init__(self, args, callback, extensions=["log"], tail_lines=0):
         """Arguments:
 
         (str) @args:
@@ -40,7 +41,7 @@ class Worker(object):
         self.files_map = {}
         self.callback = callback
         self.extensions = extensions
-        self.logger = logger
+        self.logger = logging.getLogger('beaver')
         self.config = args
 
         if self.config.path is not None:
@@ -194,8 +195,10 @@ class Worker(object):
         self.files_map.clear()
 
 
-def run_worker(options, fileconfig, logger):
+def run_worker(options, fileconfig):
+    logger = logging.getLogger('beaver')
     logger.info("Logging using the {0} transport".format(options.transport))
+
     if options.transport == 'redis':
         import beaver.redis_transport
         transport = beaver.redis_transport.RedisTransport(fileconfig)
@@ -213,7 +216,7 @@ def run_worker(options, fileconfig, logger):
 
     try:
         logger.info("Starting worker...")
-        l = Worker(options, logger, transport.callback)
+        l = Worker(options, transport.callback)
         logger.info("Working...")
         l.loop()
     except KeyboardInterrupt:
@@ -221,7 +224,7 @@ def run_worker(options, fileconfig, logger):
         transport.interrupt()
         logger.info("Shutdown complete.")
         sys.exit(0)
-    except Exception, e:
+    except Exception:
         import traceback
         exception_list = traceback.format_stack()
         exception_list = exception_list[:-2]

@@ -1,6 +1,8 @@
 import ConfigParser
-import os
 import glob
+import os
+
+import utils
 
 
 class Config():
@@ -22,8 +24,10 @@ class Config():
     [...]
     '''
 
-    def __init__(self, configfile, logger):
-        logger.info('processing config file %s' % configfile)
+    def __init__(self, configfile):
+        logger = logging.getLogger('beaver')
+        logger.info('Processing config file %s' % configfile)
+
         defaults = {
             'add_field': '',
             'debug': '',
