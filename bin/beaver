@@ -61,15 +61,19 @@ parser.set_defaults(
     config='/dev/null'
 )
 
+loghandler = logging.StreamHandler()
+loghandler.setFormatter(logging.Formatter('[%(asctime)s] %(levelname)-7s %(message)s'))
+
+logger = logging.getLogger('beaver')
+logger.addHandler(loghandler)
+logger.setLevel(logging.INFO)
+
 args = parser.parse_args()
 
-configfile = beaver.config.Config(args.config)
+configfile = beaver.config.Config(args.config, logger)
 try:
     args.files.extend(configfile.getfilepaths())
 except AttributeError:
     args.files = configfile.getfilepaths()
 
-if args.transport == 'stdout':
-    logging.getLogger().addHandler(logging.StreamHandler())
-
-beaver.worker.run_worker(args, configfile)
+beaver.worker.run_worker(args, configfile, logger)
