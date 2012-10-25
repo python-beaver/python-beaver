@@ -85,13 +85,16 @@ class Config():
             return []
 
     def getaddfield(self, filename):
-        result = self._getfield(filename, 'add_field').split(",")
-        if result == ['']:
+        try:
+            result = self._getfield(filename, 'add_field').split(",")
+            if result == ['']:
+                return {}
+            if (len(result) % 2) == 1:
+                raise Exception('Wrong number of values for add_field')
+            fieldkeys = result[0::2]
+            fieldvalues = [[x] for x in result[1::2]]
+            return dict(zip(fieldkeys, fieldvalues))
+        except TypeError, err:
             return {}
-        if (len(result) % 2) == 1:
-            raise Exception('Wrong number of values for add_field')
-        fieldkeys = result[0::2]
-        fieldvalues = [[x] for x in result[1::2]]
-        return dict(zip(fieldkeys, fieldvalues))
 
     #  TODO: add support for any file property
