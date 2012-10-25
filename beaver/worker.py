@@ -4,7 +4,6 @@ import stat
 import sys
 import time
 import glob
-import beaver.utils as utils
 
 
 class Worker(object):
@@ -21,7 +20,7 @@ class Worker(object):
     >>> l.loop()
     """
 
-    def __init__(self, args, callback, extensions=["log"], tail_lines=0):
+    def __init__(self, args, logger, callback, extensions=["log"], tail_lines=0):
         """Arguments:
 
         (str) @args:
@@ -41,6 +40,7 @@ class Worker(object):
         self.files_map = {}
         self.callback = callback
         self.extensions = extensions
+        self.logger = logger
         self.config = args
 
         if self.config.path is not None:
@@ -171,7 +171,7 @@ class Worker(object):
             if err.errno != errno.ENOENT:
                 raise
         else:
-            utils.log("[{0}] - watching logfile {1}".format(fid, fname))
+            self.logger.info("[{0}] - watching logfile {1}".format(fid, fname))
             self.files_map[fid] = file
 
     def unwatch(self, file, fid):
@@ -179,7 +179,7 @@ class Worker(object):
         # try to read it for the last time in case the
         # log rotator has written something in it.
         lines = self.readfile(file)
-        utils.log("[{0}] - un-watching logfile {1}".format(fid, file.name))
+        self.logger.info("[{0}] - un-watching logfile {1}".format(fid, file.name))
         del self.files_map[fid]
         if lines:
             self.callback(file.name, lines)
@@ -194,8 +194,8 @@ class Worker(object):
         self.files_map.clear()
 
 
-def run_worker(options, fileconfig):
-    utils.log("Logging using the {0} transport".format(options.transport))
+def run_worker(options, fileconfig, logger):
+    logger.info("Logging using the {0} transport".format(options.transport))
     if options.transport == 'redis':
         import beaver.redis_transport
         transport = beaver.redis_transport.RedisTransport(fileconfig)
@@ -212,14 +212,14 @@ def run_worker(options, fileconfig):
         raise Exception('Invalid transport {0}'.format(options.transport))
 
     try:
-        utils.log("Starting worker...")
-        l = Worker(options, transport.callback)
-        utils.log("Working...")
+        logger.info("Starting worker...")
+        l = Worker(options, logger, transport.callback)
+        logger.info("Working...")
         l.loop()
     except KeyboardInterrupt:
-        utils.log("Shutting down. Please wait.")
+        logger.info("Shutting down. Please wait.")
         transport.interrupt()
-        utils.log("Shutdown complete.")
+        logger.info("Shutdown complete.")
         sys.exit(0)
     except Exception, e:
         import traceback
@@ -231,8 +231,8 @@ def run_worker(options, fileconfig):
         exception_str += "".join(exception_list)
         exception_str = exception_str[:-1]
 
-        utils.log("Unhandled Exception:")
-        utils.log(exception_str)
+        logger.info("Unhandled Exception:")
+        logger.info(exception_str)
 
         transport.unhandled()
         sys.exit(1)
