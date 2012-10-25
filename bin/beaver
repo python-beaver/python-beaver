@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
 import argparse
-import utils
 import os
 
-import beaver.worker
 import beaver.config
+import beaver.utils
+import beaver.worker
 
 epilog_example = """
 Beaver provides an lightweight method for shipping local log
