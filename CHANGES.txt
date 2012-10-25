@@ -1,1 +1,12 @@
+v2, 2012-10-25 -- Second release.
+
+- Updated documentation
+- Added support for `config.ini` based option parsing
+- Refactored transports into separate files
+- Added support for file globbing in paths
+- Added msgpack and regular string output
+- Force UTC time when ingesting logs
+- Refactored logging to use the Python Logging Framework
+- Added RabbitMQ support
+
 v1, 2012-08-05 -- Initial release.

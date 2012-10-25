@@ -16,27 +16,26 @@ stdin, zeromq input somewhere down the road to get the events.
 Events are sent in logstash's json_event format. Options can
 also be set as environment variables.
 
-Example 1: Listen to all files in the default path of /var/log on standard out
-    cli: python beaver.py
+Example 1: Listen to all files in the default path of /var/log on standard out as json
+    cli: beaver
 
-Example 2: Listen to all .log files /var/log on standard out
-    cli: python beaver.py -f /var/log/*.log
+Example 2: Listen to all files in the default path of /var/log on standard out with msgpack
+    cli: BEAVER_FORMAT='msgpack' beaver
 
-Example 3: Sending logs from /var/log files to a redis list
-    cli: REDIS_URL="redis://localhost:6379/0" python beaver.py -t redis
+Example 3: Listen to all files in the default path of /var/log on standard out as a string
+    cli: BEAVER_FORMAT='string' beaver
 
-Example 4: Use environment variables to send logs from /var/log files to a redis list
-    cli: REDIS_URL="redis://localhost:6379/0" BEAVER_PATH="/var/log" BEAVER_TRANSPORT=redis python beaver.py
+Example 4: Sending logs from /var/log files to a redis list
+    cli: REDIS_URL="redis://localhost:6379/0" beaver -t redis
 
-Example 5: Zeromq listening on port 5556 (all interfaces)
+Example 5: Use environment variables to send logs from /var/log files to a redis list
+    cli: REDIS_URL="redis://localhost:6379/0" BEAVER_PATH="/var/log" BEAVER_TRANSPORT=redis beaver
 
-    cli: ZEROMQ_ADDRESS="tcp://*:5556" python beaver.py -m bind
+Example 6: Zeromq listening on port 5556 (all interfaces)
+    cli: ZEROMQ_ADDRESS="tcp://*:5556" beaver -m bind -t zmq
 
-Example 6: Zeromq connecting to remote port 5556 on indexer
-    cli: ZEROMQ_ADDRESS="tcp://indexer:5556" python beaver.py -m connect
+Please see the readme for more complete examples.
 
-Example 7: RabbitMQ connecting to defaults on remote broker
-    cli: RABBITMQ_HOST="10.0.0.1" python beaver.py -t rabbitmq
 """
 parser = argparse.ArgumentParser(description='Beaver logfile shipper',
                                 epilog=epilog_example,

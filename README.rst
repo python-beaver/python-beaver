@@ -21,30 +21,31 @@ From Github::
 
 From PyPI::
 
-    pip install beaver==1
+    pip install beaver==2
 
 Usage
 =====
 
 usage::
 
-    beaver [-h] [-r {worker,interactive}] [-m {bind,connect}] [-p PATH]
-                     [-f FILES [FILES ...]] [-t TRANSPORT]
+    beaver [-h] [-m {bind,connect}] [-p PATH] [-f FILES [FILES ...]]
+              [-t {rabbitmq,redis,stdout,zmq}] [-c CONFIG] [-d DEBUG]
 
 optional arguments::
 
     -h, --help            show this help message and exit
     -m {bind,connect}, --mode {bind,connect}
-                          bind or connect mode
+                        bind or connect mode
     -p PATH, --path PATH  path to log files
     -f FILES [FILES ...], --files FILES [FILES ...]
-                          space-separated filelist to watch. Overrides --path
-                          argument
-    -t/--transport {rabbitmq,redis,stdout,zmq}
-                      log transport method
-                      default is stdout
+                        space-separated filelist to watch, can include globs
+                        (*.log). Overrides --path argument
+    -t {rabbitmq,redis,stdout,zmq}, --transport {rabbitmq,redis,stdout,zmq}
+                        log transport method
     -c CONFIG, --configfile CONFIG
-                          ini config file path
+                        ini config file path
+    -d DEBUG, --debug DEBUG
+                        enable debug mode
 
 Background
 ==========
@@ -163,7 +164,7 @@ Todo
 * More transports
 * ~Separate tranports into different files so that individual transport requirements are not required on all installations (libzmq)~
 * ~Create a python package~
-* Ability to specify files, tags, and other  metadata within a configuration file
+* ~Ability to specify files, tags, and other  metadata within a configuration file~
 
 Credits
 =======
