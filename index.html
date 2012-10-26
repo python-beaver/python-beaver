@@ -47,31 +47,32 @@
 
 <p>From PyPI::</p>
 
-<pre><code>pip install beaver==1
+<pre><code>pip install beaver==2
 </code></pre>
 
 <h1>Usage</h1>
 
 <p>usage::</p>
 
-<pre><code>beaver [-h] [-r {worker,interactive}] [-m {bind,connect}] [-p PATH]
-                 [-f FILES [FILES ...]] [-t TRANSPORT]
+<pre><code>beaver [-h] [-m {bind,connect}] [-p PATH] [-f FILES [FILES ...]]
+          [-t {rabbitmq,redis,stdout,zmq}] [-c CONFIG] [-d DEBUG]
 </code></pre>
 
 <p>optional arguments::</p>
 
 <pre><code>-h, --help            show this help message and exit
 -m {bind,connect}, --mode {bind,connect}
-                      bind or connect mode
+                    bind or connect mode
 -p PATH, --path PATH  path to log files
 -f FILES [FILES ...], --files FILES [FILES ...]
-                      space-separated filelist to watch. Overrides --path
-                      argument
--t/--transport {rabbitmq,redis,stdout,zmq}
-                  log transport method
-                  default is stdout
+                    space-separated filelist to watch, can include globs
+                    (*.log). Overrides --path argument
+-t {rabbitmq,redis,stdout,zmq}, --transport {rabbitmq,redis,stdout,zmq}
+                    log transport method
 -c CONFIG, --configfile CONFIG
-                      ini config file path
+                    ini config file path
+-d DEBUG, --debug DEBUG
+                    enable debug mode
 </code></pre>
 
 <h1>Background</h1>
@@ -198,7 +199,7 @@ tags: sys
 <li>More transports</li>
 <li>~Separate tranports into different files so that individual transport requirements are not required on all installations (libzmq)~</li>
 <li>~Create a python package~</li>
-<li>Ability to specify files, tags, and other  metadata within a configuration file</li>
+<li>~Ability to specify files, tags, and other  metadata within a configuration file~</li>
 </ul><h1>Credits</h1>
 
 <p>Based on work from Giampaolo and Lusis::</p>
