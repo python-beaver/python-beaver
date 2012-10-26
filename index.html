@@ -68,8 +68,10 @@
                       space-separated filelist to watch. Overrides --path
                       argument
 -t/--transport {rabbitmq,redis,stdout,zmq}
-                      log transport method
-                      default is stdout
+                  log transport method
+                  default is stdout
+-c CONFIG, --configfile CONFIG
+                      ini config file path
 </code></pre>
 
 <h1>Background</h1>
@@ -80,22 +82,32 @@
 
 <h2>Examples</h2>
 
-<p>Example 1: Listen to all files in the default path of /var/log on standard out::</p>
+<p>Example 1: Listen to all files in the default path of /var/log on standard out as json::</p>
 
 <pre><code>beaver
 </code></pre>
 
-<p>Example 2: Sending logs from /var/log files to a redis list::</p>
+<p>Example 2: Listen to all files in the default path of /var/log on standard out with msgpack::</p>
+
+<pre><code>BEAVER_FORMAT='msgpack' beaver
+</code></pre>
+
+<p>Example 3: Listen to all files in the default path of /var/log on standard out as a string::</p>
+
+<pre><code>BEAVER_FORMAT='string' beaver
+</code></pre>
+
+<p>Example 4: Sending logs from /var/log files to a redis list::</p>
 
 <pre><code>REDIS_URL="redis://localhost:6379/0" beaver -t redis
 </code></pre>
 
-<p>Example 3: Use environment variables to send logs from /var/log files to a redis list::</p>
+<p>Example 5: Use environment variables to send logs from /var/log files to a redis list::</p>
 
 <pre><code>REDIS_URL="redis://localhost:6379/0" BEAVER_PATH="/var/log" BEAVER_TRANSPORT=redis beaver
 </code></pre>
 
-<p>Example 4: Zeromq listening on port 5556 (all interfaces)::</p>
+<p>Example 6: Zeromq listening on port 5556 (all interfaces)::</p>
 
 <pre><code>ZEROMQ_ADDRESS="tcp://*:5556" beaver -m bind -t zmq
 
@@ -109,7 +121,7 @@ input { zeromq {
 output { stdout { debug =&gt; true } }
 </code></pre>
 
-<p>Example 5: Zeromq connecting to remote port 5556 on indexer::</p>
+<p>Example 7: Zeromq connecting to remote port 5556 on indexer::</p>
 
 <pre><code>ZEROMQ_ADDRESS="tcp://indexer:5556" beaver -m connect -t zmq
 
@@ -123,7 +135,7 @@ input { zeromq {
 output { stdout { debug =&gt; true } }
 </code></pre>
 
-<p>Example 6: Real-world usage of Redis as a transport::</p>
+<p>Example 8: Real-world usage of Redis as a transport::</p>
 
 <pre><code># in /etc/hosts
 192.168.0.10 redis-internal
@@ -132,19 +144,21 @@ output { stdout { debug =&gt; true } }
 REDIS_NAMESPACE='app:unmappable' REDIS_URL='redis://redis-internal:6379/0' beaver -f /var/log/unmappable.log -t redis
 
 # logstash indexer config:
-redis {
+input { redis {
     host =&gt; 'redis-internal' # this is in dns for work
     data_type =&gt; 'list'
     key =&gt; 'app:unmappable'
     type =&gt; 'app:unmappable'
-}
+}}
+output { stdout { debug =&gt; "true" }}
 </code></pre>
 
 <p>As you can see, <code>beaver</code> is pretty flexible as to how you can use/abuse it in production.</p>
 
-<p>Example 7: RabbitMQ connecting to defaults on remote broker</p>
+<p>Example 9: RabbitMQ connecting to defaults on remote broker::</p>
 
-<pre><code>RABBITMQ_ADDRESS="10.0.0.1" beaver -t rabbitmq
+<pre><code># From the commandline
+RABBITMQ_HOST="10.0.0.1" beaver -t rabbitmq
 
 # logstash config:
 input { amqp {
@@ -158,6 +172,22 @@ input { amqp {
     auto_delete =&gt; false
   }}
 output { stdout { debug =&gt; "true" }}
+</code></pre>
+
+<p>Example 10: Read config from config.ini and put to stdout::</p>
+
+<pre><code># From the commandline
+beaver -c config.ini -t stdout
+
+# config.ini content:
+[/tmp/somefile]
+type: mytype
+tags: tag1,tag2
+add_field: fieldname1,fieldvalue1[,fieldname2,fieldvalue2, ...]
+
+[/var/log/*log]
+type: syslog
+tags: sys
 </code></pre>
 
 <h1>Todo</h1>
