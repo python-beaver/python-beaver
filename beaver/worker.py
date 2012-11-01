@@ -49,6 +49,7 @@ class Worker(object):
         self.configfile = configfile
         self.sincedb_prefix = ".sincedb-"
         self.sincedb_lut = {}
+        self.tail_lines = tail_lines
 
         if self.config.path is not None:
             self.folder = os.path.realpath(args.path)
@@ -60,7 +61,8 @@ class Worker(object):
         # In case of files created afterwards we don't do this.
         for id, file in self.files_map.iteritems():
             # If sincedb_path is defined, don't seek to the end of the file,
-            # and ignore the value of tail_lines
+            # and ignore the value of tail_lines.  Unless start_position is tail
+            # then tail is handled by init_sincedb and watch
             if not self.configfile._getfield(file.name, "sincedb_path"):
                file.seek(os.path.getsize(file.name))  # EOF
                if tail_lines:
@@ -107,6 +109,17 @@ class Worker(object):
             # We only care if it's not a non-existant file error
             if err.errno != errno.ENOENT:
                 raise
+            else: # Sincedb file doesn't exist, where shall we start?
+                start_position = self.configfile._getfield(filename, "start_position")
+                if start_position == "beginning":
+                    line=0
+                elif start_position == "end":
+                    line=-1
+                elif start_position == "tail":
+                    if self.tail_lines==0:
+                        line=-1
+                    else:
+                        line=-1*self.tail_lines
         else:
           # There should only be one line containing the last read line offset
           data = f.readline()
@@ -224,6 +237,22 @@ class Worker(object):
             else:
                 again=False
 
+    def file_len(file):
+        # Make sure to start at the top
+        file.seek(0, os.SEEK_SET)
+        lines = 0
+        buf_size = 1024 * 1024
+        read_f = file.read # loop optimization
+
+        buf = read_f(buf_size)
+        while buf:
+            lines += buf.count('\n')
+            buf = read_f(buf_size)
+
+        # Reset to the top
+        file.seek(0, os.SEEK_SET)
+        return lines
+
     def watch(self, fname):
         try:
             if re.search('.gz$', fname):
@@ -241,9 +270,11 @@ class Worker(object):
                     sincedb_hash = hashlib.sha1(first_line).hexdigest()
                     # Init sincedb
                     starting_line = self.init_sincedb(fname, sincedb_hash)
+                    if starting_line < 0:
+                        # Figure out how long the file is, and translate to a positive number
+                        starting_line = self.file_len(file)+starting_line
                     # Seek to the relevant line
                     current_line=0
-                    print "Seeking to line " + str(starting_line)
                     while current_line < starting_line:
                         file.readline()
                         current_line+=1
