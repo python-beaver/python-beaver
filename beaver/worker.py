@@ -5,6 +5,9 @@ import os
 import stat
 import sys
 import time
+import hashlib
+import gzip
+import re
 
 
 class Worker(object):
@@ -21,7 +24,7 @@ class Worker(object):
     >>> l.loop()
     """
 
-    def __init__(self, args, callback, extensions=["log"], tail_lines=0):
+    def __init__(self, args, configfile, callback, extensions=["log"], tail_lines=0):
         """Arguments:
 
         (str) @args:
@@ -43,6 +46,9 @@ class Worker(object):
         self.extensions = extensions
         self.logger = logging.getLogger('beaver')
         self.config = args
+        self.configfile = configfile
+        self.sincedb_prefix = ".sincedb-"
+        self.sincedb_lut = {}
 
         if self.config.path is not None:
             self.folder = os.path.realpath(args.path)
@@ -53,11 +59,14 @@ class Worker(object):
         # The first time we run the script we move all file markers at EOF.
         # In case of files created afterwards we don't do this.
         for id, file in self.files_map.iteritems():
-            file.seek(os.path.getsize(file.name))  # EOF
-            if tail_lines:
-                lines = self.tail(file.name, tail_lines)
-                if lines:
-                    self.callback(file.name, lines)
+            # If sincedb_path is defined, don't seek to the end of the file,
+            # and ignore the value of tail_lines
+            if not self.configfile._getfield(file.name, "sincedb_path"):
+               file.seek(os.path.getsize(file.name))  # EOF
+               if tail_lines:
+                   lines = self.tail(file.name, tail_lines)
+                   if lines:
+                       self.callback(file.name, lines)
 
     def __del__(self):
         self.close()
@@ -85,6 +94,52 @@ class Worker(object):
                                            in self.extensions]
         else:
             return ls
+
+    # Pass in a filename, a hash of the first line of the file, and an override starting line
+    # Populates an internal hash of filesnames to sincedb info
+    # Returns the offset line to start with
+    def init_sincedb(self, filename, sincedb_hash, line=0):
+        # Open the file ~/.sincedb-${sincedb_hash} if it exists
+        sincedb_path = self.configfile._getfield(filename, "sincedb_path")
+        try:
+          f = open(sincedb_path + "/" + self.sincedb_prefix + sincedb_hash, 'r')
+        except IOError, err:
+            # We only care if it's not a non-existant file error
+            if err.errno != errno.ENOENT:
+                raise
+        else:
+          # There should only be one line containing the last read line offset
+          data = f.readline()
+          values=data.split("\t")
+          if not values:
+              line = 0
+          else:
+              try:
+                  line = int(values[0])
+              except ValueError:
+                  line = 0
+          f.close()
+        
+        # Populate self.sincedb_lut with the info
+	self.sincedb_lut[filename]={'hash': sincedb_hash, 'line': line}
+        return line
+
+    def update_sincedb(self, filename, lines_read):
+        sincedb_hash = self.sincedb_lut[filename]['hash']
+        lines = self.sincedb_lut[filename]['line'] + lines_read
+        self.sincedb_lut[filename]['line'] = lines
+        sincedb_path = self.configfile._getfield(filename, "sincedb_path")
+        try:
+          f = open(sincedb_path + "/" + self.sincedb_prefix + sincedb_hash, 'w')
+        except IOError, err:
+            # We only care if it's not a non-existant file error
+            if err.errno != errno.ENOENT:
+                raise
+        else:
+          # There should only be one line containing the last read line offset
+          f.write(str(lines)+"\t"+filename+"\n")
+          f.close()
+        return True
 
     @staticmethod
     def tail(fname, window):
@@ -160,14 +215,39 @@ class Worker(object):
                 self.watch(fname)
 
     def readfile(self, file):
-        lines = file.readlines()
-        if lines:
-            self.callback(file.name, lines)
+        again = True
+        while again:
+            lines = file.readlines(102400)
+            if lines:
+                self.callback(file.name, lines)
+                self.update_sincedb(file.name, len(lines))
+            else:
+                again=False
 
     def watch(self, fname):
         try:
-            file = open(fname, "r")
+            if re.search('.gz$', fname):
+                file = gzip.open(fname, "rb")
+            else:
+                file = open(fname, "r")
             fid = self.get_file_id(os.stat(fname))
+            if self.configfile._getfield(fname, "sincedb_path"):
+                # Read the first line
+                file.seek(0, os.SEEK_SET)
+                first_line = file.readline()
+                file.seek(0, os.SEEK_SET)
+                if first_line:
+                    # Generate a hash from that line
+                    sincedb_hash = hashlib.sha1(first_line).hexdigest()
+                    # Init sincedb
+                    starting_line = self.init_sincedb(fname, sincedb_hash)
+                    # Seek to the relevant line
+                    current_line=0
+                    print "Seeking to line " + str(starting_line)
+                    while current_line < starting_line:
+                        file.readline()
+                        current_line+=1
+                    
         except EnvironmentError, err:
             if err.errno != errno.ENOENT:
                 raise
@@ -214,9 +294,10 @@ def run_worker(options, fileconfig):
     else:
         raise Exception('Invalid transport {0}'.format(options.transport))
 
+
     try:
         logger.info("Starting worker...")
-        l = Worker(options, transport.callback)
+        l = Worker(options, fileconfig, transport.callback)
         logger.info("Working...")
         l.loop()
     except KeyboardInterrupt:
