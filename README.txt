@@ -29,7 +29,7 @@ Usage
 usage::
 
     beaver [-h] [-m {bind,connect}] [-p PATH] [-f FILES [FILES ...]]
-              [-t {rabbitmq,redis,stdout,zmq}] [-c CONFIG] [-d DEBUG]
+              [-t {rabbitmq,redis,stdout,zmq,udp}] [-c CONFIG] [-d DEBUG]
 
 optional arguments::
 
@@ -155,6 +155,21 @@ Example 10: Read config from config.ini and put to stdout::
     [/var/log/*log]
     type: syslog
     tags: sys
+
+Example 11: UDP transport::
+
+    # From the commandline
+    UDP_HOST="127.0.0.1" UDP_PORT="9999" beaver -t udp
+
+    # logstash config:
+    input { 
+      udp {
+        type => "shipper-input"
+        host => "127.0.0.1"
+        port => "9999"
+      }
+    }
+    output { stdout { debug => "true" }}
 
 Todo
 ====
