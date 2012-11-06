@@ -211,6 +211,9 @@ def run_worker(options, fileconfig):
     elif options.transport == 'rabbitmq':
         import beaver.rabbitmq_transport
         transport = beaver.rabbitmq_transport.RabbitmqTransport(fileconfig)
+    elif options.transport == 'udp':
+        import beaver.udp_transport
+        transport = beaver.udp_transport.UdpTransport(fileconfig)
     else:
         raise Exception('Invalid transport {0}'.format(options.transport))
 
