@@ -16,7 +16,7 @@ class UdpTransport(beaver.transport.Transport):
         self.udp_port = int(os.environ.get("UDP_PORT", 9999))
 
     def callback(self, filename, lines):
-        timestamp = datetime.datetime.utcnow().isoformat()
+        timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
         for line in lines:
             formatted = self.format(filename, timestamp, line)
             self.sock.sendto(formatted, (self.udp_host, self.udp_port))

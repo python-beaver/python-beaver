@@ -19,7 +19,7 @@ class RedisTransport(beaver.transport.Transport):
         self.redis_namespace = os.environ.get("REDIS_NAMESPACE", "logstash:beaver")
 
     def callback(self, filename, lines):
-        timestamp = datetime.datetime.utcnow().isoformat()
+        timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
         for line in lines:
             self.redis.rpush(
                 self.redis_namespace,
