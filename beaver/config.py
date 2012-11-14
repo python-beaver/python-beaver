@@ -37,6 +37,7 @@ class Config():
             'format': '',
             'message_format': '',
             'sincedb_path': '',
+            'start_position': '',
             'sincedb_write_interval': '15',
             'stat_interval': '1',
             'tags': '',
