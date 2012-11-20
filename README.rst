@@ -8,7 +8,10 @@ Requirements
 ============
 
 * Python 2.7 (untested on other versions)
-* libzmq (``brew install zmq`` or ``apt-get install libzmq-dev``)
+* Optional requirements
+** Zeromq support
+*** libzmq (``brew install zmq`` or ``apt-get install libzmq-dev``)
+*** pyzmq (pip install pyzmq==2.1.11)
 
 Installation
 ============
@@ -177,7 +180,6 @@ Todo
 * Use python threading + subprocess in order to support usage of ``yield`` across all operating systems
 * Fix usage on non-linux platforms - file.readline() does not work as expected on OS X. See above for potential solution
 * More transports
-* ~Separate tranports into different files so that individual transport requirements are not required on all installations (libzmq)~
 * ~Create a python package~
 * ~Ability to specify files, tags, and other  metadata within a configuration file~
 
