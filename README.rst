@@ -8,10 +8,8 @@ Requirements
 ============
 
 * Python 2.7 (untested on other versions)
-* Optional requirements
-** Zeromq support
-*** libzmq (``brew install zmq`` or ``apt-get install libzmq-dev``)
-*** pyzmq (pip install pyzmq==2.1.11)
+* Optional zeromq support: install libzmq (``brew install zmq`` or ``apt-get install libzmq-dev``) and pyzmq (``pip install pyzmq==2.1.11``)
+
 
 Installation
 ============
