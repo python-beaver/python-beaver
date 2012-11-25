@@ -1,3 +1,9 @@
+v3, DATE_UNKNOWN -- Third release.
+
+- lpush changed to rpush on redis transport
+- added udp support
+- Updated timestamp in ISO 8601 format with the "Z" suffix to express UTC
+
 v2, 2012-10-25 -- Second release.
 
 - Updated documentation
