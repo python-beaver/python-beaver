@@ -1,8 +1,11 @@
 v3, DATE_UNKNOWN -- Third release.
 
-- lpush changed to rpush on redis transport
-- added udp support
+- Changed lpush to rpush on redis transport
+- Added udp support
 - Updated timestamp in ISO 8601 format with the "Z" suffix to express UTC
+- Zeromq installation is now optional
+- Removed redundant README.txt
+- Added classifiers to package
 
 v2, 2012-10-25 -- Second release.
 
