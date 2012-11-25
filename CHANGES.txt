@@ -6,6 +6,8 @@ v3, DATE_UNKNOWN -- Third release.
 - Zeromq installation is now optional
 - Removed redundant README.txt
 - Added classifiers to package
+- Added example supervisor config file
+- Added example bash startup file
 
 v2, 2012-10-25 -- Second release.
 
