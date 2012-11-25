@@ -14,6 +14,5 @@ setup(
     install_requires=[
         "redis==2.4.11",
         "ujson==1.9",
-        "pika==0.9.5",
     ],
 )

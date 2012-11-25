@@ -1,7 +1,4 @@
 ujson==1.9
 
-# AMQP support
-pika==0.9.5
-
 # redis support
 redis==2.4.11
