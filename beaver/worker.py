@@ -199,21 +199,21 @@ def run_worker(options, fileconfig):
     logger = logging.getLogger('beaver')
     logger.info("Logging using the {0} transport".format(options.transport))
 
-    if options.transport == 'redis':
+    if options.transport == 'rabbitmq':
+        import beaver.rabbitmq_transport
+        transport = beaver.rabbitmq_transport.RabbitmqTransport(fileconfig)
+    elif options.transport == 'redis':
         import beaver.redis_transport
         transport = beaver.redis_transport.RedisTransport(fileconfig)
     elif options.transport == 'stdout':
         import beaver.stdout_transport
         transport = beaver.stdout_transport.StdoutTransport(fileconfig)
-    elif options.transport == 'zmq':
-        import beaver.zmq_transport
-        transport = beaver.zmq_transport.ZmqTransport(fileconfig)
-    elif options.transport == 'rabbitmq':
-        import beaver.rabbitmq_transport
-        transport = beaver.rabbitmq_transport.RabbitmqTransport(fileconfig)
     elif options.transport == 'udp':
         import beaver.udp_transport
         transport = beaver.udp_transport.UdpTransport(fileconfig)
+    elif options.transport == 'zmq':
+        import beaver.zmq_transport
+        transport = beaver.zmq_transport.ZmqTransport(fileconfig)
     else:
         raise Exception('Invalid transport {0}'.format(options.transport))
 
