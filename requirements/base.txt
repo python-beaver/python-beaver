@@ -1,0 +1,4 @@
+ujson==1.9
+
+# redis support
+redis==2.4.11
