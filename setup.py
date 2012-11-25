@@ -9,6 +9,13 @@ setup(
     scripts=['bin/beaver'],
     url='http://github.com/josegonzalez/beaver',
     license='LICENSE.txt',
+    classifiers=[
+        'Development Status :: 5 - Production/Stable',
+        'Intended Audience :: System Administrators',
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python :: 2.7',
+        'Topic :: System :: Logging',
+    ],
     description='python daemon that munches on logs and sends their contents to logstash',
     long_description=open('README.rst').read(),
     install_requires=[
