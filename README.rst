@@ -162,7 +162,7 @@ Example 11: UDP transport::
     UDP_HOST="127.0.0.1" UDP_PORT="9999" beaver -t udp
 
     # logstash config:
-    input { 
+    input {
       udp {
         type => "shipper-input"
         host => "127.0.0.1"
