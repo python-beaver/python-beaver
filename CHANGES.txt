@@ -4,6 +4,7 @@ v4, DATE_UNKNOWN -- Fourth release.
 - Relaxed pika version requirements
 - Added python 2.6 support
 - PEP8 Formatting
+- Allow rabbitmq exchange type and durability to be configured
 
 v3, 2012-11-24 -- Third release.
 

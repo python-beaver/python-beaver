@@ -17,6 +17,8 @@ class RabbitmqTransport(beaver.transport.Transport):
         rabbitmq_user = os.environ.get("RABBITMQ_USERNAME", 'guest')
         rabbitmq_pass = os.environ.get("RABBITMQ_PASSWORD", 'guest')
         rabbitmq_queue = os.environ.get("RABBITMQ_QUEUE", 'logstash-queue')
+        rabbitmq_exchange_type = os.environ.get("RABBITMQ_EXCHANGE_TYPE", 'direct')
+        rabbitmq_exchange_durable = bool(os.environ.get("RABBITMQ_EXCHANGE_DURABLE", 0))
         self.rabbitmq_key = os.environ.get("RABBITMQ_KEY", 'logstash-key')
         self.rabbitmq_exchange = os.environ.get("RABBITMQ_EXCHANGE", 'logstash-exchange')
 
@@ -38,7 +40,8 @@ class RabbitmqTransport(beaver.transport.Transport):
         self.channel.queue_declare(queue=rabbitmq_queue)
         self.channel.exchange_declare(
             exchange=self.rabbitmq_exchange,
-            type='direct'
+            type=rabbitmq_exchange_type,
+            durable=rabbitmq_exchange_durable
         )
         self.channel.queue_bind(
             exchange=self.rabbitmq_exchange,
