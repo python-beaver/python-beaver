@@ -35,7 +35,7 @@
 
 <ul>
 <li>Python 2.7 (untested on other versions)</li>
-<li>libzmq (<code>brew install zmq</code> or <code>apt-get install libzmq-dev</code>)</li>
+<li>Optional zeromq support: install libzmq (<code>brew install zmq</code> or <code>apt-get install libzmq-dev</code>) and pyzmq (<code>pip install pyzmq==2.1.11</code>)</li>
 </ul><h1>Installation</h1>
 
 <p>Using PIP:</p>
@@ -47,7 +47,7 @@
 
 <p>From PyPI::</p>
 
-<pre><code>pip install beaver==2
+<pre><code>pip install beaver==3
 </code></pre>
 
 <h1>Usage</h1>
@@ -55,7 +55,7 @@
 <p>usage::</p>
 
 <pre><code>beaver [-h] [-m {bind,connect}] [-p PATH] [-f FILES [FILES ...]]
-          [-t {rabbitmq,redis,stdout,zmq}] [-c CONFIG] [-d DEBUG]
+          [-t {rabbitmq,redis,stdout,zmq,udp}] [-c CONFIG] [-d DEBUG]
 </code></pre>
 
 <p>optional arguments::</p>
@@ -191,13 +191,28 @@ type: syslog
 tags: sys
 </code></pre>
 
+<p>Example 11: UDP transport::</p>
+
+<pre><code># From the commandline
+UDP_HOST="127.0.0.1" UDP_PORT="9999" beaver -t udp
+
+# logstash config:
+input {
+  udp {
+    type =&gt; "shipper-input"
+    host =&gt; "127.0.0.1"
+    port =&gt; "9999"
+  }
+}
+output { stdout { debug =&gt; "true" }}
+</code></pre>
+
 <h1>Todo</h1>
 
 <ul>
 <li>Use python threading + subprocess in order to support usage of <code>yield</code> across all operating systems</li>
 <li>Fix usage on non-linux platforms - file.readline() does not work as expected on OS X. See above for potential solution</li>
 <li>More transports</li>
-<li>~Separate tranports into different files so that individual transport requirements are not required on all installations (libzmq)~</li>
 <li>~Create a python package~</li>
 <li>~Ability to specify files, tags, and other  metadata within a configuration file~</li>
 </ul><h1>Credits</h1>
