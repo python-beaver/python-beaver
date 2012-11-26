@@ -2,7 +2,6 @@ import ConfigParser
 import glob
 import logging
 import os
-import time
 
 
 class Config():
@@ -44,34 +43,46 @@ class Config():
         self._configfile = configfile
         self._config = ConfigParser.ConfigParser(defaults)
         self._sanitize()
-        self._data = self._parse()
+        self._files, self._globs = self._parse()
 
     def _sanitize(self):
         if len(self._config.read(self._configfile)) != 1:
             raise Exception('Could not parse config file "%s"' % self._configfile)
 
     def _parse(self):
+        logger = logging.getLogger('beaver')
+
+        glob_paths = {}
         inputs = {}
         for filename in self._config.sections():
             if not self._config.get(filename, 'type'):
                 raise Exception('%s: missing mandatory config "type"' % filename)
 
+            config = dict((x[0], x[1]) for x in self._config.items(filename))
+            glob_paths[filename] = config
+
             globs = glob.glob(filename)
-            while not globs:
-                time.sleep(2)
-                globs = glob.glob(filename)
+            if not globs:
+                logger.info('Skipping glob due to no files found: %s' % filename)
+                continue
 
             for globbed in globs:
-                configs = dict((x[0], x[1]) for x in self._config.items(filename))
-                inputs[os.path.realpath(globbed)] = configs
+                inputs[os.path.realpath(globbed)] = config
 
-        return inputs
+        return inputs, glob_paths
 
     def _getfield(self, filename, field):
-        return self._data.get(os.path.realpath(filename))[field]
+        return self._files.get(os.path.realpath(filename))[field]
+
+    def addglob(self, globname, globbed):
+        for filename in globbed:
+            self._files[filename] = self._globs[globname]
 
     def getfilepaths(self):
-        return self._data.keys()
+        return self._files.keys()
+
+    def getglobs(self):
+        return self._globs.keys()
 
     def gettype(self, filename):
         try:

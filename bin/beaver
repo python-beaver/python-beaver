@@ -64,12 +64,16 @@ parser.set_defaults(
 
 
 args = parser.parse_args()
+args.globs = files
+
 logger = beaver.utils.setup_custom_logger('beaver', args.debug)
 
 configfile = beaver.config.Config(args.config)
 try:
     args.files.extend(configfile.getfilepaths())
+    args.globs.extend(configfile.getglobs())
 except AttributeError:
     args.files = configfile.getfilepaths()
+    args.globs = configfile.getglobs()
 
-beaver.worker.run_worker(args, configfile)
+beaver.worker.run_worker(configfile, args)

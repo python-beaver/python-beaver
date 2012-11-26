@@ -21,7 +21,7 @@ class Worker(object):
     >>> l.loop()
     """
 
-    def __init__(self, args, callback, extensions=["log"], tail_lines=0):
+    def __init__(self, configfile, args, callback, extensions=["log"], tail_lines=0):
         """Arguments:
 
         (str) @args:
@@ -38,13 +38,14 @@ class Worker(object):
         (int) @tail_lines:
             read last N lines from files being watched before starting
         """
-        self.files_map = {}
+        self.args = args
+        self.configfile = configfile
         self.callback = callback
         self.extensions = extensions
+        self.files_map = {}
         self.logger = logging.getLogger('beaver')
-        self.config = args
 
-        if self.config.path is not None:
+        if self.args.path is not None:
             self.folder = os.path.realpath(args.path)
             assert os.path.isdir(self.folder), "%s does not exists" \
                                             % self.folder
@@ -120,9 +121,11 @@ class Worker(object):
     def update_files(self):
         ls = []
         files = []
-        if len(self.config.files) > 0:
-            for name in self.config.files:
-                files.extend([os.path.realpath(globbed) for globbed in glob.glob(name)])
+        if len(self.args.globs) > 0:
+            for name in self.args.globs:
+                globbed = [os.path.realpath(filename) for filename in glob.glob(name)]
+                files.extend(globbed)
+                self.configfile.addglob(name, globbed)
         else:
             for name in self.listdir():
                 files.append(os.path.realpath(os.path.join(self.folder, name)))
@@ -195,31 +198,31 @@ class Worker(object):
         self.files_map.clear()
 
 
-def run_worker(options, fileconfig):
+def run_worker(configfile, args):
     logger = logging.getLogger('beaver')
-    logger.info("Logging using the {0} transport".format(options.transport))
+    logger.info("Logging using the {0} transport".format(args.transport))
 
-    if options.transport == 'rabbitmq':
+    if args.transport == 'rabbitmq':
         import beaver.rabbitmq_transport
-        transport = beaver.rabbitmq_transport.RabbitmqTransport(fileconfig)
-    elif options.transport == 'redis':
+        transport = beaver.rabbitmq_transport.RabbitmqTransport(configfile)
+    elif args.transport == 'redis':
         import beaver.redis_transport
-        transport = beaver.redis_transport.RedisTransport(fileconfig)
-    elif options.transport == 'stdout':
+        transport = beaver.redis_transport.RedisTransport(configfile)
+    elif args.transport == 'stdout':
         import beaver.stdout_transport
-        transport = beaver.stdout_transport.StdoutTransport(fileconfig)
-    elif options.transport == 'udp':
+        transport = beaver.stdout_transport.StdoutTransport(configfile)
+    elif args.transport == 'udp':
         import beaver.udp_transport
-        transport = beaver.udp_transport.UdpTransport(fileconfig)
-    elif options.transport == 'zmq':
+        transport = beaver.udp_transport.UdpTransport(configfile)
+    elif args.transport == 'zmq':
         import beaver.zmq_transport
-        transport = beaver.zmq_transport.ZmqTransport(fileconfig)
+        transport = beaver.zmq_transport.ZmqTransport(configfile)
     else:
-        raise Exception('Invalid transport {0}'.format(options.transport))
+        raise Exception('Invalid transport {0}'.format(args.transport))
 
     try:
         logger.info("Starting worker...")
-        l = Worker(options, transport.callback)
+        l = Worker(configfile, args, transport.callback)
         logger.info("Working...")
         l.loop()
     except KeyboardInterrupt:
