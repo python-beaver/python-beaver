@@ -1,3 +1,8 @@
+v4, DATE_UNKNOWN -- Fourth release.
+
+- Added argparse as a requirement for systems without argparse installed
+- Relaxed pika version requirements
+
 v3, 2012-11-24 -- Third release.
 
 - Changed lpush to rpush on redis transport

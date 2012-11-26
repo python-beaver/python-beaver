@@ -19,7 +19,8 @@ setup(
     description='python daemon that munches on logs and sends their contents to logstash',
     long_description=open('README.rst').read(),
     install_requires=[
-        "pika==0.9.5",
+        "argparse>=1.2.0",
+        "pika>=0.9.5",
         "redis==2.4.11",
         "ujson==1.9",
     ],
