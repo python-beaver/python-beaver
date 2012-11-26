@@ -83,7 +83,7 @@ class Config():
         try:
             result = self._getfield(filename, 'tags').split(",")
             return result if result else []
-        except TypeError, err:
+        except TypeError:
             return []
 
     def getaddfield(self, filename):
@@ -96,7 +96,7 @@ class Config():
             fieldkeys = result[0::2]
             fieldvalues = [[x] for x in result[1::2]]
             return dict(zip(fieldkeys, fieldvalues))
-        except TypeError, err:
+        except TypeError:
             return {}
 
     #  TODO: add support for any file property
