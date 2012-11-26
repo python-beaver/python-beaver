@@ -1,3 +1,8 @@
+v6, 2012-11-26 -- Sixth release.
+
+- Fix issue where polling for files was done incorrectly
+- Added ubuntu init.d example config
+
 v5, 2012-11-25 -- Fifth release.
 
 - Try to poll for files on startup instead of throwing exceptions
