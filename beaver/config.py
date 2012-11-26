@@ -64,7 +64,7 @@ class Config():
                 raise Exception('%s is not a valid file path' % filename)
             else:
                 for globbed in glob.glob(filename):
-                    configs = {x[0]: x[1] for x in self._config.items(filename)}
+                    configs = dict((x[0], x[1]) for x in self._config.items(filename))
                     inputs[os.path.realpath(globbed)] = configs
         return inputs
 

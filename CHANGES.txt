@@ -2,6 +2,7 @@ v4, DATE_UNKNOWN -- Fourth release.
 
 - Added argparse as a requirement for systems without argparse installed
 - Relaxed pika version requirements
+- Added python 2.6 support
 
 v3, 2012-11-24 -- Third release.
 
