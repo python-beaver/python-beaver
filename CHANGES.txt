@@ -1,4 +1,4 @@
-v4, DATE_UNKNOWN -- Fourth release.
+v4, 2012-11-25 -- Fourth release.
 
 - Added argparse as a requirement for systems without argparse installed
 - Relaxed pika version requirements
