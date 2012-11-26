@@ -12,12 +12,12 @@ class RabbitmqTransport(beaver.transport.Transport):
 
         # Create our connection object
         rabbitmq_address = os.environ.get("RABBITMQ_HOST", "localhost")
-        rabbitmq_port    = os.environ.get("RABBITMQ_PORT", 5672)
-        rabbitmq_vhost   = os.environ.get("RABBITMQ_VHOST", "/")
-        rabbitmq_user    = os.environ.get("RABBITMQ_USERNAME", 'guest')
-        rabbitmq_pass    = os.environ.get("RABBITMQ_PASSWORD", 'guest')
-        rabbitmq_queue   = os.environ.get("RABBITMQ_QUEUE", 'logstash-queue')
-        self.rabbitmq_key      = os.environ.get("RABBITMQ_KEY", 'logstash-key')
+        rabbitmq_port = os.environ.get("RABBITMQ_PORT", 5672)
+        rabbitmq_vhost = os.environ.get("RABBITMQ_VHOST", "/")
+        rabbitmq_user = os.environ.get("RABBITMQ_USERNAME", 'guest')
+        rabbitmq_pass = os.environ.get("RABBITMQ_PASSWORD", 'guest')
+        rabbitmq_queue = os.environ.get("RABBITMQ_QUEUE", 'logstash-queue')
+        self.rabbitmq_key = os.environ.get("RABBITMQ_KEY", 'logstash-key')
         self.rabbitmq_exchange = os.environ.get("RABBITMQ_EXCHANGE", 'logstash-exchange')
 
         # Setup RabbitMQ connection

@@ -10,8 +10,8 @@ class UdpTransport(beaver.transport.Transport):
     def __init__(self, configfile):
         super(UdpTransport, self).__init__(configfile)
 
-        self.sock = socket.socket(socket.AF_INET, # Internet
-            socket.SOCK_DGRAM) # UDP
+        self.sock = socket.socket(socket.AF_INET,  # Internet
+            socket.SOCK_DGRAM)  # UDP
         self.udp_host = os.environ.get("UDP_HOST", "127.0.0.1")
         self.udp_port = int(os.environ.get("UDP_PORT", 9999))
 
