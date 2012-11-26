@@ -2,6 +2,7 @@ import ConfigParser
 import glob
 import logging
 import os
+import time
 
 
 class Config():
@@ -47,23 +48,23 @@ class Config():
 
     def _sanitize(self):
         if len(self._config.read(self._configfile)) != 1:
-            raise Exception('Could not parse config file "%s"'
-                % self._configfile)
+            raise Exception('Could not parse config file "%s"' % self._configfile)
 
     def _parse(self):
         inputs = {}
         for filename in self._config.sections():
             if not self._config.get(filename, 'type'):
-                raise Exception('%s: missing mandatory config "type"'
-                    % filename
-                )
+                raise Exception('%s: missing mandatory config "type"' % filename)
+
             globs = glob.glob(filename)
-            if not globs:
-                raise Exception('%s is not a valid file path' % filename)
-            else:
-                for globbed in glob.glob(filename):
-                    configs = dict((x[0], x[1]) for x in self._config.items(filename))
-                    inputs[os.path.realpath(globbed)] = configs
+            while not globs:
+                time.sleep(2)
+                globs = glob.glob(filename)
+
+            for globbed in globs:
+                configs = dict((x[0], x[1]) for x in self._config.items(filename))
+                inputs[os.path.realpath(globbed)] = configs
+
         return inputs
 
     def _getfield(self, filename, field):
