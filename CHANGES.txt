@@ -1,4 +1,4 @@
-v3, DATE_UNKNOWN -- Third release.
+v3, 2012-11-24 -- Third release.
 
 - Changed lpush to rpush on redis transport
 - Added udp support
