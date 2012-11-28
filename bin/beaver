@@ -2,10 +2,14 @@
 
 import argparse
 import os
+import sys
 
 import beaver.config
 import beaver.utils
 import beaver.worker
+
+from beaver.transport import TransportException
+from time import sleep
 
 epilog_example = """
 Beaver provides an lightweight method for shipping local log
@@ -62,7 +66,6 @@ parser.set_defaults(
     debug=False
 )
 
-
 args = parser.parse_args()
 args.globs = files
 
@@ -76,4 +79,26 @@ except AttributeError:
     args.files = configfile.getfilepaths()
     args.globs = configfile.getglobs()
 
-beaver.worker.run_worker(configfile, args)
+failure_count = 0
+respawn_delay = 3
+max_failure = 7
+
+while 1:
+    try:
+        worker = beaver.worker.run_worker(configfile, args)
+    except TransportException, e:
+        failure_count = failure_count + 1
+        if failure_count > max_failure:
+            failure_count = max_failure
+        sleep_time = respawn_delay ** failure_count
+        logger.info("Caught transport exception ('%s'), respawning in %d seconds" % (e.message, sleep_time))
+        try:
+            sleep(sleep_time)
+        except KeyboardInterrupt:
+            logger.info("User cancelled respawn.")
+            sys.exit(0)
+    except KeyboardInterrupt:
+        logger.info("Shutting down. Please wait.")
+        worker.close()
+        logger.info("Shutdown complete.")
+        sys.exit(0)
