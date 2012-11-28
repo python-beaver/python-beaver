@@ -41,7 +41,7 @@ class RabbitmqTransport(beaver.transport.Transport):
         self.channel.queue_declare(queue=rabbitmq_queue)
         self.channel.exchange_declare(
             exchange=self.rabbitmq_exchange,
-            type=rabbitmq_exchange_type,
+            exchange_type=rabbitmq_exchange_type,
             durable=rabbitmq_exchange_durable
         )
         self.channel.queue_bind(
