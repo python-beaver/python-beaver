@@ -16,14 +16,14 @@ if [ ! $? -eq 0 ]; then # working directory is NOT clean
   exit
 fi
 
-echo "${YELLOW}--->${COLOR_OFF} Retrieving release versions"
+echo -e "${YELLOW}--->${COLOR_OFF} Retrieving release versions"
 
 current_version=`cat setup.py |grep version|sed 's/[^0-9]//g'`
 next_version=$(($current_version + 1));
 
-echo "${YELLOW}  ->${COLOR_OFF} ${MAGENTA}${current_version}${COLOR_OFF} ${CYAN}->${COLOR_OFF} ${MAGENTA}${next_version}${COLOR_OFF}"
+echo -e  "${YELLOW}   >${COLOR_OFF} ${MAGENTA}${current_version}${COLOR_OFF} -> ${MAGENTA}${next_version}${COLOR_OFF}"
 
-echo "${YELLOW}--->${COLOR_OFF} Creating necessary temp file"
+echo -e "${YELLOW}--->${COLOR_OFF} Creating necessary temp file"
 tempfoo=`basename $0`
 TMPFILE=`mktemp /tmp/${tempfoo}.XXXXXX` || {
   echo -e "${RED}WARNING: Cannot create temp file using mktemp in /tmp dir ${COLOR_OFF}\n"
@@ -33,32 +33,31 @@ TMPFILE=`mktemp /tmp/${tempfoo}.XXXXXX` || {
 find_this="version='$current_version',"
 replace_with="version='$next_version',"
 
-echo "${YELLOW}--->${COLOR_OFF} Updating setup.py"
-sed "s/$find_this/$replace_with/" setup.py > TMPFILE && mv TMPFILE setup.py
+echo -e "${YELLOW}--->${COLOR_OFF} Updating setup.py"
+sed "s/$find_this/$replace_with/" setup.py > $TMPFILE && mv $TMPFILE setup.py
 
 find_this="pip install beaver==$current_version"
 replace_with="pip install beaver==$next_version"
 
-echo "${YELLOW}--->${COLOR_OFF} Updating README.rst"
-sed "s/$find_this/$replace_with/" README.rst > TMPFILE && mv TMPFILE README.rst
+echo -e "${YELLOW}--->${COLOR_OFF} Updating README.rst"
+sed "s/$find_this/$replace_with/" README.rst > $TMPFILE && mv $TMPFILE README.rst
 
-echo "${YELLOW}--->${COLOR_OFF} Updating README.txt"
-sed "s/$find_this/$replace_with/" README.txt > TMPFILE
-mv TMPFILE README.txt
+echo -e "${YELLOW}--->${COLOR_OFF} Updating README.txt"
+sed "s/$find_this/$replace_with/" README.txt > $TMPFILE && mv $TMPFILE README.txt
 
-echo "${YELLOW}--->${COLOR_OFF} Adding changed files to git"
+echo -e "${YELLOW}--->${COLOR_OFF} Adding changed files to git"
 git add README.rst README.txt setup.py
 
-echo "${YELLOW}--->${COLOR_OFF} Creating release"
+echo -e "${YELLOW}--->${COLOR_OFF} Creating release"
 git commit -q -m "Release version $next_version"
 
-echo "${YELLOW}--->${COLOR_OFF} Tagging release"
+echo -e "${YELLOW}--->${COLOR_OFF} Tagging release"
 git tag -a $next_version -m "Release version $next_version"
 
-echo "${YELLOW}--->${COLOR_OFF} Pushing release and tags to github"
+echo -e "${YELLOW}--->${COLOR_OFF} Pushing release and tags to github"
 git push -q origin master && git push -q --tags
 
-echo "${YELLOW}--->${COLOR_OFF} Creating python release"
+echo -e "${YELLOW}--->${COLOR_OFF} Creating python release"
 python setup.py sdist upload > /dev/null
 
-echo "\n${CYAN}RELEASED VERSION ${next_version}!${COLOR_OFF}\n"
+echo -e "\n${CYAN}RELEASED VERSION ${next_version}!${COLOR_OFF}\n"
