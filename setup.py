@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='Beaver',
-    version='7',
+    version='8',
     author='Jose Diaz-Gonzalez',
     author_email='support@savant.be',
     packages=['beaver'],
