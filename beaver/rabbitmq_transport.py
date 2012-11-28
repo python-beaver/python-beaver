@@ -3,6 +3,7 @@ import datetime
 import pika
 
 import beaver.transport
+from beaver.transport import TransportException
 
 
 class RabbitmqTransport(beaver.transport.Transport):
@@ -52,18 +53,30 @@ class RabbitmqTransport(beaver.transport.Transport):
     def callback(self, filename, lines):
         timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
         for line in lines:
-            self.channel.basic_publish(
-                exchange=self.rabbitmq_exchange,
-                routing_key=self.rabbitmq_key,
-                body=self.format(filename, timestamp, line),
-                properties=pika.BasicProperties(
-                    content_type="text/json",
-                    delivery_mode=1
-                )
-            )
+            try:
+                import warnings
+                with warnings.catch_warnings():
+                    warnings.simplefilter("error")
+                    self.channel.basic_publish(
+                        exchange=self.rabbitmq_exchange,
+                        routing_key=self.rabbitmq_key,
+                        body=self.format(filename, timestamp, line),
+                        properties=pika.BasicProperties(
+                            content_type="text/json",
+                            delivery_mode=1
+                        )
+                    )
+            except UserWarning:
+                raise TransportException("Connection appears to have been lost")
+            except Exception, e:
+                try:
+                    raise TransportException(e.strerror)
+                except AttributeError:
+                    raise TransportException("Unspecified exception encountered")  # TRAP ALL THE THINGS!
 
     def interrupt(self):
-        self.connection.close()
+        if self.connection:
+            self.connection.close()
 
     def unhandled(self):
         return True

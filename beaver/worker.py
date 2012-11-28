@@ -5,6 +5,7 @@ import os
 import stat
 import sys
 import time
+from transport import TransportException
 
 
 class Worker(object):
@@ -225,6 +226,8 @@ def run_worker(configfile, args):
         l = Worker(configfile, args, transport.callback)
         logger.info("Working...")
         l.loop()
+    except TransportException, e:
+        raise TransportException(e.message)
     except KeyboardInterrupt:
         logger.info("Shutting down. Please wait.")
         transport.interrupt()

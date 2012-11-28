@@ -61,3 +61,7 @@ class Transport(object):
             })
 
         return "[{0}] [{1}] {2}".format(self.current_host, timestamp, line)
+
+
+class TransportException(Exception):
+    pass
