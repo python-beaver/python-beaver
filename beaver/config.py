@@ -27,7 +27,7 @@ class Config():
         logger = logging.getLogger('beaver')
         logger.info('Processing config file %s' % configfile)
 
-        defaults = {
+        self._defaults = {
             'add_field': '',
             'debug': '',
             'discover_interval': '15',
@@ -41,7 +41,7 @@ class Config():
             'type': ''
         }
         self._configfile = configfile
-        self._config = ConfigParser.ConfigParser(defaults)
+        self._config = ConfigParser.ConfigParser(self._defaults)
         self._sanitize()
         self._files, self._globs = self._parse()
 
@@ -75,8 +75,10 @@ class Config():
         return self._files.get(os.path.realpath(filename))[field]
 
     def addglob(self, globname, globbed):
+        config = self._globs.get(globname, self._defaults)
+
         for filename in globbed:
-            self._files[filename] = self._globs[globname]
+            self._files[filename] = config
 
     def getfilepaths(self):
         return self._files.keys()
