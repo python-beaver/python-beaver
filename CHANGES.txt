@@ -1,3 +1,7 @@
+v7, 2012-11-28 -- Seventh release.
+
+- Partial fix for crashes caused by globbed files
+
 v6, 2012-11-26 -- Sixth release.
 
 - Fix issue where polling for files was done incorrectly
