@@ -16,6 +16,9 @@ if [ ! $? -eq 0 ]; then # working directory is NOT clean
   exit
 fi
 
+echo -e "${YELLOW}--->${COLOR_OFF} Updating local copy"
+git pull -q origin master
+
 echo -e "${YELLOW}--->${COLOR_OFF} Retrieving release versions"
 
 current_version=`cat setup.py |grep version|sed 's/[^0-9]//g'`

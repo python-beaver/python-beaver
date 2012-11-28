@@ -1,3 +1,13 @@
+v9, 2012-11-28 -- Ninth release.
+
+- Fixed deprecated warning when declaring exchange type
+- More release script changes
+
+v8, 2012-11-28 -- Eigth release.
+
+- Added connection exception trapping code
+- Fixed release script
+
 v7, 2012-11-28 -- Seventh release.
 
 - Partial fix for crashes caused by globbed files
