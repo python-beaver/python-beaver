@@ -69,7 +69,13 @@ class RabbitmqTransport(beaver.transport.Transport):
             except UserWarning:
                 raise TransportException("Connection appears to have been lost")
             except Exception, e:
-                raise TransportException(e.strerror)
+                try:
+                    raise TransportException(e.strerror)
+                except AttributeError:
+                    try:
+                        raise TransportException(e.message)
+                    except AttributeError:
+                        raise TransportException("Unspecified exception encountered")  # TRAP ALL THE THINGS!
 
     def interrupt(self):
         if self.connection:
