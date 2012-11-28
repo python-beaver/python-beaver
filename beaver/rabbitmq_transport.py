@@ -72,10 +72,7 @@ class RabbitmqTransport(beaver.transport.Transport):
                 try:
                     raise TransportException(e.strerror)
                 except AttributeError:
-                    try:
-                        raise TransportException(e.message)
-                    except AttributeError:
-                        raise TransportException("Unspecified exception encountered")  # TRAP ALL THE THINGS!
+                    raise TransportException("Unspecified exception encountered")  # TRAP ALL THE THINGS!
 
     def interrupt(self):
         if self.connection:

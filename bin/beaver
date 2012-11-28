@@ -91,7 +91,7 @@ while 1:
         if failure_count > max_failure:
             failure_count = max_failure
         sleep_time = respawn_delay ** failure_count
-        logger.info("Caught transport exception ('%s'), respawning in %d seconds" % (e.message, sleep_time))
+        logger.info("Caught transport exception, respawning in %d seconds" % sleep_time)
         try:
             sleep(sleep_time)
         except KeyboardInterrupt:
