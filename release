@@ -1,0 +1,64 @@
+#!/bin/bash
+
+# Colors
+COLOR_OFF="\033[0m"   # unsets color to term fg color
+RED="\033[0;31m"      # red
+GREEN="\033[0;32m"    # green
+YELLOW="\033[0;33m"   # yellow
+MAGENTA="\033[0;35m"  # magenta
+CYAN="\033[0;36m"     # cyan
+
+echo -e "\n${GREEN}STARTING RELEASE PROCESS${COLOR_OFF}\n"
+
+git status | grep "working directory clean" &> /dev/null
+if [ ! $? -eq 0 ]; then # working directory is NOT clean
+  echo -e "${RED}WARNING: You have uncomitted changes, you may have forgotten something${COLOR_OFF}\n"
+  exit
+fi
+
+echo "${YELLOW}--->${COLOR_OFF} Retrieving release versions"
+
+current_version=`cat setup.py |grep version|sed 's/[^0-9]//g'`
+next_version=$(($current_version + 1));
+
+echo "${YELLOW}  ->${COLOR_OFF} ${MAGENTA}${current_version}${COLOR_OFF} ${CYAN}->${COLOR_OFF} ${MAGENTA}${next_version}${COLOR_OFF}"
+
+echo "${YELLOW}--->${COLOR_OFF} Creating necessary temp file"
+tempfoo=`basename $0`
+TMPFILE=`mktemp /tmp/${tempfoo}.XXXXXX` || {
+  echo -e "${RED}WARNING: Cannot create temp file using mktemp in /tmp dir ${COLOR_OFF}\n"
+	exit 1
+}
+
+find_this="version='$current_version',"
+replace_with="version='$next_version',"
+
+echo "${YELLOW}--->${COLOR_OFF} Updating setup.py"
+sed "s/$find_this/$replace_with/" setup.py > TMPFILE && mv TMPFILE setup.py
+
+find_this="pip install beaver==$current_version"
+replace_with="pip install beaver==$next_version"
+
+echo "${YELLOW}--->${COLOR_OFF} Updating README.rst"
+sed "s/$find_this/$replace_with/" README.rst > TMPFILE && mv TMPFILE README.rst
+
+echo "${YELLOW}--->${COLOR_OFF} Updating README.txt"
+sed "s/$find_this/$replace_with/" README.txt > TMPFILE
+mv TMPFILE README.txt
+
+echo "${YELLOW}--->${COLOR_OFF} Adding changed files to git"
+git add README.rst README.txt setup.py
+
+echo "${YELLOW}--->${COLOR_OFF} Creating release"
+git commit -q -m "Release version $next_version"
+
+echo "${YELLOW}--->${COLOR_OFF} Tagging release"
+git tag -a $next_version -m "Release version $next_version"
+
+echo "${YELLOW}--->${COLOR_OFF} Pushing release and tags to github"
+git push -q origin master && git push -q --tags
+
+echo "${YELLOW}--->${COLOR_OFF} Creating python release"
+python setup.py sdist upload > /dev/null
+
+echo "\n${CYAN}RELEASED VERSION ${next_version}!${COLOR_OFF}\n"
