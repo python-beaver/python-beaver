@@ -7,16 +7,16 @@ import beaver.transport
 
 class ZmqTransport(beaver.transport.Transport):
 
-    def __init__(self, configfile):
+    def __init__(self, configfile, args):
         super(ZmqTransport, self).__init__(configfile)
 
         zeromq_address = os.environ.get("ZEROMQ_ADDRESS", "tcp://localhost:2120")
-        zeromq_bind = os.environ.get("BIND", False)
+        self.zeromq_bind = (args.mode == "bind")
 
         self.ctx = zmq.Context()
         self.pub = self.ctx.socket(zmq.PUSH)
 
-        if zeromq_bind:
+        if self.zeromq_bind:
             self.pub.bind(zeromq_address)
         else:
             self.pub.connect(zeromq_address)
