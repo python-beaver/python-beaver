@@ -57,8 +57,10 @@ files = os.environ.get("BEAVER_FILES", None)
 if files is not None:
     files = files.split(',')
 
+bound = "bind" if os.environ.get("BIND", False) else None
+
 parser.set_defaults(
-    mode=os.environ.get("BEAVER_MODE", 'bind'),
+    mode=os.environ.get("BEAVER_MODE", "bind" if os.environ.get("BIND", False) else "connect"),
     path=os.environ.get("BEAVER_PATH", '/var/log'),
     files=files,
     transport=os.environ.get("BEAVER_TRANSPORT", 'stdout'),

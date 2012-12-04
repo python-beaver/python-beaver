@@ -217,7 +217,7 @@ def run_worker(configfile, args):
         transport = beaver.udp_transport.UdpTransport(configfile)
     elif args.transport == 'zmq':
         import beaver.zmq_transport
-        transport = beaver.zmq_transport.ZmqTransport(configfile)
+        transport = beaver.zmq_transport.ZmqTransport(configfile, args)
     else:
         raise Exception('Invalid transport {0}'.format(args.transport))
 

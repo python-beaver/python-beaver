@@ -1,11 +1,16 @@
-from distutils.core import setup
+#!/usr/bin/env python
+
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 
 setup(
     name='Beaver',
     version='9',
     author='Jose Diaz-Gonzalez',
     author_email='support@savant.be',
-    packages=['beaver'],
+    packages=['beaver', 'beaver.tests'],
     scripts=['bin/beaver'],
     url='http://github.com/josegonzalez/beaver',
     license='LICENSE.txt',
@@ -19,6 +24,8 @@ setup(
     ],
     description='python daemon that munches on logs and sends their contents to logstash',
     long_description=open('README.rst').read(),
+    tests_require=["nose",],
+    test_suite="nose.collector",
     install_requires=[
         "argparse>=1.2.0",
         "pika>=0.9.5",
