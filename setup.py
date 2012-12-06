@@ -27,10 +27,5 @@ setup(
                      open('CHANGES.rst').read(),
     tests_require=["nose",],
     test_suite="nose.collector",
-    install_requires=[
-        "argparse>=1.2.0",
-        "pika>=0.9.5",
-        "redis==2.4.11",
-        "ujson==1.9",
-    ],
+    install_requires=open('requirements/base.txt').readlines(),
 )
