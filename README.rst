@@ -54,6 +54,8 @@ Beaver provides an lightweight method for shipping local log files to Logstash. 
 
 Events are sent in logstash's ``json_event`` format. Options can also be set as environment variables.
 
+NOTE: the redis transport uses a namespace of ``logstash:beaver`` by default.  You will need to update your logstash indexer to match this.
+
 Examples
 --------
 
@@ -177,7 +179,6 @@ Todo
 * Use python threading + subprocess in order to support usage of ``yield`` across all operating systems
 * Fix usage on non-linux platforms - file.readline() does not work as expected on OS X. See above for potential solution
 * More transports
-* ~Create a python package~
 * ~Ability to specify files, tags, and other  metadata within a configuration file~
 
 Credits
