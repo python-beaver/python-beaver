@@ -115,7 +115,7 @@ Example 8: Real-world usage of Redis as a transport::
 
     # logstash indexer config:
     input { redis {
-        host => 'redis-internal' # this is in dns for work
+        host => 'redis-internal'
         data_type => 'list'
         key => 'app:unmappable'
         type => 'app:unmappable'
