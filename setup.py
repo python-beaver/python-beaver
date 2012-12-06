@@ -25,7 +25,7 @@ setup(
     description='python daemon that munches on logs and sends their contents to logstash',
     long_description=open('README.rst').read() + '\n\n' +
                      open('CHANGES.rst').read(),
-    tests_require=["nose",],
-    test_suite="nose.collector",
+    tests_require=['nose'],
+    test_suite='nose.collector',
     install_requires=open('requirements/base.txt').readlines(),
 )
