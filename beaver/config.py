@@ -96,6 +96,7 @@ class Config():
     def gettags(self, filename):
         try:
             result = self._getfield(filename, 'tags').split(",")
+            result = filter(None, result)
             return result if result else []
         except TypeError:
             return []
