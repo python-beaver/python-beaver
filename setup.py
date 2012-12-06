@@ -13,7 +13,7 @@ setup(
     packages=['beaver', 'beaver.tests'],
     scripts=['bin/beaver'],
     url='http://github.com/josegonzalez/beaver',
-    license='LICENSE.txt',
+    license=open('LICENSE.txt').read(),
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: System Administrators',
