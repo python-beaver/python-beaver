@@ -1,28 +1,39 @@
-v9, 2012-11-28 -- Ninth release.
+.. :changelog:
+
+Changes
+-------
+
+9 (2012-11-28)
+++++++++++++++
 
 - Fixed deprecated warning when declaring exchange type
 - More release script changes
 
-v8, 2012-11-28 -- Eigth release.
+8 (2012-11-28)
+++++++++++++++
 
 - Added connection exception trapping code
 - Fixed release script
 
-v7, 2012-11-28 -- Seventh release.
+7 (2012-11-28)
+++++++++++++++
 
 - Partial fix for crashes caused by globbed files
 - Added a helper script for creating releases
 
-v6, 2012-11-26 -- Sixth release.
+6 (2012-11-26)
+++++++++++++++
 
 - Fix issue where polling for files was done incorrectly
 - Added ubuntu init.d example config
 
-v5, 2012-11-25 -- Fifth release.
+5 (2012-11-25)
+++++++++++++++
 
 - Try to poll for files on startup instead of throwing exceptions
 
-v4, 2012-11-25 -- Fourth release.
+4 (2012-11-25)
+++++++++++++++
 
 - Added argparse as a requirement for systems without argparse installed
 - Relaxed pika version requirements
@@ -30,7 +41,8 @@ v4, 2012-11-25 -- Fourth release.
 - PEP8 Formatting
 - Allow rabbitmq exchange type and durability to be configured
 
-v3, 2012-11-24 -- Third release.
+3 (2012-11-24)
+++++++++++++++
 
 - Changed lpush to rpush on redis transport
 - Added udp support
@@ -41,10 +53,11 @@ v3, 2012-11-24 -- Third release.
 - Added example supervisor config file
 - Added example bash startup file
 
-v2, 2012-10-25 -- Second release.
+2 (2012-10-25)
+++++++++++++++
 
 - Updated documentation
-- Added support for `config.ini` based option parsing
+- Added support for ``config.ini`` based option parsing
 - Refactored transports into separate files
 - Added support for file globbing in paths
 - Added msgpack and regular string output
@@ -52,4 +65,7 @@ v2, 2012-10-25 -- Second release.
 - Refactored logging to use the Python Logging Framework
 - Added RabbitMQ support
 
-v1, 2012-08-05 -- Initial release.
+1 (2012-08-05)
+++++++++++++++
+
+- Initial release
