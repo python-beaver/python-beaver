@@ -71,7 +71,11 @@ class Worker(object):
         while 1:
             self.update_files()
             for fid, file in list(self.files_map.iteritems()):
-                self.readfile(file)
+                try:
+                    self.readfile(file)
+                except IOError, e:
+                    if e.errno == errno.ESTALE:
+                        self.unwatch(file, fid)
             if async:
                 return
             time.sleep(interval)
