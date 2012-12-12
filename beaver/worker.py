@@ -187,7 +187,12 @@ class Worker(object):
         # file no longer exists; if it has been renamed
         # try to read it for the last time in case the
         # log rotator has written something in it.
-        lines = self.readfile(file)
+        lines = None
+        try:
+            lines = self.readfile(file)
+        except IOError, e:
+            # Silently ignore any IOErrors -- file is gone
+            pass
         self.logger.info("[{0}] - un-watching logfile {1}".format(fid, file.name))
         del self.files_map[fid]
         if lines:
