@@ -156,6 +156,10 @@ Example 10: Read config from config.ini and put to stdout::
     type: syslog
     tags: sys
 
+    [/var/log/{secure,messages}.log]
+    type: syslog
+    tags: sys
+
 Example 11: UDP transport::
 
     # From the commandline

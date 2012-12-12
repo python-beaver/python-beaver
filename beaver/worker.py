@@ -1,11 +1,11 @@
 import errno
-import glob
 import logging
 import os
 import stat
 import sys
 import time
 from transport import TransportException
+from utils import eglob
 
 
 class Worker(object):
@@ -128,7 +128,7 @@ class Worker(object):
         files = []
         if len(self.args.globs) > 0:
             for name in self.args.globs:
-                globbed = [os.path.realpath(filename) for filename in glob.glob(name)]
+                globbed = [os.path.realpath(filename) for filename in eglob(name)]
                 files.extend(globbed)
                 self.configfile.addglob(name, globbed)
         else:

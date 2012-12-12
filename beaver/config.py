@@ -1,7 +1,7 @@
 import ConfigParser
-import glob
 import logging
 import os
+from utils import eglob
 
 
 class Config():
@@ -61,7 +61,7 @@ class Config():
             config = dict((x[0], x[1]) for x in self._config.items(filename))
             glob_paths[filename] = config
 
-            globs = glob.glob(filename)
+            globs = eglob(filename)
             if not globs:
                 logger.info('Skipping glob due to no files found: %s' % filename)
                 continue
