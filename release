@@ -45,11 +45,8 @@ replace_with="pip install beaver==$next_version"
 echo -e "${YELLOW}--->${COLOR_OFF} Updating README.rst"
 sed "s/$find_this/$replace_with/" README.rst > $TMPFILE && mv $TMPFILE README.rst
 
-echo -e "${YELLOW}--->${COLOR_OFF} Updating README.txt"
-sed "s/$find_this/$replace_with/" README.txt > $TMPFILE && mv $TMPFILE README.txt
-
 echo -e "${YELLOW}--->${COLOR_OFF} Adding changed files to git"
-git add README.rst README.txt setup.py
+git add README.rst setup.py
 
 echo -e "${YELLOW}--->${COLOR_OFF} Creating release"
 git commit -q -m "Release version $next_version"
