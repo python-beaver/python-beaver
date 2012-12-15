@@ -3,13 +3,15 @@
 import argparse
 import os
 import sys
+import time
 
 import beaver.config
+import beaver.transport
 import beaver.utils
 import beaver.worker
 
-from beaver.transport import TransportException
-from time import sleep
+from beaver import __version__ as full_version
+
 
 epilog_example = """
 Beaver provides an lightweight method for shipping local log
@@ -50,6 +52,7 @@ parser.add_argument('-f', '--files', help='space-separated filelist to watch, ca
 parser.add_argument('-t', '--transport', help='log transport method', dest='transport', choices=['rabbitmq', 'redis', 'stdout', 'zmq', 'udp'])
 parser.add_argument('-c', '--configfile', help='ini config file path', dest='config')
 parser.add_argument('-d', '--debug', help='enable debug mode', type=bool, dest='debug')
+parser.add_argument('-v', '--version', help='output version and quit', dest='version', action='store_true')
 
 
 # Support env variable parsing as well
@@ -69,10 +72,18 @@ parser.set_defaults(
 )
 
 args = parser.parse_args()
-args.globs = files
+
+if args.version:
+    import logging
+    formatter = logging.Formatter('%(message)s')
+    logger = beaver.utils.setup_custom_logger('beaver', debug=args.debug, formatter=formatter)
+    logger.info("Beaver {0}".format(full_version))
+    sys.exit(0)
 
 logger = beaver.utils.setup_custom_logger('beaver', args.debug)
 
+
+args.globs = files
 configfile = beaver.config.Config(args.config)
 try:
     args.files.extend(configfile.getfilepaths())
@@ -88,14 +99,14 @@ max_failure = 7
 while 1:
     try:
         worker = beaver.worker.run_worker(configfile, args)
-    except TransportException, e:
+    except beaver.transport.TransportException, e:
         failure_count = failure_count + 1
         if failure_count > max_failure:
             failure_count = max_failure
         sleep_time = respawn_delay ** failure_count
         logger.info("Caught transport exception, respawning in %d seconds" % sleep_time)
         try:
-            sleep(sleep_time)
+            time.sleep(sleep_time)
         except KeyboardInterrupt:
             logger.info("User cancelled respawn.")
             sys.exit(0)

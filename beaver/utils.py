@@ -3,9 +3,12 @@ import glob
 import re
 import itertools
 
+_magic_brackets = re.compile("({([^}]+)})")
 
-def setup_custom_logger(name, debug=False):
-    formatter = logging.Formatter('[%(asctime)s] %(levelname)-7s %(message)s')
+
+def setup_custom_logger(name, debug=False, formatter=None):
+    if formatter is None:
+        formatter = logging.Formatter('[%(asctime)s] %(levelname)-7s %(message)s')
 
     handler = logging.StreamHandler()
     handler.setFormatter(formatter)
@@ -20,10 +23,12 @@ def setup_custom_logger(name, debug=False):
     logger.addHandler(handler)
     return logger
 
+
 def _replace_all(path, replacements):
     for j in replacements:
         path = path.replace(*j)
     return path
+
 
 def eglob(path):
     """Like glob.glob, but supports "/path/**/{a,b,c}.txt" lookup"""
@@ -31,7 +36,7 @@ def eglob(path):
     paths = expand_paths(path)
     return list(fi(glob.iglob(d) for d in paths))
 
-_magic_brackets = re.compile("({([^}]+)})")
+
 def expand_paths(path):
     """When given a path with brackets, expands it to return all permutations
        of the path with expanded brackets, similar to ant.

@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from beaver import __version__
+
 try:
     from setuptools import setup
 except ImportError:
@@ -7,7 +9,7 @@ except ImportError:
 
 setup(
     name='Beaver',
-    version='10',
+    version=__version__,
     author='Jose Diaz-Gonzalez',
     author_email='support@savant.be',
     packages=['beaver', 'beaver.tests'],

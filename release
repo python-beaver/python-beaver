@@ -21,7 +21,7 @@ git pull -q origin master
 
 echo -e "${YELLOW}--->${COLOR_OFF} Retrieving release versions"
 
-current_version=`cat setup.py |grep version|sed 's/[^0-9]//g'`
+current_version=`cat beaver/__init__.py |grep version|sed 's/[^0-9]//g'`
 next_version=$(($current_version + 1));
 
 echo -e  "${YELLOW}   >${COLOR_OFF} ${MAGENTA}${current_version}${COLOR_OFF} -> ${MAGENTA}${next_version}${COLOR_OFF}"
@@ -33,11 +33,11 @@ TMPFILE=`mktemp /tmp/${tempfoo}.XXXXXX` || {
 	exit 1
 }
 
-find_this="version='$current_version',"
-replace_with="version='$next_version',"
+find_this="__version__ = '$current_version'"
+replace_with="__version__ = '$next_version'"
 
-echo -e "${YELLOW}--->${COLOR_OFF} Updating setup.py"
-sed "s/$find_this/$replace_with/" setup.py > $TMPFILE && mv $TMPFILE setup.py
+echo -e "${YELLOW}--->${COLOR_OFF} Updating beaver/__init__.py"
+sed "s/$find_this/$replace_with/" beaver/__init__.py > $TMPFILE && mv $TMPFILE beaver/__init__.py
 
 find_this="pip install beaver==$current_version"
 replace_with="pip install beaver==$next_version"
@@ -51,7 +51,7 @@ dashes=`yes '-'|head -n ${#version_header}|tr -d '\n'`
 gitchangelog |sed "4s/.*/$version_header/"|sed "5s/.*/$dashes/" > $TMPFILE && mv $TMPFILE CHANGES.rst
 
 echo -e "${YELLOW}--->${COLOR_OFF} Adding changed files to git"
-git add CHANGES.rst README.rst setup.py
+git add CHANGES.rst README.rst beaver/__init__.py
 
 echo -e "${YELLOW}--->${COLOR_OFF} Creating release"
 git commit -q -m "Release version $next_version"
