@@ -6,7 +6,7 @@ except ImportError:
     from distutils.core import setup
 
 setup(
-    name='beaver',
+    name='Beaver',
     version='9',
     author='Jose Diaz-Gonzalez',
     author_email='support@savant.be',
