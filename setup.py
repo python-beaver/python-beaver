@@ -7,7 +7,7 @@ except ImportError:
 
 setup(
     name='Beaver',
-    version='9',
+    version='10',
     author='Jose Diaz-Gonzalez',
     author_email='support@savant.be',
     packages=['beaver', 'beaver.tests'],
