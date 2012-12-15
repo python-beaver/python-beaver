@@ -161,6 +161,11 @@ class Worker(object):
                     # same name but different file (rotation); reload it.
                     self.unwatch(file, fid)
                     self.watch(file.name)
+                elif file.tell() > st.st_size:
+                    # file truncated; reload it
+                    self.logger.info("[{0}] - file truncated {1}".format(fid,file.name))
+                    self.unwatch(file, fid)
+                    self.watch(file.name)
 
         # add new ones
         for fid, fname in ls:
