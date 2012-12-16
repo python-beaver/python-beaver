@@ -7,8 +7,8 @@ import beaver.transport
 
 class UdpTransport(beaver.transport.Transport):
 
-    def __init__(self, configfile):
-        super(UdpTransport, self).__init__(configfile)
+    def __init__(self, configfile, args):
+        super(UdpTransport, self).__init__(configfile, args)
 
         self.sock = socket.socket(socket.AF_INET,  # Internet
             socket.SOCK_DGRAM)  # UDP

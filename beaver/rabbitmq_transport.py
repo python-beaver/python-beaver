@@ -8,8 +8,8 @@ from beaver.transport import TransportException
 
 class RabbitmqTransport(beaver.transport.Transport):
 
-    def __init__(self, configfile):
-        super(RabbitmqTransport, self).__init__(configfile)
+    def __init__(self, configfile, args):
+        super(RabbitmqTransport, self).__init__(configfile, args)
 
         # Create our connection object
         rabbitmq_address = os.environ.get("RABBITMQ_HOST", "localhost")
