@@ -53,6 +53,7 @@ parser.add_argument('-t', '--transport', help='log transport method', dest='tran
 parser.add_argument('-c', '--configfile', help='ini config file path', dest='config')
 parser.add_argument('-d', '--debug', help='enable debug mode', type=bool, dest='debug')
 parser.add_argument('-v', '--version', help='output version and quit', dest='version', action='store_true')
+parser.add_argument('--fqdn', help="use the machine's FQDN", dest="fqdn", action='store_true')
 
 
 # Support env variable parsing as well
@@ -68,7 +69,8 @@ parser.set_defaults(
     files=files,
     transport=os.environ.get("BEAVER_TRANSPORT", 'stdout'),
     config='/dev/null',
-    debug=False
+    debug=False,
+    fqdn=False
 )
 
 args = parser.parse_args()

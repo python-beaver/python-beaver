@@ -29,7 +29,7 @@ Usage
 usage::
 
     beaver [-h] [-m {bind,connect}] [-p PATH] [-f FILES [FILES ...]]
-              [-t {rabbitmq,redis,stdout,zmq,udp}] [-c CONFIG] [-d DEBUG]
+              [-t {rabbitmq,redis,stdout,zmq,udp}] [-c CONFIG] [-d DEBUG] [--fqdn]
 
 optional arguments::
 
@@ -46,6 +46,8 @@ optional arguments::
                         ini config file path
     -d DEBUG, --debug DEBUG
                         enable debug mode
+    --fqdn
+                        use the machine's FQDN for source_host
 
 Background
 ==========
