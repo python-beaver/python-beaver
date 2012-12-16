@@ -21,8 +21,10 @@ else:
 
 class Transport(object):
 
-    def __init__(self, configfile):
+    def __init__(self, configfile, args):
         self.current_host = socket.gethostname()
+        if args.fqdn == True:
+            self.current_host = socket.getfqdn()
         self.configfile = configfile
         if BEAVER_FORMAT == 'msgpack':
             self.packer = msgpack.Packer()

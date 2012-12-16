@@ -219,16 +219,16 @@ def run_worker(configfile, args):
 
     if args.transport == 'rabbitmq':
         import beaver.rabbitmq_transport
-        transport = beaver.rabbitmq_transport.RabbitmqTransport(configfile)
+        transport = beaver.rabbitmq_transport.RabbitmqTransport(configfile, args)
     elif args.transport == 'redis':
         import beaver.redis_transport
-        transport = beaver.redis_transport.RedisTransport(configfile)
+        transport = beaver.redis_transport.RedisTransport(configfile, args)
     elif args.transport == 'stdout':
         import beaver.stdout_transport
-        transport = beaver.stdout_transport.StdoutTransport(configfile)
+        transport = beaver.stdout_transport.StdoutTransport(configfile, args)
     elif args.transport == 'udp':
         import beaver.udp_transport
-        transport = beaver.udp_transport.UdpTransport(configfile)
+        transport = beaver.udp_transport.UdpTransport(configfile, args)
     elif args.transport == 'zmq':
         import beaver.zmq_transport
         transport = beaver.zmq_transport.ZmqTransport(configfile, args)
