@@ -47,7 +47,7 @@
 
 <p>From PyPI::</p>
 
-<pre><code>pip install beaver==3
+<pre><code>pip install beaver==10
 </code></pre>
 
 <h1>Usage</h1>
@@ -81,6 +81,8 @@
 
 <p>Events are sent in logstash's <code>json_event</code> format. Options can also be set as environment variables.</p>
 
+<p>NOTE: the redis transport uses a namespace of <code>logstash:beaver</code> by default.  You will need to update your logstash indexer to match this.</p>
+
 <h2>Examples</h2>
 
 <p>Example 1: Listen to all files in the default path of /var/log on standard out as json::</p>
@@ -100,39 +102,43 @@
 
 <p>Example 4: Sending logs from /var/log files to a redis list::</p>
 
-<pre><code>REDIS_URL="redis://localhost:6379/0" beaver -t redis
+<pre><code>REDIS_URL='redis://localhost:6379/0' beaver -t redis
 </code></pre>
 
 <p>Example 5: Use environment variables to send logs from /var/log files to a redis list::</p>
 
-<pre><code>REDIS_URL="redis://localhost:6379/0" BEAVER_PATH="/var/log" BEAVER_TRANSPORT=redis beaver
+<pre><code>REDIS_URL='redis://localhost:6379/0' BEAVER_PATH='/var/log' BEAVER_TRANSPORT=redis beaver
 </code></pre>
 
 <p>Example 6: Zeromq listening on port 5556 (all interfaces)::</p>
 
-<pre><code>ZEROMQ_ADDRESS="tcp://*:5556" beaver -m bind -t zmq
+<pre><code>ZEROMQ_ADDRESS='tcp://*:5556' beaver -m bind -t zmq
 
 # logstash config:
-input { zeromq {
+input {
+  zeromq {
     type =&gt; 'shipper-input'
     mode =&gt; 'client'
     topology =&gt; 'pushpull'
     address =&gt; 'tcp://shipperhost:5556'
-  } }
+  }
+}
 output { stdout { debug =&gt; true } }
 </code></pre>
 
 <p>Example 7: Zeromq connecting to remote port 5556 on indexer::</p>
 
-<pre><code>ZEROMQ_ADDRESS="tcp://indexer:5556" beaver -m connect -t zmq
+<pre><code>ZEROMQ_ADDRESS='tcp://indexer:5556' beaver -m connect -t zmq
 
 # logstash config:
-input { zeromq {
+input {
+  zeromq {
     type =&gt; 'shipper-input'
     mode =&gt; 'server'
     topology =&gt; 'pushpull'
     address =&gt; 'tcp://*:5556'
-  }}
+  }
+}
 output { stdout { debug =&gt; true } }
 </code></pre>
 
@@ -145,13 +151,15 @@ output { stdout { debug =&gt; true } }
 REDIS_NAMESPACE='app:unmappable' REDIS_URL='redis://redis-internal:6379/0' beaver -f /var/log/unmappable.log -t redis
 
 # logstash indexer config:
-input { redis {
-    host =&gt; 'redis-internal' # this is in dns for work
+input {
+  redis {
+    host =&gt; 'redis-internal'
     data_type =&gt; 'list'
     key =&gt; 'app:unmappable'
     type =&gt; 'app:unmappable'
-}}
-output { stdout { debug =&gt; "true" }}
+  }
+}
+output { stdout { debug =&gt; true } }
 </code></pre>
 
 <p>As you can see, <code>beaver</code> is pretty flexible as to how you can use/abuse it in production.</p>
@@ -159,20 +167,21 @@ output { stdout { debug =&gt; "true" }}
 <p>Example 9: RabbitMQ connecting to defaults on remote broker::</p>
 
 <pre><code># From the commandline
-RABBITMQ_HOST="10.0.0.1" beaver -t rabbitmq
+RABBITMQ_HOST='10.0.0.1' beaver -t rabbitmq
 
 # logstash config:
 input { amqp {
-    name =&gt; "logstash-queue"
-    type =&gt; "direct"
-    host =&gt; "10.0.0.1"
-    exchange =&gt; "logstash-exchange"
-    key =&gt; "logstash-key"
+    name =&gt; 'logstash-queue'
+    type =&gt; 'direct'
+    host =&gt; '10.0.0.1'
+    exchange =&gt; 'logstash-exchange'
+    key =&gt; 'logstash-key'
     exclusive =&gt; false
     durable =&gt; false
     auto_delete =&gt; false
-  }}
-output { stdout { debug =&gt; "true" }}
+  }
+}
+output { stdout { debug =&gt; true } }
 </code></pre>
 
 <p>Example 10: Read config from config.ini and put to stdout::</p>
@@ -189,22 +198,26 @@ add_field: fieldname1,fieldvalue1[,fieldname2,fieldvalue2, ...]
 [/var/log/*log]
 type: syslog
 tags: sys
+
+[/var/log/{secure,messages}.log]
+type: syslog
+tags: sys
 </code></pre>
 
 <p>Example 11: UDP transport::</p>
 
 <pre><code># From the commandline
-UDP_HOST="127.0.0.1" UDP_PORT="9999" beaver -t udp
+UDP_HOST='127.0.0.1' UDP_PORT='9999' beaver -t udp
 
 # logstash config:
 input {
   udp {
-    type =&gt; "shipper-input"
-    host =&gt; "127.0.0.1"
-    port =&gt; "9999"
+    type =&gt; 'shipper-input'
+    host =&gt; '127.0.0.1'
+    port =&gt; '9999'
   }
 }
-output { stdout { debug =&gt; "true" }}
+output { stdout { debug =&gt; true } }
 </code></pre>
 
 <h1>Todo</h1>
@@ -213,9 +226,25 @@ output { stdout { debug =&gt; "true" }}
 <li>Use python threading + subprocess in order to support usage of <code>yield</code> across all operating systems</li>
 <li>Fix usage on non-linux platforms - file.readline() does not work as expected on OS X. See above for potential solution</li>
 <li>More transports</li>
-<li>~Create a python package~</li>
-<li>~Ability to specify files, tags, and other  metadata within a configuration file~</li>
-</ul><h1>Credits</h1>
+<li>~Ability to specify files, tags, and other metadata within a configuration file~</li>
+</ul><h1>Caveats</h1>
+
+<p>When using <code>copytruncate</code> style log rotation, two race conditions can occur:</p>
+
+<ol>
+<li><p>Any log data written prior to truncation which beaver has not yet
+read and processed is lost. Nothing we can do about that.</p></li>
+<li>
+<p>Should the file be truncated, rewritten, and end up being larger than
+the original file during the sleep interval, beaver won't detect
+this. After some experimentation, this behavior also exists in GNU
+tail, so I'm going to call this a "don't do that then" bug :)</p>
+
+<p>Additionally, the files beaver will most likely be called upon to
+watch which may be truncated are generally going to be large enough
+and slow-filling enough that this won't crop up in the wild.</p>
+</li>
+</ol><h1>Credits</h1>
 
 <p>Based on work from Giampaolo and Lusis::</p>
 
