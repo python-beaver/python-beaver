@@ -47,7 +47,7 @@
 
 <p>From PyPI::</p>
 
-<pre><code>pip install beaver==10
+<pre><code>pip install beaver==11
 </code></pre>
 
 <h1>Usage</h1>
@@ -55,7 +55,7 @@
 <p>usage::</p>
 
 <pre><code>beaver [-h] [-m {bind,connect}] [-p PATH] [-f FILES [FILES ...]]
-          [-t {rabbitmq,redis,stdout,zmq,udp}] [-c CONFIG] [-d DEBUG]
+          [-t {rabbitmq,redis,stdout,zmq,udp}] [-c CONFIG] [-d DEBUG] [--fqdn]
 </code></pre>
 
 <p>optional arguments::</p>
@@ -73,6 +73,8 @@
                     ini config file path
 -d DEBUG, --debug DEBUG
                     enable debug mode
+--fqdn
+                    use the machine's FQDN for source_host
 </code></pre>
 
 <h1>Background</h1>
