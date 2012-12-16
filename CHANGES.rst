@@ -1,6 +1,43 @@
 Changelog
 =========
 
+11 (2012-12-16)
+---------------
+
+- Add optional support for socket.getfqdn. [Jeremy Kitchen]
+
+  For my setup I need to have the fqdn used at all times since my
+  hostnames are the same but the environment (among other things) is
+  found in the rest of the FQDN.
+  
+  Since just changing socket.gethostname to socket.getfqdn has lots of
+  potential for breakage, and socket.gethostname doesn't always return
+  an
+  FQDN, it's now an option to explicitly always use the fqdn.
+  
+  Fixes #68
+
+- Check for log file truncation fixes #55. [Jeremy Kitchen]
+
+  This adds a simple check for log file truncation and resets the watch
+  when detected.
+  
+  There do exist 2 race conditions here:
+  1. Any log data written prior to truncation which beaver has not yet
+  read and processed is lost. Nothing we can do about that.
+  2. Should the file be truncated, rewritten, and end up being larger
+  than
+  the original file during the sleep interval, beaver won't detect
+  this. After some experimentation, this behavior also exists in GNU
+  tail, so I'm going to call this a "don't do that then" bug :)
+  
+  Additionally, the files beaver will most likely be called upon to
+  watch which may be truncated are generally going to be large enough
+  and slow
+  filling enough that this won't crop up in the wild.
+
+- Add a version number to beaver. [Jose Diaz-Gonzalez]
+
 10 (2012-12-15)
 ---------------
 
@@ -52,17 +89,10 @@ Changelog
 - Fixed deprecated warning when declaring exchange type. [Rafael
   Fonseca]
 
-8 (2012-11-28)
---------------
-
-- Updated release script. [Jose Diaz-Gonzalez]
-
 7 (2012-11-28)
 --------------
 
 - Added a helper script for creating releases. [Jose Diaz-Gonzalez]
-
-- Updated changelog. [Jose Diaz-Gonzalez]
 
 - Partial fix for crashes caused by globbed files. [Jose Diaz-Gonzalez]
 
@@ -74,8 +104,6 @@ Changelog
 
 6 (2012-11-26)
 --------------
-
-- Release sixth version. [Jose Diaz-Gonzalez]
 
 - Fix issue where polling for files was done incorrectly. [Jose Diaz-
   Gonzalez]
@@ -105,8 +133,6 @@ Changelog
 - Use alternate dict syntax for Python 2.6 support. Closes #43. [Jose
   Diaz-Gonzalez]
 
-- Updated and relaxed requirements. [Jose Diaz-Gonzalez]
-
 - Fixed release date for version 3. [Jose Diaz-Gonzalez]
 
 3 (2012-11-25)
@@ -121,14 +147,10 @@ Changelog
 
   This reverts commit e667f63706e0af8bc82c0eac6eac43318144e107.
 
-- Updated CHANGES.txt. [Jose Diaz-Gonzalez]
-
 - Added bash startup script. Closes #35. [Jose Diaz-Gonzalez]
 
 - Added an example supervisor config for redis. closes #34. [Jose Diaz-
   Gonzalez]
-
-- Updated changes. [Jose Diaz-Gonzalez]
 
 - Removed redundant README.txt. [Jose Diaz-Gonzalez]
 
@@ -179,41 +201,37 @@ Changelog
 
 - Fix wrong addfield values. [Alexander Fortin]
 
-- Updated README.txt. [Jose Diaz-Gonzalez]
-
 - Add add_field to config example. [Alexander Fortin]
 
 - Add support for add_field into config file. [Alexander Fortin]
 
 - Minor readme updates. [Jose Diaz-Gonzalez]
 
-- Update beaver/worker.py. [librato-peter]
-
-  Fix so that empty file lists do not override the PATH.
-
 - Add support for type reading from INI config file. [Alexander Fortin]
 
-  Add support for symlinks in config file  Add support for file globbing
-  in config file  Add support for tags  - a little bit of refactoring,
-  move type and tags check down into   transport class - create config
-  object (reading /dev/null) even if no config file   has been given via
-  cli  Add documentation for INI file to readme  Remove unused json
-  library
-  Conflicts:         README.rst
-
-- Update README.rst. [librato-peter]
-
-  Updating docs for zmq transport method
-
-- Update README.txt. [librato-peter]
-
-  Updating docs for zmq transport method
+  Add support for symlinks in config file
+  
+  Add support for file globbing in config file
+  
+  Add support for tags
+  
+  
+  a little bit of refactoring, move type and tags check down into
+  transport class
+  
+  create config object (reading /dev/null) even if no config file
+  has been given via cli
+  
+  Add documentation for INI file to readme
+  
+  Remove unused json library
+  
+  Conflicts:
+  README.rst
 
 - When sending data over the wire, use UTC timestamps. [Darren Worrall]
 
 - Support globs in file paths. [Darren Worrall]
-
-- Updated readme. [Jose Diaz-Gonzalez]
 
 - Added msgpack support. [Jose Diaz-Gonzalez]
 
@@ -225,35 +243,24 @@ Changelog
 
 - Refactor transports. [Jose Diaz-Gonzalez]
 
-  - Fix the json import to use the fastest json module available - Move
-  formatting into Transport class
+  Fix the json import to use the fastest json module available
+  
+  Move formatting into Transport class
 
 - Attempt to fix defaults from env variables. [Jose Diaz-Gonzalez]
 
 - Fix README and beaver CLI help to reference correct RABBITMQ_HOST
   environment variable. [jdutton]
 
-- Update README.txt. [Jose Diaz-Gonzalez]
-
-- Update README.rst. [Jose Diaz-Gonzalez]
-
 - Add RabbitMQ support. [Alexander Fortin]
 
 - Added real-world example of beaver usage for tailing a file. [Jose
   Diaz-Gonzalez]
 
-- Updated readme to include libzmq as a dependency. [Jose Diaz-Gonzalez]
-
 - Removed unused argument. [Jose Diaz-Gonzalez]
-
-- Updated installation instructions. [Jose Diaz-Gonzalez]
 
 - Ensure that python-compatible readme is included in package. [Jose
   Diaz-Gonzalez]
-
-- Updated manifest. [Jose Diaz-Gonzalez]
-
-- Updated readme todo list. [Jose Diaz-Gonzalez]
 
 - Fix variable naming and timeout for redis transport. [Jose Diaz-
   Gonzalez]
@@ -293,8 +300,6 @@ Changelog
 - Support usage of environment variables instead of arguments. [Jose
   Diaz-Gonzalez]
 
-- Updated logging statements. [Jose Diaz-Gonzalez]
-
 - Fixed files argument parsing. [Jose Diaz-Gonzalez]
 
 - One does not simply license all the things. [Jose Diaz-Gonzalez]
@@ -304,8 +309,6 @@ Changelog
 - Added version to pyzmq. [Jose Diaz-Gonzalez]
 
 - Added license. [Jose Diaz-Gonzalez]
-
-- Updated readme. [Jose Diaz-Gonzalez]
 
 - Reordered imports. [Jose Diaz-Gonzalez]
 
@@ -321,8 +324,6 @@ Changelog
 
 - Removed another compiled python file. [Jose Diaz-Gonzalez]
 
-- Updated requirements.txt file. [Jose Diaz-Gonzalez]
-
 - Use ujson instead of simplejson. [Jose Diaz-Gonzalez]
 
 - Ignore compiled python files. [Jose Diaz-Gonzalez]
@@ -331,12 +332,8 @@ Changelog
 
 - Fixed up readme instructions. [Jose Diaz-Gonzalez]
 
-- Updated readme tagline. [Jose Diaz-Gonzalez]
-
 - Refactor transports so that connections are no longer global. [Jose
   Diaz-Gonzalez]
-
-- Updated docblocks. [Jose Diaz-Gonzalez]
 
 - Readme and License. [Jose Diaz-Gonzalez]
 
