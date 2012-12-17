@@ -1,6 +1,36 @@
 Changelog
 =========
 
+12 (2012-12-17)
+---------------
+
+- Reload tailed files on non-linux platforms. [Jose Diaz-Gonzalez]
+
+  Python has an issue on OS X were the underlying C implementation of
+  `file.read()` caches the EOF, therefore causing `readlines()` to only
+  work once. This happens to also fail miserably when you are seeking to
+  the end before calling readlines.
+  
+  This fix solves the issue by constantly re
+  reading the files changed.
+  
+  Note that this also causes debug mode to be very noisy on OS X. We all
+  have to make sacrifices...
+
+- Deprecate all environment variables. [Jose Diaz-Gonzalez]
+
+  This shifts configuration management into the BeaverConfig class.
+  Note that we currently throw a warning if you are using environment
+  variables.
+  
+  Refs #72
+  Closes #60
+
+- Warn when using deprecated ENV variables for configuration. Refs #72.
+  [Jose Diaz-Gonzalez]
+
+- Minor changes for PEP8 conformance. [Jose Diaz-Gonzalez]
+
 11 (2012-12-16)
 ---------------
 
