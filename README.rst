@@ -34,20 +34,22 @@ usage::
 optional arguments::
 
     -h, --help            show this help message and exit
-    -m {bind,connect}, --mode {bind,connect}
-                        bind or connect mode
-    -p PATH, --path PATH  path to log files
-    -f FILES [FILES ...], --files FILES [FILES ...]
-                        space-separated filelist to watch, can include globs
-                        (*.log). Overrides --path argument
-    -t {rabbitmq,redis,stdout,zmq}, --transport {rabbitmq,redis,stdout,zmq}
-                        log transport method
     -c CONFIG, --configfile CONFIG
-                        ini config file path
-    -d DEBUG, --debug DEBUG
-                        enable debug mode
-    --fqdn
-                        use the machine's FQDN for source_host
+                          ini config file path
+    -d, --debug           enable debug mode
+    -f FILES [FILES ...], --files FILES [FILES ...]
+                          space-separated filelist to watch, can include globs
+                          (*.log). Overrides --path argument
+    --format {json,msgpack,string}
+                          format to use when sending to transport
+    --hostname HOSTNAME   manual hostname override for source_host
+    -m {bind,connect}, --mode {bind,connect}
+                          bind or connect mode
+    -p PATH, --path PATH  path to log files
+    -t {rabbitmq,redis,stdout,zmq,udp}, --transport {rabbitmq,redis,stdout,zmq,udp}
+                          log transport method
+    -v, --version         output version and quit
+    --fqdn                use the machine's FQDN
 
 Background
 ==========

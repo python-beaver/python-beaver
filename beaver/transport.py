@@ -1,5 +1,4 @@
 import os
-import socket
 
 
 class Transport(object):
@@ -8,10 +7,7 @@ class Transport(object):
         self._file_config = file_config
         self._format = beaver_config.get('format')
 
-        if beaver_config.get('fqdn') == True:
-            self._current_host = socket.getfqdn()
-        else:
-            self._current_host = socket.gethostname()
+        self._current_host = beaver_config.get('hostname')
 
         if self._format == 'msgpack':
             import msgpack

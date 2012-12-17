@@ -1,6 +1,7 @@
 import ConfigParser
 import collections
 import os
+import socket
 import warnings
 
 
@@ -42,6 +43,7 @@ class BeaverConfig():
             'path': os.environ.get('BEAVER_PATH', '/var/log'),
             'transport': os.environ.get('BEAVER_TRANSPORT', 'stdout'),  # this needs to be passed to the import class somehow
             'fqdn': False,
+            'hostname': None,
         }
 
         self._configfile = args.config
@@ -78,6 +80,15 @@ class BeaverConfig():
             config['path'] = args.path
         if args.transport:
             config['transport'] = args.transport
+
+        if args.hostname:
+            config['hostname'] = args.hostname
+
+        if config.get('hostname') is None:
+            if bool(config.get('fqdn')) == True:
+                config['hostname'] = socket.getfqdn()
+            else:
+                config['hostname'] = socket.gethostname()
 
         config = collections.OrderedDict(sorted(config.items()))
         return config
