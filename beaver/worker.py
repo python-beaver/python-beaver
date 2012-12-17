@@ -163,7 +163,7 @@ class Worker(object):
                     self.watch(file.name)
                 elif file.tell() > st.st_size:
                     # file truncated; reload it
-                    self.logger.info("[{0}] - file truncated {1}".format(fid,file.name))
+                    self.logger.info("[{0}] - file truncated {1}".format(fid, file.name))
                     self.unwatch(file, fid)
                     self.watch(file.name)
 
@@ -195,7 +195,7 @@ class Worker(object):
         lines = None
         try:
             lines = self.readfile(file)
-        except IOError, e:
+        except IOError:
             # Silently ignore any IOErrors -- file is gone
             pass
         self.logger.info("[{0}] - un-watching logfile {1}".format(fid, file.name))
