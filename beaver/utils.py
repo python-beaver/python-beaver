@@ -1,64 +1,35 @@
 import glob
 import itertools
 import logging
-import os
 import re
-import warnings
 
+logging.basicConfig()
 _magic_brackets = re.compile("({([^}]+)})")
 
 
 def setup_custom_logger(name, debug=False, formatter=None):
-    if formatter is None:
-        formatter = logging.Formatter('[%(asctime)s] %(levelname)-7s %(message)s')
+    logger = logging.getLogger()
+    if logger.handlers:
+        logger.handlers = []
 
-    handler = logging.StreamHandler()
-    handler.setFormatter(formatter)
+    if not logger.handlers:
+        if formatter is None:
+            formatter = logging.Formatter('[%(asctime)s] %(levelname)-7s %(message)s')
 
-    logger = logging.getLogger(name)
+        handler = logging.StreamHandler()
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+
     if debug:
         logger.setLevel(logging.DEBUG)
-        logger.info('debug level is on')
+        logger.info('Debug level is on')
+        logging.captureWarnings(True)
     else:
         logger.setLevel(logging.INFO)
+        logger.info('Info level is on')
+        logging.captureWarnings(False)
 
-    logger.addHandler(handler)
     return logger
-
-
-def check_for_deprecated_usage():
-    env_vars = [
-      'RABBITMQ_HOST',
-      'RABBITMQ_PORT',
-      'RABBITMQ_VHOST',
-      'RABBITMQ_USERNAME',
-      'RABBITMQ_PASSWORD',
-      'RABBITMQ_QUEUE',
-      'RABBITMQ_EXCHANGE_TYPE',
-      'RABBITMQ_EXCHANGE_DURABLE',
-      'RABBITMQ_KEY',
-      'RABBITMQ_EXCHANGE',
-      'REDIS_URL',
-      'REDIS_NAMESPACE',
-      'UDP_HOST',
-      'UDP_PORT',
-      'ZEROMQ_ADDRESS',
-      'BEAVER_FILES',
-      'BEAVER_FORMAT',
-      'BEAVER_MODE',
-      'BEAVER_PATH',
-      'BEAVER_TRANSPORT',
-    ]
-
-    deprecated_env_var_usage = []
-
-    for e in env_vars:
-        v = os.environ.get(e, None)
-        if v is not None:
-            deprecated_env_var_usage.append(e)
-
-    if len(deprecated_env_var_usage) > 0:
-        warnings.warn('Deprecated use of ENV VAR: {0}'.format(deprecated_env_var_usage.join(', ')), DeprecationWarning)
 
 
 def _replace_all(path, replacements):

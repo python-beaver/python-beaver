@@ -1,10 +1,10 @@
 import ConfigParser
-import logging
 import os
+
 from utils import eglob
 
 
-class Config():
+class FileConfig():
     '''
     Parse a given INI-style config file using ConfigParser module.
     Stanza's names match file names, and properties are defaulted as in
@@ -23,9 +23,9 @@ class Config():
     [...]
     '''
 
-    def __init__(self, configfile):
-        logger = logging.getLogger('beaver')
-        logger.info('Processing config file %s' % configfile)
+    def __init__(self, args, logger):
+        self._logger = logger
+        self._logger.info('Processing file portion of config file %s' % args.config)
 
         self._defaults = {
             'add_field': '',
@@ -40,7 +40,8 @@ class Config():
             'tags': '',
             'type': ''
         }
-        self._configfile = configfile
+
+        self._configfile = args.config
         self._config = ConfigParser.ConfigParser(self._defaults)
         self._sanitize()
         self._files, self._globs = self._parse()
@@ -49,9 +50,10 @@ class Config():
         if len(self._config.read(self._configfile)) != 1:
             raise Exception('Could not parse config file "%s"' % self._configfile)
 
-    def _parse(self):
-        logger = logging.getLogger('beaver')
+        if self._config.has_section('beaver'):
+            self._config.remove_section('beaver')
 
+    def _parse(self):
         glob_paths = {}
         inputs = {}
         for filename in self._config.sections():
@@ -63,7 +65,7 @@ class Config():
 
             globs = eglob(filename)
             if not globs:
-                logger.info('Skipping glob due to no files found: %s' % filename)
+                self._logger.info('Skipping glob due to no files found: %s' % filename)
                 continue
 
             for globbed in globs:
