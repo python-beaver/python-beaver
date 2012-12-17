@@ -5,6 +5,7 @@ import stat
 import sys
 import time
 
+from ssh_tunnel import BeaverSshTunnel
 from transport import TransportException
 from utils import eglob
 
@@ -25,7 +26,7 @@ class Worker(object):
     >>> l.loop()
     """
 
-    def __init__(self, file_config, beaver_config, callback, logger, extensions=["log"], tail_lines=0):
+    def __init__(self, file_config, beaver_config, callback, logger, ssh_tunnel=None, extensions=["log"], tail_lines=0):
         """Arguments:
 
         (FileConfig) @file_config:
@@ -228,9 +229,7 @@ class Worker(object):
         self.files_map.clear()
 
 
-def run_worker(file_config, beaver_config, logger):
-    logger.info("Logging using the {0} transport".format(beaver_config.get('transport')))
-
+def create_transport(file_config, beaver_config):
     if beaver_config.get('transport') == 'rabbitmq':
         import beaver.rabbitmq_transport
         transport = beaver.rabbitmq_transport.RabbitmqTransport(file_config, beaver_config)
@@ -249,9 +248,23 @@ def run_worker(file_config, beaver_config, logger):
     else:
         raise Exception('Invalid transport {0}'.format(beaver_config.get('transport')))
 
+    return transport
+
+
+def create_ssh_tunnel(file_config, beaver_config):
+    if not beaver_config.use_ssh_tunnel():
+        return None
+
+    return BeaverSshTunnel(beaver_config)
+
+
+def run_worker(file_config, beaver_config, logger, ssh_tunnel=None):
+    logger.info("Logging using the {0} transport".format(beaver_config.get('transport')))
+    transport = create_transport(file_config, beaver_config)
+
     try:
         logger.info("Starting worker...")
-        l = Worker(file_config, beaver_config, transport.callback, logger)
+        l = Worker(file_config, beaver_config, transport.callback, logger, ssh_tunnel=ssh_tunnel)
         logger.info("Working...")
         l.loop()
     except TransportException, e:

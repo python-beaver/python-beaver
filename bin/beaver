@@ -76,9 +76,13 @@ beaver_config.check_for_deprecated_usage()
 
 failure_count = 0
 
+ssh_tunnel = beaver.worker.create_ssh_tunnel(file_config, beaver_config)
+if ssh_tunnel is not None:
+    logger.info("Proxying transport using through local ssh tunnel")
+
 while 1:
     try:
-        worker = beaver.worker.run_worker(file_config, beaver_config, logger)
+        worker = beaver.worker.run_worker(file_config, beaver_config, logger, ssh_tunnel=ssh_tunnel)
     except beaver.transport.TransportException, e:
         failure_count = failure_count + 1
         if failure_count > int(beaver_config.get('max_failure')):
@@ -91,10 +95,18 @@ while 1:
             time.sleep(sleep_time)
         except KeyboardInterrupt:
             logger.info("User cancelled respawn.")
+            if ssh_tunnel is not None:
+                logger.info("Closing ssh tunnel.")
+                ssh_tunnel.close()
+
             sys.exit(0)
 
     except KeyboardInterrupt:
         logger.info("Shutting down. Please wait.")
         worker.close()
+        if ssh_tunnel is not None:
+            logger.info("Closing ssh tunnel.")
+            ssh_tunnel.close()
+
         logger.info("Shutdown complete.")
         sys.exit(0)

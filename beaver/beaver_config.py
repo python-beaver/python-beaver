@@ -38,6 +38,13 @@ class BeaverConfig():
             'respawn_delay': '3',
             'max_failure': '7',
 
+            # ssh tunnel support
+            'ssh_key_file': None,
+            'ssh_tunnel': None,
+            'ssh_tunnel_port': None,
+            'ssh_remote_host': None,
+            'ssh_remote_port': None,
+
             # the following can be passed via argparse
             'zeromq_bind': os.environ.get('BEAVER_MODE', 'bind' if os.environ.get('BIND', False) else 'connect'),
             'files': files,
@@ -116,6 +123,21 @@ class BeaverConfig():
 
         self.set('globs', globs)
         self.set('files', files)
+
+    def use_ssh_tunnel(self):
+        required = [
+            'ssh_key_file',
+            'ssh_tunnel',
+            'ssh_tunnel_port',
+            'ssh_remote_host',
+            'ssh_remote_port',
+        ]
+
+        has = len(filter(lambda x: self.get(x) != None, required))
+        if has > 0 and has != len(required):
+            self._logger.warning("Missing {0} of {1} required config variables for ssh".format(len(required) - has, len(required)))
+
+        return has == len(required)
 
     def check_for_deprecated_usage(self):
         env_vars = [
