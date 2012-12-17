@@ -108,19 +108,17 @@ Examples
 --------
 
 
-All of the following examples, except where specified, use the following config file living at ``/etc/beaver.conf``. This is by no means an exhaustive list, and you can mix/match different configurations to best suit your needs::
-
 Example 1: Listen to all files in the default path of /var/log on standard out as json::
 
-    beaver  -c /etc/beaver.conf
+    beaver
 
 Example 2: Listen to all files in the default path of /var/log on standard out with msgpack::
 
-    beaver  -c /etc/beaver.conf --format msgpack
+    beaver --format msgpack
 
 Example 3: Listen to all files in the default path of /var/log on standard out as a string::
 
-    beaver  -c /etc/beaver.conf --format string
+    beaver --format string
 
 Example 4: Sending logs from /var/log files to a redis list::
 
