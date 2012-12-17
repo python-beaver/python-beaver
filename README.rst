@@ -61,31 +61,46 @@ NOTE: the redis transport uses a namespace of ``logstash:beaver`` by default.  Y
 Examples
 --------
 
+
+All of the following examples, except where specified, use the following config file living at ``/etc/beaver.conf``. This is by no means an exhaustive list, and you can mix/match different configurations to best suit your needs::
+
 Example 1: Listen to all files in the default path of /var/log on standard out as json::
 
-    beaver
+    beaver  -c /etc/beaver.conf
 
 Example 2: Listen to all files in the default path of /var/log on standard out with msgpack::
 
-    BEAVER_FORMAT='msgpack' beaver
+    beaver  -c /etc/beaver.conf --format msgpack
 
 Example 3: Listen to all files in the default path of /var/log on standard out as a string::
 
-    BEAVER_FORMAT='string' beaver
+    beaver  -c /etc/beaver.conf --format string
 
 Example 4: Sending logs from /var/log files to a redis list::
 
-    REDIS_URL='redis://localhost:6379/0' beaver -t redis
+    # /etc/beaver.conf
+    [beaver]
+    redis_url: redis://localhost:6379/0
+
+    # From the commandline
+    beaver  -c /etc/beaver.conf -t redis
 
 Example 5: Use environment variables to send logs from /var/log files to a redis list::
 
-    REDIS_URL='redis://localhost:6379/0' BEAVER_PATH='/var/log' BEAVER_TRANSPORT=redis beaver
+    # /etc/beaver.conf
+    [beaver]
+    redis_url: redis://localhost:6379/0
+
+    # From the commandline
+    beaver  -c /etc/beaver.conf -p '/var/log' -t redis
 
 Example 6: Zeromq listening on port 5556 (all interfaces)::
 
-    ZEROMQ_ADDRESS='tcp://*:5556' beaver -m bind -t zmq
+    # /etc/beaver.conf
+    [beaver]
+    zeromq_address: tcp://*:5556
 
-    # logstash config:
+    # logstash indexer config:
     input {
       zeromq {
         type => 'shipper-input'
@@ -96,11 +111,17 @@ Example 6: Zeromq listening on port 5556 (all interfaces)::
     }
     output { stdout { debug => true } }
 
+    # From the commandline
+    beaver  -c /etc/beaver.conf -m bind -t zmq
+
+
 Example 7: Zeromq connecting to remote port 5556 on indexer::
 
-    ZEROMQ_ADDRESS='tcp://indexer:5556' beaver -m connect -t zmq
+    # /etc/beaver.conf
+    [beaver]
+    zeromq_address: tcp://indexer:5556
 
-    # logstash config:
+    # logstash indexer config:
     input {
       zeromq {
         type => 'shipper-input'
@@ -111,13 +132,18 @@ Example 7: Zeromq connecting to remote port 5556 on indexer::
     }
     output { stdout { debug => true } }
 
+    # on the commandline
+    beaver -c /etc/beaver.conf -m connect -t zmq
+
 Example 8: Real-world usage of Redis as a transport::
 
     # in /etc/hosts
     192.168.0.10 redis-internal
 
-    # From the commandline
-    REDIS_NAMESPACE='app:unmappable' REDIS_URL='redis://redis-internal:6379/0' beaver -f /var/log/unmappable.log -t redis
+    # /etc/beaver.conf
+    [beaver]
+    redis_url: redis://redis-internal:6379/0
+    redis_namespace: app:unmappable
 
     # logstash indexer config:
     input {
@@ -130,14 +156,18 @@ Example 8: Real-world usage of Redis as a transport::
     }
     output { stdout { debug => true } }
 
+    # From the commandline
+    beaver -c /etc/beaver.conf -f /var/log/unmappable.log -t redis
+
 As you can see, ``beaver`` is pretty flexible as to how you can use/abuse it in production.
 
 Example 9: RabbitMQ connecting to defaults on remote broker::
 
-    # From the commandline
-    RABBITMQ_HOST='10.0.0.1' beaver -t rabbitmq
+    # /etc/beaver.conf
+    [beaver]
+    rabbitmq_host: 10.0.0.1
 
-    # logstash config:
+    # logstash indexer config:
     input { amqp {
         name => 'logstash-queue'
         type => 'direct'
@@ -151,12 +181,12 @@ Example 9: RabbitMQ connecting to defaults on remote broker::
     }
     output { stdout { debug => true } }
 
+    # From the commandline
+    beaver -c /etc/beaver.conf -t rabbitmq
+
 Example 10: Read config from config.ini and put to stdout::
 
-    # From the commandline
-    beaver -c config.ini -t stdout
-
-    # config.ini content:
+    # /etc/beaver.conf:
     [/tmp/somefile]
     type: mytype
     tags: tag1,tag2
@@ -170,12 +200,17 @@ Example 10: Read config from config.ini and put to stdout::
     type: syslog
     tags: sys
 
+    # From the commandline
+    beaver -c /etc/beaver.conf -t stdout
+
 Example 11: UDP transport::
 
-    # From the commandline
-    UDP_HOST='127.0.0.1' UDP_PORT='9999' beaver -t udp
+    # /etc/beaver.conf
+    [beaver]
+    udp_host: 127.0.0.1
+    udp_port: 9999
 
-    # logstash config:
+    # logstash indexer config:
     input {
       udp {
         type => 'shipper-input'
@@ -184,6 +219,9 @@ Example 11: UDP transport::
       }
     }
     output { stdout { debug => true } }
+
+    # From the commandline
+    beaver -c /etc/beaver.conf -t udp
 
 Todo
 ====
