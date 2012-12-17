@@ -1,11 +1,14 @@
 import errno
 import os
+import platform
 import stat
 import sys
 import time
 
 from transport import TransportException
 from utils import eglob
+
+REOPEN_FILES = platform.platform() != 'Linux'
 
 
 class Worker(object):
@@ -170,6 +173,14 @@ class Worker(object):
                     self._logger.info("[{0}] - file truncated {1}".format(fid, file.name))
                     self.unwatch(file, fid)
                     self.watch(file.name)
+                elif REOPEN_FILES:
+                    self._logger.debug("[{0}] - file reloaded (non-linux) {1}".format(fid, file.name))
+                    position = file.tell()
+                    fname = file.name
+                    file.close()
+                    file = open(fname, "r")
+                    file.seek(position)
+                    self.files_map[fid] = file
 
         # add new ones
         for fid, fname in ls:
