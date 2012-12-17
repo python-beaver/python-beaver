@@ -1,5 +1,6 @@
 import datetime
 import redis
+import time
 import urlparse
 
 import beaver.transport
@@ -16,6 +17,19 @@ class RedisTransport(beaver.transport.Transport):
 
         self.redis = redis.StrictRedis(host=_url.hostname, port=_url.port, db=int(_db), socket_timeout=10)
         self.redis_namespace = beaver_config.get('redis_namespace')
+
+        wait = 0
+        while 1:
+            if wait == 20:
+                break
+
+            time.sleep(0.1)
+            wait += 1
+            try:
+                self.redis.ping()
+                break
+            except redis.exceptions.ConnectionError:
+                pass
 
     def callback(self, filename, lines):
         timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
