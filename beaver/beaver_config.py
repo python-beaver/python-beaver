@@ -18,24 +18,25 @@ class BeaverConfig():
 
         self._beaver_defaults = {
             'rabbitmq_host': os.environ.get('RABBITMQ_HOST', 'localhost'),
-            'rabbitmq_port': os.environ.get('RABBITMQ_', 5672),
+            'rabbitmq_port': os.environ.get('RABBITMQ_', '5672'),
             'rabbitmq_vhost': os.environ.get('RABBITMQ_', '/'),
             'rabbitmq_username': os.environ.get('RABBITMQ_', 'guest'),
             'rabbitmq_password': os.environ.get('RABBITMQ_', 'guest'),
             'rabbitmq_queue': os.environ.get('RABBITMQ_', 'logstash-queue'),
             'rabbitmq_exchange': os.environ.get('RABBITMQ_', 'direct'),
-            'rabbitmq_exchange_durable': os.environ.get('RABBITMQ_', 0),
+            'rabbitmq_exchange_durable': os.environ.get('RABBITMQ_EXCHANGE_DURABLE', '0'),
             'rabbitmq_key': os.environ.get('RABBITMQ_', 'logstash-key'),
             'rabbitmq_exchange': os.environ.get('RABBITMQ_', 'logstash-exchange'),
             'redis_url': os.environ.get('REDIS_URL', 'redis://localhost:6379/0'),
             'redis_namespace': os.environ.get('REDIS_NAMESPACE', 'logstash:beaver'),
             'udp_host': os.environ.get('UDP_HOST', '127.0.0.1'),
-            'udp_port': os.environ.get('UDP_PORT', 9999),
+            'udp_port': os.environ.get('UDP_PORT', '9999'),
             'zeromq_address': os.environ.get('ZEROMQ_ADDRESS', 'tcp://localhost:2120'),
             'format': os.environ.get('BEAVER_FORMAT', 'json'),
 
-            'respawn_delay': 3,
-            'max_failure': 7,
+            # exponential backoff
+            'respawn_delay': '3',
+            'max_failure': '7',
 
             # the following can be passed via argparse
             'zeromq_bind': os.environ.get('BEAVER_MODE', 'bind' if os.environ.get('BIND', False) else 'connect'),
