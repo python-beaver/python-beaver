@@ -60,6 +60,50 @@ Events are sent in logstash's ``json_event`` format. Options can also be set as 
 
 NOTE: the redis transport uses a namespace of ``logstash:beaver`` by default.  You will need to update your logstash indexer to match this.
 
+Configuration File Options
+--------------------------
+
+Beaver can optionally get data from a ``configfile`` using the ``-c`` flag. This file is in ``ini`` format. Global configuration will be under the ``beaver`` stanza. The following are global beaver configuration keys with their respective meanings:
+
+* rabbitmq_host: Defaults ``localhost``. Host for RabbitMQ.
+* rabbitmq_port: Defaults ``5672``. Port for RabbitMQ.
+* rabbitmq_vhost: Default ``/``
+* rabbitmq_username: Default ``guest``
+* rabbitmq_password: Default ``guest``
+* rabbitmq_queue: Default ``logstash-queue``.
+* rabbitmq_exchange: Default ``direct``.
+* rabbitmq_exchange_durable: Default ``0``.
+* rabbitmq_key: Default ``logstash-key``.
+* rabbitmq_exchange: Default ``logstash-exchange``.
+* redis_url: Default ``redis://localhost:6379/0``. Redis URL
+* redis_namespace: Default ``logstash:beaver``. Redis key namespace
+* udp_host: Default ``127.0.0.1``. UDP Host
+* udp_port: Default ``9999``. UDP Port
+* zeromq_address: Default ``tcp://localhost:2120``. Zeromq URL
+* zeromq_bind: Default ``bind``. Whether to bind to zeromq host or simply connect
+
+The following are used for instances when a TransportException is thrown - Transport dependent
+
+* respawn_delay: Default ``3``. Initial respawn delay for exponential backoff
+* max_failure: Default ``7``. Max failures before exponential backoff terminates
+
+The following configuration keys are for building an SSH Tunnel that can be used to proxy from the current host to a desired server. This proxy is torn down when Beaver halts in all cases.
+
+* ssh_key_file: Default ``None``. Full path to ``id_rsa`` key file
+* ssh_tunnel: Default ``None``. SSH Tunnel in the format ``user@host:port``
+* ssh_tunnel_port: Default ``None``. Local port for SSH Tunnel
+* ssh_remote_host: Default ``None``. Remote host to connect to within SSH Tunnel
+* ssh_remote_port: Default ``None``. Remote port to connect to within SSH Tunnel
+
+The following can also be passed via argparse. Argparse will override all options in the configfile, when specified.
+
+* format: Default ``json``. Options ``[ json, msgpack, string ]``. Format to use when sending to transport
+* files: Default ``files``. Space-separated list of files to tail.
+* path: Default ``/var/log``. Path glob to tail.
+* transport: Default ``stdout``. Transport to use when log changes are detected
+* fqdn: Default ``False``. Whether to use the machine's FQDN in transport output
+* hostname: Default ``None``. Manually specified hostname
+
 Examples
 --------
 
