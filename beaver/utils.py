@@ -1,7 +1,9 @@
-import logging
 import glob
-import re
 import itertools
+import logging
+import os
+import re
+import warnings
 
 _magic_brackets = re.compile("({([^}]+)})")
 
@@ -22,6 +24,41 @@ def setup_custom_logger(name, debug=False, formatter=None):
 
     logger.addHandler(handler)
     return logger
+
+
+def check_for_deprecated_usage():
+    env_vars = [
+      'RABBITMQ_HOST',
+      'RABBITMQ_PORT',
+      'RABBITMQ_VHOST',
+      'RABBITMQ_USERNAME',
+      'RABBITMQ_PASSWORD',
+      'RABBITMQ_QUEUE',
+      'RABBITMQ_EXCHANGE_TYPE',
+      'RABBITMQ_EXCHANGE_DURABLE',
+      'RABBITMQ_KEY',
+      'RABBITMQ_EXCHANGE',
+      'REDIS_URL',
+      'REDIS_NAMESPACE',
+      'UDP_HOST',
+      'UDP_PORT',
+      'ZEROMQ_ADDRESS',
+      'BEAVER_FILES',
+      'BEAVER_FORMAT',
+      'BEAVER_MODE',
+      'BEAVER_PATH',
+      'BEAVER_TRANSPORT',
+    ]
+
+    deprecated_env_var_usage = []
+
+    for e in env_vars:
+        v = os.environ.get(e, None)
+        if v is not None:
+            deprecated_env_var_usage.append(e)
+
+    if len(deprecated_env_var_usage) > 0:
+        warnings.warn('Deprecated use of ENV VAR: {0}'.format(deprecated_env_var_usage.join(', ')), DeprecationWarning)
 
 
 def _replace_all(path, replacements):

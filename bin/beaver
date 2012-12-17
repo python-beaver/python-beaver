@@ -82,8 +82,11 @@ if args.version:
     logger.info("Beaver {0}".format(full_version))
     sys.exit(0)
 
-logger = beaver.utils.setup_custom_logger('beaver', args.debug)
+# Check for deprecated usage of Beaver
+beaver.utils.check_for_deprecated_usage()
 
+# Setup logging
+logger = beaver.utils.setup_custom_logger('beaver', args.debug)
 
 args.globs = files
 configfile = beaver.config.Config(args.config)
