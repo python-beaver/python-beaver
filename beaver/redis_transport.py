@@ -1,5 +1,4 @@
 import datetime
-import os
 import redis
 import urlparse
 
@@ -8,15 +7,15 @@ import beaver.transport
 
 class RedisTransport(beaver.transport.Transport):
 
-    def __init__(self, configfile, args):
-        super(RedisTransport, self).__init__(configfile, args)
+    def __init__(self, file_config, beaver_config):
+        super(RedisTransport, self).__init__(file_config, beaver_config)
 
-        redis_url = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
+        redis_url = beaver_config.get('redis_url')
         _url = urlparse.urlparse(redis_url, scheme="redis")
         _, _, _db = _url.path.rpartition("/")
 
         self.redis = redis.StrictRedis(host=_url.hostname, port=_url.port, db=int(_db), socket_timeout=10)
-        self.redis_namespace = os.environ.get("REDIS_NAMESPACE", "logstash:beaver")
+        self.redis_namespace = beaver_config.get('redis_namespace')
 
     def callback(self, filename, lines):
         timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")

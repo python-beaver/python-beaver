@@ -1,11 +1,14 @@
 import errno
-import logging
 import os
+import platform
 import stat
 import sys
 import time
+
 from transport import TransportException
 from utils import eglob
+
+REOPEN_FILES = platform.platform() != 'Linux'
 
 
 class Worker(object):
@@ -22,11 +25,14 @@ class Worker(object):
     >>> l.loop()
     """
 
-    def __init__(self, configfile, args, callback, extensions=["log"], tail_lines=0):
+    def __init__(self, file_config, beaver_config, callback, logger, extensions=["log"], tail_lines=0):
         """Arguments:
 
-        (str) @args:
-            set of arguments for the worker
+        (FileConfig) @file_config:
+            object containing file-related configuration
+
+        (BeaverConfig) @beaver_config:
+            object containing global configuration
 
         (callable) @callback:
             a function which is called every time a new line in a
@@ -39,15 +45,15 @@ class Worker(object):
         (int) @tail_lines:
             read last N lines from files being watched before starting
         """
-        self.args = args
-        self.configfile = configfile
+        self.beaver_config = beaver_config
+        self.file_config = file_config
         self.callback = callback
         self.extensions = extensions
         self.files_map = {}
-        self.logger = logging.getLogger('beaver')
+        self._logger = logger
 
-        if self.args.path is not None:
-            self.folder = os.path.realpath(args.path)
+        if self.beaver_config.get('path') is not None:
+            self.folder = os.path.realpath(self.beaver_config.get('path'))
             assert os.path.isdir(self.folder), "%s does not exists" \
                                             % self.folder
         assert callable(callback)
@@ -72,7 +78,7 @@ class Worker(object):
             self.update_files()
             for fid, file in list(self.files_map.iteritems()):
                 try:
-                    self.readfile(file)
+                    self.readfile(fid, file)
                 except IOError, e:
                     if e.errno == errno.ESTALE:
                         self.unwatch(file, fid)
@@ -126,11 +132,11 @@ class Worker(object):
     def update_files(self):
         ls = []
         files = []
-        if len(self.args.globs) > 0:
-            for name in self.args.globs:
+        if len(self.beaver_config.get('globs')) > 0:
+            for name in self.beaver_config.get('globs'):
                 globbed = [os.path.realpath(filename) for filename in eglob(name)]
                 files.extend(globbed)
-                self.configfile.addglob(name, globbed)
+                self.file_config.addglob(name, globbed)
         else:
             for name in self.listdir():
                 files.append(os.path.realpath(os.path.join(self.folder, name)))
@@ -159,20 +165,29 @@ class Worker(object):
             else:
                 if fid != self.get_file_id(st):
                     # same name but different file (rotation); reload it.
+                    self._logger.info("[{0}] - file rotated {1}".format(fid, file.name))
                     self.unwatch(file, fid)
                     self.watch(file.name)
                 elif file.tell() > st.st_size:
                     # file truncated; reload it
-                    self.logger.info("[{0}] - file truncated {1}".format(fid, file.name))
+                    self._logger.info("[{0}] - file truncated {1}".format(fid, file.name))
                     self.unwatch(file, fid)
                     self.watch(file.name)
+                elif REOPEN_FILES:
+                    self._logger.debug("[{0}] - file reloaded (non-linux) {1}".format(fid, file.name))
+                    position = file.tell()
+                    fname = file.name
+                    file.close()
+                    file = open(fname, "r")
+                    file.seek(position)
+                    self.files_map[fid] = file
 
         # add new ones
         for fid, fname in ls:
             if fid not in self.files_map:
                 self.watch(fname)
 
-    def readfile(self, file):
+    def readfile(self, fid, file):
         lines = file.readlines()
         if lines:
             self.callback(file.name, lines)
@@ -185,7 +200,7 @@ class Worker(object):
             if err.errno != errno.ENOENT:
                 raise
         else:
-            self.logger.info("[{0}] - watching logfile {1}".format(fid, fname))
+            self._logger.info("[{0}] - watching logfile {1}".format(fid, fname))
             self.files_map[fid] = file
 
     def unwatch(self, file, fid):
@@ -194,11 +209,11 @@ class Worker(object):
         # log rotator has written something in it.
         lines = None
         try:
-            lines = self.readfile(file)
+            lines = self.readfile(fid, file)
         except IOError:
             # Silently ignore any IOErrors -- file is gone
             pass
-        self.logger.info("[{0}] - un-watching logfile {1}".format(fid, file.name))
+        self._logger.info("[{0}] - un-watching logfile {1}".format(fid, file.name))
         del self.files_map[fid]
         if lines:
             self.callback(file.name, lines)
@@ -213,31 +228,30 @@ class Worker(object):
         self.files_map.clear()
 
 
-def run_worker(configfile, args):
-    logger = logging.getLogger('beaver')
-    logger.info("Logging using the {0} transport".format(args.transport))
+def run_worker(file_config, beaver_config, logger):
+    logger.info("Logging using the {0} transport".format(beaver_config.get('transport')))
 
-    if args.transport == 'rabbitmq':
+    if beaver_config.get('transport') == 'rabbitmq':
         import beaver.rabbitmq_transport
-        transport = beaver.rabbitmq_transport.RabbitmqTransport(configfile, args)
-    elif args.transport == 'redis':
+        transport = beaver.rabbitmq_transport.RabbitmqTransport(file_config, beaver_config)
+    elif beaver_config.get('transport') == 'redis':
         import beaver.redis_transport
-        transport = beaver.redis_transport.RedisTransport(configfile, args)
-    elif args.transport == 'stdout':
+        transport = beaver.redis_transport.RedisTransport(file_config, beaver_config)
+    elif beaver_config.get('transport') == 'stdout':
         import beaver.stdout_transport
-        transport = beaver.stdout_transport.StdoutTransport(configfile, args)
-    elif args.transport == 'udp':
+        transport = beaver.stdout_transport.StdoutTransport(file_config, beaver_config)
+    elif beaver_config.get('transport') == 'udp':
         import beaver.udp_transport
-        transport = beaver.udp_transport.UdpTransport(configfile, args)
-    elif args.transport == 'zmq':
+        transport = beaver.udp_transport.UdpTransport(file_config, beaver_config)
+    elif beaver_config.get('transport') == 'zmq':
         import beaver.zmq_transport
-        transport = beaver.zmq_transport.ZmqTransport(configfile, args)
+        transport = beaver.zmq_transport.ZmqTransport(file_config, beaver_config)
     else:
-        raise Exception('Invalid transport {0}'.format(args.transport))
+        raise Exception('Invalid transport {0}'.format(beaver_config.get('transport')))
 
     try:
         logger.info("Starting worker...")
-        l = Worker(configfile, args, transport.callback)
+        l = Worker(file_config, beaver_config, transport.callback, logger)
         logger.info("Working...")
         l.loop()
     except TransportException, e:

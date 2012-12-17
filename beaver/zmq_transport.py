@@ -1,5 +1,4 @@
 import datetime
-import os
 import zmq
 
 import beaver.transport
@@ -7,11 +6,11 @@ import beaver.transport
 
 class ZmqTransport(beaver.transport.Transport):
 
-    def __init__(self, configfile, args):
-        super(ZmqTransport, self).__init__(configfile, args)
+    def __init__(self, file_config, beaver_config):
+        super(ZmqTransport, self).__init__(file_config, beaver_config)
 
-        zeromq_address = os.environ.get("ZEROMQ_ADDRESS", "tcp://localhost:2120")
-        self.zeromq_bind = (args.mode == "bind")
+        zeromq_address = beaver_config.get('zeromq_address')
+        self.zeromq_bind = (beaver_config.get('mode') == "bind")
 
         self.ctx = zmq.Context()
         self.pub = self.ctx.socket(zmq.PUSH)
