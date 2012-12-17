@@ -1,6 +1,28 @@
 Changelog
 =========
 
+13 (2012-12-17)
+---------------
+
+- Fixed certain environment variables. [Jose Diaz-Gonzalez]
+
+- SSH Tunnel Support. [Jose Diaz-Gonzalez]
+
+  This code should allow us to create an ssh tunnel between two distinct
+  servers for the purposes of sending and receiving data.
+  
+  This is useful in certain cases where you would otherwise need to
+  whitelist in your Firewall or iptables setup, such as when running in
+  two different regions on AWS.
+
+- Allow for initial connection lag. Helpful when waiting for an SSH
+  proxy to connect. [Jose Diaz-Gonzalez]
+
+- Fix issue where certain config defaults were of an improper value.
+  [Jose Diaz-Gonzalez]
+
+- Allow specifying host via flag. Closes #70. [Jose Diaz-Gonzalez]
+
 12 (2012-12-17)
 ---------------
 
