@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import sys
 
 from beaver import __version__
 
@@ -6,6 +7,12 @@ try:
     from setuptools import setup
 except ImportError:
     from distutils.core import setup
+
+
+if sys.version_info[:2] <= (2, 6):
+    requirements = open('requirements/base26.txt').readlines()
+else:
+    requirements = open('requirements/base.txt').readlines()
 
 setup(
     name='Beaver',
@@ -29,5 +36,5 @@ setup(
                      open('CHANGES.rst').read(),
     tests_require=['nose'],
     test_suite='nose.collector',
-    install_requires=open('requirements/base.txt').readlines(),
+    install_requires=requirements,
 )

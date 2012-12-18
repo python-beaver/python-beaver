@@ -23,11 +23,15 @@ def setup_custom_logger(name, debug=False, formatter=None):
     if debug:
         logger.setLevel(logging.DEBUG)
         logger.info('Debug level is on')
-        logging.captureWarnings(True)
+        if hasattr(logging, 'captureWarnings'):
+            # New in Python 2.7
+            logging.captureWarnings(True)
     else:
         logger.setLevel(logging.INFO)
         logger.info('Info level is on')
-        logging.captureWarnings(False)
+        if hasattr(logging, 'captureWarnings'):
+            # New in Python 2.7
+            logging.captureWarnings(False)
 
     return logger
 

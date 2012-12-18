@@ -1,8 +1,12 @@
 import ConfigParser
-import collections
 import os
 import socket
 import warnings
+
+try:
+    from collections import OrderedDict
+except ImportError:
+    from ordereddict import OrderedDict
 
 
 class BeaverConfig():
@@ -98,7 +102,7 @@ class BeaverConfig():
             else:
                 config['hostname'] = socket.gethostname()
 
-        config = collections.OrderedDict(sorted(config.items()))
+        config = OrderedDict(sorted(config.items()))
         return config
 
     def get(self, key, default=None):
@@ -173,4 +177,3 @@ class BeaverConfig():
         if len(deprecated_env_var_usage) > 0:
             warnings.simplefilter('default')
             warnings.warn('ENV Variable support will be removed by version 20. Stop using: {0}'.format(", ".join(deprecated_env_var_usage)), DeprecationWarning)
-
