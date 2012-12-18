@@ -47,7 +47,7 @@
 
 <p>From PyPI::</p>
 
-<pre><code>pip install beaver==11
+<pre><code>pip install beaver==14
 </code></pre>
 
 <h1>Usage</h1>
@@ -61,20 +61,22 @@
 <p>optional arguments::</p>
 
 <pre><code>-h, --help            show this help message and exit
--m {bind,connect}, --mode {bind,connect}
-                    bind or connect mode
--p PATH, --path PATH  path to log files
--f FILES [FILES ...], --files FILES [FILES ...]
-                    space-separated filelist to watch, can include globs
-                    (*.log). Overrides --path argument
--t {rabbitmq,redis,stdout,zmq}, --transport {rabbitmq,redis,stdout,zmq}
-                    log transport method
 -c CONFIG, --configfile CONFIG
-                    ini config file path
--d DEBUG, --debug DEBUG
-                    enable debug mode
---fqdn
-                    use the machine's FQDN for source_host
+                      ini config file path
+-d, --debug           enable debug mode
+-f FILES [FILES ...], --files FILES [FILES ...]
+                      space-separated filelist to watch, can include globs
+                      (*.log). Overrides --path argument
+--format {json,msgpack,string}
+                      format to use when sending to transport
+--hostname HOSTNAME   manual hostname override for source_host
+-m {bind,connect}, --mode {bind,connect}
+                      bind or connect mode
+-p PATH, --path PATH  path to log files
+-t {rabbitmq,redis,stdout,zmq,udp}, --transport {rabbitmq,redis,stdout,zmq,udp}
+                      log transport method
+-v, --version         output version and quit
+--fqdn                use the machine's FQDN
 </code></pre>
 
 <h1>Background</h1>
@@ -85,7 +87,54 @@
 
 <p>NOTE: the redis transport uses a namespace of <code>logstash:beaver</code> by default.  You will need to update your logstash indexer to match this.</p>
 
-<h2>Examples</h2>
+<h2>Configuration File Options</h2>
+
+<p>Beaver can optionally get data from a <code>configfile</code> using the <code>-c</code> flag. This file is in <code>ini</code> format. Global configuration will be under the <code>beaver</code> stanza. The following are global beaver configuration keys with their respective meanings:</p>
+
+<ul>
+<li>rabbitmq_host: Defaults <code>localhost</code>. Host for RabbitMQ.</li>
+<li>rabbitmq_port: Defaults <code>5672</code>. Port for RabbitMQ.</li>
+<li>rabbitmq_vhost: Default <code>/</code>
+</li>
+<li>rabbitmq_username: Default <code>guest</code>
+</li>
+<li>rabbitmq_password: Default <code>guest</code>
+</li>
+<li>rabbitmq_queue: Default <code>logstash-queue</code>.</li>
+<li>rabbitmq_exchange: Default <code>direct</code>.</li>
+<li>rabbitmq_exchange_durable: Default <code>0</code>.</li>
+<li>rabbitmq_key: Default <code>logstash-key</code>.</li>
+<li>rabbitmq_exchange: Default <code>logstash-exchange</code>.</li>
+<li>redis_url: Default <code>redis://localhost:6379/0</code>. Redis URL</li>
+<li>redis_namespace: Default <code>logstash:beaver</code>. Redis key namespace</li>
+<li>udp_host: Default <code>127.0.0.1</code>. UDP Host</li>
+<li>udp_port: Default <code>9999</code>. UDP Port</li>
+<li>zeromq_address: Default <code>tcp://localhost:2120</code>. Zeromq URL</li>
+<li>zeromq_bind: Default <code>bind</code>. Whether to bind to zeromq host or simply connect</li>
+</ul><p>The following are used for instances when a TransportException is thrown - Transport dependent</p>
+
+<ul>
+<li>respawn_delay: Default <code>3</code>. Initial respawn delay for exponential backoff</li>
+<li>max_failure: Default <code>7</code>. Max failures before exponential backoff terminates</li>
+</ul><p>The following configuration keys are for building an SSH Tunnel that can be used to proxy from the current host to a desired server. This proxy is torn down when Beaver halts in all cases.</p>
+
+<ul>
+<li>ssh_key_file: Default <code>None</code>. Full path to <code>id_rsa</code> key file</li>
+<li>ssh_tunnel: Default <code>None</code>. SSH Tunnel in the format <code>user@host:port</code>
+</li>
+<li>ssh_tunnel_port: Default <code>None</code>. Local port for SSH Tunnel</li>
+<li>ssh_remote_host: Default <code>None</code>. Remote host to connect to within SSH Tunnel</li>
+<li>ssh_remote_port: Default <code>None</code>. Remote port to connect to within SSH Tunnel</li>
+</ul><p>The following can also be passed via argparse. Argparse will override all options in the configfile, when specified.</p>
+
+<ul>
+<li>format: Default <code>json</code>. Options <code>[ json, msgpack, string ]</code>. Format to use when sending to transport</li>
+<li>files: Default <code>files</code>. Space-separated list of files to tail.</li>
+<li>path: Default <code>/var/log</code>. Path glob to tail.</li>
+<li>transport: Default <code>stdout</code>. Transport to use when log changes are detected</li>
+<li>fqdn: Default <code>False</code>. Whether to use the machine's FQDN in transport output</li>
+<li>hostname: Default <code>None</code>. Manually specified hostname</li>
+</ul><h2>Examples</h2>
 
 <p>Example 1: Listen to all files in the default path of /var/log on standard out as json::</p>
 
@@ -94,29 +143,41 @@
 
 <p>Example 2: Listen to all files in the default path of /var/log on standard out with msgpack::</p>
 
-<pre><code>BEAVER_FORMAT='msgpack' beaver
+<pre><code>beaver --format msgpack
 </code></pre>
 
 <p>Example 3: Listen to all files in the default path of /var/log on standard out as a string::</p>
 
-<pre><code>BEAVER_FORMAT='string' beaver
+<pre><code>beaver --format string
 </code></pre>
 
 <p>Example 4: Sending logs from /var/log files to a redis list::</p>
 
-<pre><code>REDIS_URL='redis://localhost:6379/0' beaver -t redis
+<pre><code># /etc/beaver.conf
+[beaver]
+redis_url: redis://localhost:6379/0
+
+# From the commandline
+beaver  -c /etc/beaver.conf -t redis
 </code></pre>
 
 <p>Example 5: Use environment variables to send logs from /var/log files to a redis list::</p>
 
-<pre><code>REDIS_URL='redis://localhost:6379/0' BEAVER_PATH='/var/log' BEAVER_TRANSPORT=redis beaver
+<pre><code># /etc/beaver.conf
+[beaver]
+redis_url: redis://localhost:6379/0
+
+# From the commandline
+beaver  -c /etc/beaver.conf -p '/var/log' -t redis
 </code></pre>
 
 <p>Example 6: Zeromq listening on port 5556 (all interfaces)::</p>
 
-<pre><code>ZEROMQ_ADDRESS='tcp://*:5556' beaver -m bind -t zmq
+<pre><code># /etc/beaver.conf
+[beaver]
+zeromq_address: tcp://*:5556
 
-# logstash config:
+# logstash indexer config:
 input {
   zeromq {
     type =&gt; 'shipper-input'
@@ -126,13 +187,18 @@ input {
   }
 }
 output { stdout { debug =&gt; true } }
+
+# From the commandline
+beaver  -c /etc/beaver.conf -m bind -t zmq
 </code></pre>
 
 <p>Example 7: Zeromq connecting to remote port 5556 on indexer::</p>
 
-<pre><code>ZEROMQ_ADDRESS='tcp://indexer:5556' beaver -m connect -t zmq
+<pre><code># /etc/beaver.conf
+[beaver]
+zeromq_address: tcp://indexer:5556
 
-# logstash config:
+# logstash indexer config:
 input {
   zeromq {
     type =&gt; 'shipper-input'
@@ -142,6 +208,9 @@ input {
   }
 }
 output { stdout { debug =&gt; true } }
+
+# on the commandline
+beaver -c /etc/beaver.conf -m connect -t zmq
 </code></pre>
 
 <p>Example 8: Real-world usage of Redis as a transport::</p>
@@ -149,8 +218,10 @@ output { stdout { debug =&gt; true } }
 <pre><code># in /etc/hosts
 192.168.0.10 redis-internal
 
-# From the commandline
-REDIS_NAMESPACE='app:unmappable' REDIS_URL='redis://redis-internal:6379/0' beaver -f /var/log/unmappable.log -t redis
+# /etc/beaver.conf
+[beaver]
+redis_url: redis://redis-internal:6379/0
+redis_namespace: app:unmappable
 
 # logstash indexer config:
 input {
@@ -162,16 +233,20 @@ input {
   }
 }
 output { stdout { debug =&gt; true } }
+
+# From the commandline
+beaver -c /etc/beaver.conf -f /var/log/unmappable.log -t redis
 </code></pre>
 
 <p>As you can see, <code>beaver</code> is pretty flexible as to how you can use/abuse it in production.</p>
 
 <p>Example 9: RabbitMQ connecting to defaults on remote broker::</p>
 
-<pre><code># From the commandline
-RABBITMQ_HOST='10.0.0.1' beaver -t rabbitmq
+<pre><code># /etc/beaver.conf
+[beaver]
+rabbitmq_host: 10.0.0.1
 
-# logstash config:
+# logstash indexer config:
 input { amqp {
     name =&gt; 'logstash-queue'
     type =&gt; 'direct'
@@ -184,14 +259,14 @@ input { amqp {
   }
 }
 output { stdout { debug =&gt; true } }
+
+# From the commandline
+beaver -c /etc/beaver.conf -t rabbitmq
 </code></pre>
 
 <p>Example 10: Read config from config.ini and put to stdout::</p>
 
-<pre><code># From the commandline
-beaver -c config.ini -t stdout
-
-# config.ini content:
+<pre><code># /etc/beaver.conf:
 [/tmp/somefile]
 type: mytype
 tags: tag1,tag2
@@ -204,14 +279,19 @@ tags: sys
 [/var/log/{secure,messages}.log]
 type: syslog
 tags: sys
+
+# From the commandline
+beaver -c /etc/beaver.conf -t stdout
 </code></pre>
 
 <p>Example 11: UDP transport::</p>
 
-<pre><code># From the commandline
-UDP_HOST='127.0.0.1' UDP_PORT='9999' beaver -t udp
+<pre><code># /etc/beaver.conf
+[beaver]
+udp_host: 127.0.0.1
+udp_port: 9999
 
-# logstash config:
+# logstash indexer config:
 input {
   udp {
     type =&gt; 'shipper-input'
@@ -220,6 +300,9 @@ input {
   }
 }
 output { stdout { debug =&gt; true } }
+
+# From the commandline
+beaver -c /etc/beaver.conf -t udp
 </code></pre>
 
 <h1>Todo</h1>
