@@ -1,6 +1,20 @@
 Changelog
 =========
 
+14 (2012-12-18)
+---------------
+
+- Removed erroneous redundant code. [Jose Diaz-Gonzalez]
+
+- Workaround for differing iteration implementation in Python 2.6. [Jose
+  Diaz-Gonzalez]
+
+- Properly detect non-linux platforms. [Jose Diaz-Gonzalez]
+
+- Improve Python 2.6 support. [Jose Diaz-Gonzalez]
+
+- Fix broken python readme. [Jose Diaz-Gonzalez]
+
 13 (2012-12-17)
 ---------------
 
