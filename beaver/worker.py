@@ -9,7 +9,7 @@ from ssh_tunnel import BeaverSshTunnel
 from transport import TransportException
 from utils import eglob
 
-REOPEN_FILES = platform.platform() != 'Linux'
+REOPEN_FILES = 'linux' not in platform.platform().lower()
 
 
 class Worker(object):
@@ -261,6 +261,9 @@ def create_ssh_tunnel(file_config, beaver_config):
 def run_worker(file_config, beaver_config, logger, ssh_tunnel=None):
     logger.info("Logging using the {0} transport".format(beaver_config.get('transport')))
     transport = create_transport(file_config, beaver_config)
+
+    if REOPEN_FILES:
+        logger.info("Detected non-linux platform. Files will be reopened for tailing")
 
     try:
         logger.info("Starting worker...")
