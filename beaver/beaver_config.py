@@ -15,11 +15,6 @@ class BeaverConfig():
         self._logger = logger
         self._logger.info('Processing beaver portion of config file %s' % args.config)
 
-        # Support env variable parsing as well
-        files = os.environ.get("BEAVER_FILES", None)
-        if files is not None:
-            files = files.split(',')
-
         self._beaver_defaults = {
             'rabbitmq_host': os.environ.get('RABBITMQ_HOST', 'localhost'),
             'rabbitmq_port': os.environ.get('RABBITMQ_PORT', '5672'),
@@ -43,19 +38,19 @@ class BeaverConfig():
             'max_failure': '7',
 
             # ssh tunnel support
-            'ssh_key_file': None,
-            'ssh_tunnel': None,
-            'ssh_tunnel_port': None,
-            'ssh_remote_host': None,
-            'ssh_remote_port': None,
+            'ssh_key_file': '',
+            'ssh_tunnel': '',
+            'ssh_tunnel_port': '',
+            'ssh_remote_host': '',
+            'ssh_remote_port': '',
 
             # the following can be passed via argparse
             'zeromq_bind': os.environ.get('BEAVER_MODE', 'bind' if os.environ.get('BIND', False) else 'connect'),
-            'files': files,
+            'files': os.environ.get('BEAVER_FILES', ''),
             'path': os.environ.get('BEAVER_PATH', '/var/log'),
             'transport': os.environ.get('BEAVER_TRANSPORT', 'stdout'),  # this needs to be passed to the import class somehow
-            'fqdn': False,
-            'hostname': None,
+            'fqdn': '0',
+            'hostname': '',
         }
 
         self._configfile = args.config
@@ -92,9 +87,21 @@ class BeaverConfig():
             config['path'] = args.path
         if args.transport:
             config['transport'] = args.transport
-
         if args.hostname:
             config['hostname'] = args.hostname
+
+        # HACK: Python 2.6 ConfigParser does not properly
+        #       handle non-string values
+        for k in config:
+            if config[k] == '':
+                config[k] = None
+
+        if config['files'] == '':
+            config['files'] = None
+        else:
+            config['files'] = config['files'].split(',')
+
+        config['fqdn'] = bool(config['fqdn'])
 
         if config.get('hostname') is None:
             if bool(config.get('fqdn')) == True:
