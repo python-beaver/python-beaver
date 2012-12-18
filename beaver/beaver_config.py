@@ -96,9 +96,7 @@ class BeaverConfig():
             if config[k] == '':
                 config[k] = None
 
-        if config['files'] == '':
-            config['files'] = None
-        else:
+        if config['files'] is not None:
             config['files'] = config['files'].split(',')
 
         config['fqdn'] = bool(config['fqdn'])
