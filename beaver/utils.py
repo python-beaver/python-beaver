@@ -7,7 +7,7 @@ logging.basicConfig()
 _magic_brackets = re.compile("({([^}]+)})")
 
 
-def setup_custom_logger(name, debug=False, formatter=None):
+def setup_custom_logger(name, args=None, formatter=None):
     logger = logging.getLogger()
     if logger.handlers:
         logger.handlers = []
@@ -20,7 +20,7 @@ def setup_custom_logger(name, debug=False, formatter=None):
         handler.setFormatter(formatter)
         logger.addHandler(handler)
 
-    if debug:
+    if args.debug:
         logger.setLevel(logging.DEBUG)
         logger.info('Debug level is on')
         if hasattr(logging, 'captureWarnings'):
@@ -28,7 +28,8 @@ def setup_custom_logger(name, debug=False, formatter=None):
             logging.captureWarnings(True)
     else:
         logger.setLevel(logging.INFO)
-        logger.info('Info level is on')
+        if not args.version:
+            logger.info('Info level is on')
         if hasattr(logging, 'captureWarnings'):
             # New in Python 2.7
             logging.captureWarnings(False)

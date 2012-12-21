@@ -62,12 +62,12 @@ args = parser.parse_args()
 
 if args.version:
     formatter = logging.Formatter('%(message)s')
-    logger = beaver.utils.setup_custom_logger('beaver', debug=args.debug, formatter=formatter)
+    logger = beaver.utils.setup_custom_logger('beaver', args=args, formatter=formatter)
     logger.info("Beaver {0}".format(full_version))
     sys.exit(0)
 
 
-logger = beaver.utils.setup_custom_logger('beaver', debug=args.debug)
+logger = beaver.utils.setup_custom_logger('beaver', args)
 
 file_config = beaver.file_config.FileConfig(args, logger=logger)
 beaver_config = beaver.beaver_config.BeaverConfig(args, logger=logger)
