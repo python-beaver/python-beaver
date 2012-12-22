@@ -5,12 +5,14 @@ import argparse
 import logging
 import sys
 import time
+import lockfile
 
 import beaver.file_config
 import beaver.beaver_config
 import beaver.transport
 import beaver.utils
 import beaver.worker
+import beaver.pidfile
 
 from beaver import __version__ as full_version
 
@@ -53,6 +55,7 @@ parser = argparse.ArgumentParser(description='Beaver logfile shipper',
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
 parser.add_argument('-c', '--configfile', help='ini config file path', dest='config', default='/dev/null')
 parser.add_argument('-D', '--daemon', help='daemonize in the background', dest='daemon', default=False, action='store_true')
+parser.add_argument('-P', '--pid', help='path to pid file', default=None, dest='pidfile')
 parser.add_argument('-d', '--debug', help='enable debug mode', dest='debug', default=False, action='store_true')
 parser.add_argument('-f', '--files', help='space-separated filelist to watch, can include globs (*.log). Overrides --path argument', dest='files', default=None, nargs='+')
 parser.add_argument('--format', help='format to use when sending to transport', default=None, dest='format', choices=['json', 'msgpack', 'string'])
@@ -119,7 +122,9 @@ def main(args):
 
 if __name__ == "__main__":
     if args.daemon:
-        with daemon.DaemonContext():
+        with daemon.DaemonContext( 
+                pidfile=beaver.pidfile.PidFile(args.pidfile),
+                ):
             main(args = args)
     else:
         main(args = args)
