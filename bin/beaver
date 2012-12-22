@@ -41,6 +41,9 @@ Example 5: Use environment variables to send logs from /var/log files to a redis
 Example 6: Zeromq listening on port 5556 (all interfaces)
     cli: ZEROMQ_ADDRESS="tcp://*:5556" beaver -m bind -t zmq
 
+Example 7: Run beaver as a daemon in the background
+    cli: beaver -D
+
 Please see the readme for more complete examples.
 
 """
@@ -48,6 +51,7 @@ parser = argparse.ArgumentParser(description='Beaver logfile shipper',
                                 epilog=epilog_example,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
 parser.add_argument('-c', '--configfile', help='ini config file path', dest='config', default='/dev/null')
+parser.add_argument('-D', '--daemon', help='daemonize in the background', dest='daemon', default=False, action='store_true')
 parser.add_argument('-d', '--debug', help='enable debug mode', dest='debug', default=False, action='store_true')
 parser.add_argument('-f', '--files', help='space-separated filelist to watch, can include globs (*.log). Overrides --path argument', dest='files', default=None, nargs='+')
 parser.add_argument('--format', help='format to use when sending to transport', default=None, dest='format', choices=['json', 'msgpack', 'string'])
@@ -60,53 +64,61 @@ parser.add_argument('--fqdn', help="use the machine's FQDN for source_host", des
 
 args = parser.parse_args()
 
-if args.version:
-    formatter = logging.Formatter('%(message)s')
-    logger = beaver.utils.setup_custom_logger('beaver', debug=args.debug, formatter=formatter)
-    logger.info("Beaver {0}".format(full_version))
-    sys.exit(0)
+def main(args):
+    if args.version:
+        formatter = logging.Formatter('%(message)s')
+        logger = beaver.utils.setup_custom_logger('beaver', debug=args.debug, formatter=formatter)
+        logger.info("Beaver {0}".format(full_version))
+        sys.exit(0)
 
 
-logger = beaver.utils.setup_custom_logger('beaver', debug=args.debug)
+    logger = beaver.utils.setup_custom_logger('beaver', debug=args.debug)
 
-file_config = beaver.file_config.FileConfig(args, logger=logger)
-beaver_config = beaver.beaver_config.BeaverConfig(args, logger=logger)
-beaver_config.update_files(file_config)
-beaver_config.check_for_deprecated_usage()
+    file_config = beaver.file_config.FileConfig(args, logger=logger)
+    beaver_config = beaver.beaver_config.BeaverConfig(args, logger=logger)
+    beaver_config.update_files(file_config)
+    beaver_config.check_for_deprecated_usage()
 
-failure_count = 0
+    failure_count = 0
 
-ssh_tunnel = beaver.worker.create_ssh_tunnel(file_config, beaver_config)
-if ssh_tunnel is not None:
-    logger.info("Proxying transport using through local ssh tunnel")
+    ssh_tunnel = beaver.worker.create_ssh_tunnel(file_config, beaver_config)
+    if ssh_tunnel is not None:
+        logger.info("Proxying transport using through local ssh tunnel")
 
-while 1:
-    try:
-        worker = beaver.worker.run_worker(file_config, beaver_config, logger, ssh_tunnel=ssh_tunnel)
-    except beaver.transport.TransportException, e:
-        failure_count = failure_count + 1
-        if failure_count > int(beaver_config.get('max_failure')):
-            failure_count = int(beaver_config.get('max_failure'))
-
-        sleep_time = int(beaver_config.get('respawn_delay')) ** failure_count
-        logger.info("Caught transport exception, respawning in %d seconds" % sleep_time)
-
+    while 1:
         try:
-            time.sleep(sleep_time)
+            worker = beaver.worker.run_worker(file_config, beaver_config, logger, ssh_tunnel=ssh_tunnel)
+        except beaver.transport.TransportException, e:
+            failure_count = failure_count + 1
+            if failure_count > int(beaver_config.get('max_failure')):
+                failure_count = int(beaver_config.get('max_failure'))
+
+            sleep_time = int(beaver_config.get('respawn_delay')) ** failure_count
+            logger.info("Caught transport exception, respawning in %d seconds" % sleep_time)
+
+            try:
+                time.sleep(sleep_time)
+            except KeyboardInterrupt:
+                logger.info("User cancelled respawn.")
+                if ssh_tunnel is not None:
+                    logger.info("Closing ssh tunnel.")
+                    ssh_tunnel.close()
+
+                sys.exit(0)
+
         except KeyboardInterrupt:
-            logger.info("User cancelled respawn.")
+            logger.info("Shutting down. Please wait.")
+            worker.close()
             if ssh_tunnel is not None:
                 logger.info("Closing ssh tunnel.")
                 ssh_tunnel.close()
 
+            logger.info("Shutdown complete.")
             sys.exit(0)
 
-    except KeyboardInterrupt:
-        logger.info("Shutting down. Please wait.")
-        worker.close()
-        if ssh_tunnel is not None:
-            logger.info("Closing ssh tunnel.")
-            ssh_tunnel.close()
-
-        logger.info("Shutdown complete.")
-        sys.exit(0)
+if __name__ == "__main__":
+    if args.daemon:
+        with daemon.DaemonContext():
+            main(args = args)
+    else:
+        main(args = args)
