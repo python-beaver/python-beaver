@@ -37,6 +37,7 @@ optional arguments::
     -c CONFIG, --configfile CONFIG
                           ini config file path
     -d, --debug           enable debug mode
+    -D, --daemon          daemonize in the background
     -f FILES [FILES ...], --files FILES [FILES ...]
                           space-separated filelist to watch, can include globs
                           (*.log). Overrides --path argument
@@ -128,6 +129,15 @@ Example 4: Sending logs from /var/log files to a redis list::
 
     # From the commandline
     beaver  -c /etc/beaver.conf -t redis
+
+Example 4: Sending logs from /var/log files to a redis list as a background daemon::
+
+    # /etc/beaver.conf
+    [beaver]
+    redis_url: redis://localhost:6379/0
+
+    # From the commandline
+    beaver  -c /etc/beaver.conf -t redis -D
 
 Example 5: Use environment variables to send logs from /var/log files to a redis list::
 
