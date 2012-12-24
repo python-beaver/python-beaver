@@ -5,7 +5,7 @@ import stat
 import sys
 import time
 
-from transport import TransportException
+from transport import create_transport, TransportException
 from utils import eglob
 
 REOPEN_FILES = 'linux' not in platform.platform().lower()
@@ -226,28 +226,6 @@ class Worker(object):
         for id, file in self.files_map.iteritems():
             file.close()
         self.files_map.clear()
-
-
-def create_transport(beaver_config, file_config):
-    if beaver_config.get('transport') == 'rabbitmq':
-        import beaver.rabbitmq_transport
-        transport = beaver.rabbitmq_transport.RabbitmqTransport(beaver_config, file_config)
-    elif beaver_config.get('transport') == 'redis':
-        import beaver.redis_transport
-        transport = beaver.redis_transport.RedisTransport(beaver_config, file_config)
-    elif beaver_config.get('transport') == 'stdout':
-        import beaver.stdout_transport
-        transport = beaver.stdout_transport.StdoutTransport(beaver_config, file_config)
-    elif beaver_config.get('transport') == 'udp':
-        import beaver.udp_transport
-        transport = beaver.udp_transport.UdpTransport(beaver_config, file_config)
-    elif beaver_config.get('transport') == 'zmq':
-        import beaver.zmq_transport
-        transport = beaver.zmq_transport.ZmqTransport(beaver_config, file_config)
-    else:
-        raise Exception('Invalid transport {0}'.format(beaver_config.get('transport')))
-
-    return transport
 
 
 def run_worker(beaver_config, file_config, logger, ssh_tunnel=None):
