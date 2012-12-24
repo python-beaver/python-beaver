@@ -3,7 +3,7 @@ import os
 
 class Transport(object):
 
-    def __init__(self, file_config, beaver_config):
+    def __init__(self, beaver_config, file_config):
         self._file_config = file_config
         self._format = beaver_config.get('format')
 

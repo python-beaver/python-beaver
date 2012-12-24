@@ -26,7 +26,7 @@ class Worker(object):
     >>> l.loop()
     """
 
-    def __init__(self, file_config, beaver_config, callback, logger, ssh_tunnel=None, extensions=["log"], tail_lines=0):
+    def __init__(self, beaver_config, file_config, callback, logger, ssh_tunnel=None, extensions=["log"], tail_lines=0):
         """Arguments:
 
         (FileConfig) @file_config:
@@ -229,45 +229,45 @@ class Worker(object):
         self.files_map.clear()
 
 
-def create_transport(file_config, beaver_config):
+def create_transport(beaver_config, file_config):
     if beaver_config.get('transport') == 'rabbitmq':
         import beaver.rabbitmq_transport
-        transport = beaver.rabbitmq_transport.RabbitmqTransport(file_config, beaver_config)
+        transport = beaver.rabbitmq_transport.RabbitmqTransport(beaver_config, file_config)
     elif beaver_config.get('transport') == 'redis':
         import beaver.redis_transport
-        transport = beaver.redis_transport.RedisTransport(file_config, beaver_config)
+        transport = beaver.redis_transport.RedisTransport(beaver_config, file_config)
     elif beaver_config.get('transport') == 'stdout':
         import beaver.stdout_transport
-        transport = beaver.stdout_transport.StdoutTransport(file_config, beaver_config)
+        transport = beaver.stdout_transport.StdoutTransport(beaver_config, file_config)
     elif beaver_config.get('transport') == 'udp':
         import beaver.udp_transport
-        transport = beaver.udp_transport.UdpTransport(file_config, beaver_config)
+        transport = beaver.udp_transport.UdpTransport(beaver_config, file_config)
     elif beaver_config.get('transport') == 'zmq':
         import beaver.zmq_transport
-        transport = beaver.zmq_transport.ZmqTransport(file_config, beaver_config)
+        transport = beaver.zmq_transport.ZmqTransport(beaver_config, file_config)
     else:
         raise Exception('Invalid transport {0}'.format(beaver_config.get('transport')))
 
     return transport
 
 
-def create_ssh_tunnel(file_config, beaver_config):
+def create_ssh_tunnel(beaver_config):
     if not beaver_config.use_ssh_tunnel():
         return None
 
     return BeaverSshTunnel(beaver_config)
 
 
-def run_worker(file_config, beaver_config, logger, ssh_tunnel=None):
+def run_worker(beaver_config, file_config, logger, ssh_tunnel=None):
     logger.info("Logging using the {0} transport".format(beaver_config.get('transport')))
-    transport = create_transport(file_config, beaver_config)
+    transport = create_transport(beaver_config, file_config)
 
     if REOPEN_FILES:
         logger.info("Detected non-linux platform. Files will be reopened for tailing")
 
     try:
         logger.info("Starting worker...")
-        l = Worker(file_config, beaver_config, transport.callback, logger, ssh_tunnel=ssh_tunnel)
+        l = Worker(beaver_config, file_config, transport.callback, logger, ssh_tunnel=ssh_tunnel)
         logger.info("Working...")
         l.loop()
     except TransportException, e:
