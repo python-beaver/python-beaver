@@ -10,8 +10,8 @@ class RabbitmqTransport(beaver.transport.Transport):
     def __init__(self, beaver_config, file_config):
         super(RabbitmqTransport, self).__init__(beaver_config, file_config)
 
-        self.rabbitmq_key = beaver_config.get('rabbitmq_key')
-        self.rabbitmq_exchange = beaver_config.get('rabbitmq_exchange')
+        self._rabbitmq_key = beaver_config.get('rabbitmq_key')
+        self._rabbitmq_exchange = beaver_config.get('rabbitmq_exchange')
 
         # Setup RabbitMQ connection
         credentials = pika.PlainCredentials(
@@ -24,20 +24,20 @@ class RabbitmqTransport(beaver.transport.Transport):
             port=int(beaver_config.get('rabbitmq_port')),
             virtual_host=beaver_config.get('rabbitmq_vhost')
         )
-        self.connection = pika.adapters.BlockingConnection(parameters)
-        self.channel = self.connection.channel()
+        self._connection = pika.adapters.BlockingConnection(parameters)
+        self._channel = self._connection.channel()
 
         # Declare RabbitMQ queue and bindings
-        self.channel.queue_declare(queue=beaver_config.get('rabbitmq_queue'))
-        self.channel.exchange_declare(
-            exchange=self.rabbitmq_exchange,
+        self._channel.queue_declare(queue=beaver_config.get('rabbitmq_queue'))
+        self._channel.exchange_declare(
+            exchange=self._rabbitmq_exchange,
             exchange_type=beaver_config.get('rabbitmq_exchange_type'),
             durable=bool(beaver_config.get('rabbitmq_exchange_durable'))
         )
-        self.channel.queue_bind(
-            exchange=self.rabbitmq_exchange,
+        self._channel.queue_bind(
+            exchange=self._rabbitmq_exchange,
             queue=beaver_config.get('rabbitmq_queue'),
-            routing_key=self.rabbitmq_key
+            routing_key=self._rabbitmq_key
         )
 
     def callback(self, filename, lines):
@@ -47,9 +47,9 @@ class RabbitmqTransport(beaver.transport.Transport):
                 import warnings
                 with warnings.catch_warnings():
                     warnings.simplefilter("error")
-                    self.channel.basic_publish(
-                        exchange=self.rabbitmq_exchange,
-                        routing_key=self.rabbitmq_key,
+                    self._channel.basic_publish(
+                        exchange=self._rabbitmq_exchange,
+                        routing_key=self._rabbitmq_key,
                         body=self.format(filename, timestamp, line),
                         properties=pika.BasicProperties(
                             content_type="text/json",
@@ -65,8 +65,8 @@ class RabbitmqTransport(beaver.transport.Transport):
                     raise TransportException("Unspecified exception encountered")  # TRAP ALL THE THINGS!
 
     def interrupt(self):
-        if self.connection:
-            self.connection.close()
+        if self._connection:
+            self._connection.close()
 
     def unhandled(self):
         return True
