@@ -50,10 +50,14 @@ class Transport(object):
                     pass
                 else:
                     break
-        else:
-            def string_format(self, data):
+        elif beaver_config.get('format') == 'string':
+            def string_formatter(self, data):
                 return "[{0}] [{1}] {2}".format(data['@source_host'], data['@timestamp'], data['@message'])
-            self._formatter = string_format
+            self._formatter = string_formatter
+        else:
+            def null_formatter(self, data):
+                return data['@message']
+            self._formatter = null_formatter
 
     def callback(self, filename, lines):
         """Processes a set of lines for a filename"""
