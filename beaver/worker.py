@@ -174,7 +174,7 @@ class Worker(object):
                     self.unwatch(file, fid)
                     self.watch(file.name)
                 elif REOPEN_FILES:
-                    # self._logger.debug("[{0}] - file reloaded (non-linux) {1}".format(fid, file.name))
+                    self._logger.debug("[{0}] - file reloaded (non-linux) {1}".format(fid, file.name))
                     position = file.tell()
                     fname = file.name
                     file.close()
