@@ -45,17 +45,77 @@ class FileConfig():
         self._config = ConfigParser.ConfigParser(self._defaults)
         self._sanitize()
         self._files, self._globs = self._parse()
+        self._default_config = self._gen_config(self._defaults)
+        self._globbed = []
 
-    def _sanitize(self):
-        if len(self._config.read(self._configfile)) != 1:
-            raise Exception('Could not parse config file "%s"' % self._configfile)
+    def get(self, field, filename):
+        self._logger.debug("Retrieving {0} for {1}".format(field, filename))
+        return self._files.get(os.path.realpath(filename), self._default_config)[field]
 
-        if self._config.has_section('beaver'):
-            self._config.remove_section('beaver')
+    def addglob(self, globname, globbed):
+        if globname not in self._globbed:
+            self._logger.debug("Adding glob {0}".format(globname))
+            config = self._globs.get(globname, self._defaults)
+            config = self._gen_config(config)
+            self._globs[globname] = config
+            for key in config:
+                self._logger.debug("Config: {0} => {1}".format(key, config[key]))
+        else:
+            config = self._globs.get(globname)
+
+        for filename in globbed:
+            self._files[filename] = config
+        self._globbed.append(globname)
+
+    def getfilepaths(self):
+        return self._files.keys()
+
+    def getglobs(self):
+        return self._globs.keys()
+
+    def _gen_config(self, config):
+        fields = config.get('add_field', '')
+        if type(fields) != dict:
+            try:
+                if type(fields) == str:
+                    fields = filter(None, fields.split(','))
+                if len(fields) == 0:
+                    config['fields'] = {}
+                elif (len(fields) % 2) == 1:
+                    raise Exception('Wrong number of values for add_field')
+                else:
+                    fieldkeys = fields[0::2]
+                    fieldvalues = [[x] for x in fields[1::2]]
+                    config['fields'] = dict(zip(fieldkeys, fieldvalues))
+            except TypeError:
+                config['fields'] = {}
+
+        if 'add_field' in config:
+            del config['add_field']
+
+        try:
+            tags = config.get('tags', '')
+            if type(tags) == str:
+                tags = filter(None, tags.split(','))
+            if len(tags) == 0:
+                tags = []
+            config['tags'] = tags
+        except TypeError:
+            config['tags'] = []
+
+        try:
+            file_type = config.get('type', 'file')
+            if not file_type:
+                file_type = 'file'
+            config['type'] = file_type
+        except:
+            config['type'] = "file"
+
+        return config
 
     def _parse(self):
         glob_paths = {}
-        inputs = {}
+        files = {}
         for filename in self._config.sections():
             if not self._config.get(filename, 'type'):
                 raise Exception('%s: missing mandatory config "type"' % filename)
@@ -68,52 +128,14 @@ class FileConfig():
                 self._logger.info('Skipping glob due to no files found: %s' % filename)
                 continue
 
-            for globbed in globs:
-                inputs[os.path.realpath(globbed)] = config
+            for globbed_file in globs:
+                files[os.path.realpath(globbed_file)] = config
 
-        return inputs, glob_paths
+        return files, glob_paths
 
-    def _getfield(self, filename, field):
-        return self._files.get(os.path.realpath(filename))[field]
+    def _sanitize(self):
+        if len(self._config.read(self._configfile)) != 1:
+            raise Exception('Could not parse config file "%s"' % self._configfile)
 
-    def addglob(self, globname, globbed):
-        config = self._globs.get(globname, self._defaults)
-
-        for filename in globbed:
-            self._files[filename] = config
-
-    def getfilepaths(self):
-        return self._files.keys()
-
-    def getglobs(self):
-        return self._globs.keys()
-
-    def gettype(self, filename):
-        try:
-            result = self._getfield(filename, 'type')
-            return result if result else "file"
-        except TypeError:
-            return "file"
-
-    def gettags(self, filename):
-        try:
-            result = self._getfield(filename, 'tags').split(",")
-            result = filter(None, result)
-            return result if result else []
-        except TypeError:
-            return []
-
-    def getaddfield(self, filename):
-        try:
-            result = self._getfield(filename, 'add_field').split(",")
-            if result == ['']:
-                return {}
-            if (len(result) % 2) == 1:
-                raise Exception('Wrong number of values for add_field')
-            fieldkeys = result[0::2]
-            fieldvalues = [[x] for x in result[1::2]]
-            return dict(zip(fieldkeys, fieldvalues))
-        except TypeError:
-            return {}
-
-    #  TODO: add support for any file property
+        if self._config.has_section('beaver'):
+            self._config.remove_section('beaver')

@@ -36,9 +36,9 @@ class Transport(object):
         if self._format == 'json':
             return self.json.dumps({
                 '@source': "file://{0}{1}".format(self._current_host, filename),
-                '@type': self._file_config.gettype(filename),
-                '@tags': self._file_config.gettags(filename),
-                '@fields': self._file_config.getaddfield(filename),
+                '@type': self._file_config.get('type', filename),
+                '@tags': self._file_config.get('tags', filename),
+                '@fields': self._file_config.get('fields', filename),
                 '@timestamp': timestamp,
                 '@source_host': self._current_host,
                 '@source_path': filename,
@@ -47,9 +47,9 @@ class Transport(object):
         elif self._format == 'msgpack':
             return self.packer.pack({
                 '@source': "file://{0}{1}".format(self._current_host, filename),
-                '@type': self._file_config.gettype(filename),
-                '@tags': self._file_config.gettags(filename),
-                '@fields': self._file_config.getaddfield(filename),
+                '@type': self._file_config.get('type', filename),
+                '@tags': self._file_config.get('tags', filename),
+                '@fields': self._file_config.get('fields', filename),
                 '@timestamp': timestamp,
                 '@source_host': self._current_host,
                 '@source_path': filename,
