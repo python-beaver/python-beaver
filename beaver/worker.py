@@ -25,7 +25,7 @@ class Worker(object):
     >>> l.loop()
     """
 
-    def __init__(self, beaver_config, file_config, callback, logger, ssh_tunnel=None, extensions=["log"], tail_lines=0):
+    def __init__(self, beaver_config, file_config, callback, logger=None, extensions=["log"], tail_lines=0):
         """Arguments:
 
         (FileConfig) @file_config:
@@ -228,7 +228,7 @@ class Worker(object):
         self.files_map.clear()
 
 
-def run_worker(beaver_config, file_config, logger, ssh_tunnel=None):
+def run_worker(beaver_config, file_config, logger=None):
     logger.info("Logging using the {0} transport".format(beaver_config.get('transport')))
     transport = create_transport(beaver_config, file_config)
 
@@ -237,7 +237,7 @@ def run_worker(beaver_config, file_config, logger, ssh_tunnel=None):
 
     try:
         logger.info("Starting worker...")
-        l = Worker(beaver_config, file_config, transport.callback, logger, ssh_tunnel=ssh_tunnel)
+        l = Worker(beaver_config, file_config, transport.callback, logger)
         logger.info("Working...")
         l.loop()
     except TransportException, e:
