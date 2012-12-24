@@ -78,8 +78,6 @@ beaver_config.check_for_deprecated_usage()
 failure_count = 0
 
 ssh_tunnel = beaver.ssh_tunnel.create_ssh_tunnel(beaver_config)
-if ssh_tunnel is not None:
-    logger.info("Proxying transport using through local ssh tunnel")
 
 while 1:
     try:
