@@ -27,59 +27,62 @@ def create_transport(beaver_config, file_config):
 class Transport(object):
 
     def __init__(self, beaver_config, file_config):
+        """Generic transport configuration
+        Will attach the file_config object, setup the
+        current hostname, and ensure we have a proper
+        formatter for the current transport
+        """
         self._file_config = file_config
-        self._format = beaver_config.get('format')
-
         self._current_host = beaver_config.get('hostname')
 
-        if self._format == 'msgpack':
+        if beaver_config.get('format') == 'msgpack':
             import msgpack
-            self.packer = msgpack.Packer()
-        elif self._format == 'json':
+            packer = msgpack.Packer()
+            self._formatter = packer.pack
+        elif beaver_config.get('format') == 'json':
             # priority: ujson > simplejson > jsonlib2 > json
             priority = ['ujson', 'simplejson', 'jsonlib2', 'json']
             for mod in priority:
                 try:
-                    self.json = __import__(mod)
+                    json = __import__(mod)
+                    self._formatter = json.dumps
                 except ImportError:
                     pass
                 else:
                     break
+        else:
+            def string_format(self, data):
+                return "[{0}] [{1}] {2}".format(data['@source_host'], data['@timestamp'], data['@message'])
+            self._formatter = string_format
 
     def callback(self, filename, lines):
+        """Processes a set of lines for a filename"""
         return True
 
     def interrupt(self):
+        """Allows keyboard interrupts to be
+        handled properly by the transport
+        """
         return True
 
     def unhandled(self):
+        """Allows unhandled exceptions to be
+        handled properly by the transport
+        """
         return True
 
     def format(self, filename, timestamp, line):
-        if self._format == 'json':
-            return self.json.dumps({
-                '@source': "file://{0}{1}".format(self._current_host, filename),
-                '@type': self._file_config.get('type', filename),
-                '@tags': self._file_config.get('tags', filename),
-                '@fields': self._file_config.get('fields', filename),
-                '@timestamp': timestamp,
-                '@source_host': self._current_host,
-                '@source_path': filename,
-                '@message': line.strip(os.linesep),
-            })
-        elif self._format == 'msgpack':
-            return self.packer.pack({
-                '@source': "file://{0}{1}".format(self._current_host, filename),
-                '@type': self._file_config.get('type', filename),
-                '@tags': self._file_config.get('tags', filename),
-                '@fields': self._file_config.get('fields', filename),
-                '@timestamp': timestamp,
-                '@source_host': self._current_host,
-                '@source_path': filename,
-                '@message': line.strip(os.linesep),
-            })
-
-        return "[{0}] [{1}] {2}".format(self._current_host, timestamp, line)
+        """Returns a formatted log line"""
+        return self._formatter({
+            '@source': "file://{0}{1}".format(self._current_host, filename),
+            '@type': self._file_config.get('type', filename),
+            '@tags': self._file_config.get('tags', filename),
+            '@fields': self._file_config.get('fields', filename),
+            '@timestamp': timestamp,
+            '@source_host': self._current_host,
+            '@source_path': filename,
+            '@message': line.strip(os.linesep),
+        })
 
 
 class TransportException(Exception):
