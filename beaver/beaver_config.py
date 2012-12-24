@@ -3,11 +3,6 @@ import os
 import socket
 import warnings
 
-try:
-    from collections import OrderedDict
-except ImportError:
-    from ordereddict import OrderedDict
-
 
 class BeaverConfig():
 
@@ -107,7 +102,6 @@ class BeaverConfig():
             else:
                 config['hostname'] = socket.gethostname()
 
-        config = OrderedDict(sorted(config.items()))
         return config
 
     def get(self, key, default=None):
