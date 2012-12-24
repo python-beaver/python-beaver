@@ -3,6 +3,13 @@ import signal
 import subprocess
 
 
+def create_ssh_tunnel(beaver_config):
+    if not beaver_config.use_ssh_tunnel():
+        return None
+
+    return BeaverSshTunnel(beaver_config)
+
+
 class BeaverSubprocess:
 
     def __init__(self, beaver_config):

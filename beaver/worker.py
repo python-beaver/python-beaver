@@ -5,7 +5,6 @@ import stat
 import sys
 import time
 
-from ssh_tunnel import BeaverSshTunnel
 from transport import TransportException
 from utils import eglob
 
@@ -249,13 +248,6 @@ def create_transport(beaver_config, file_config):
         raise Exception('Invalid transport {0}'.format(beaver_config.get('transport')))
 
     return transport
-
-
-def create_ssh_tunnel(beaver_config):
-    if not beaver_config.use_ssh_tunnel():
-        return None
-
-    return BeaverSshTunnel(beaver_config)
 
 
 def run_worker(beaver_config, file_config, logger, ssh_tunnel=None):

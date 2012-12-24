@@ -7,6 +7,7 @@ import time
 
 import beaver.file_config
 import beaver.beaver_config
+import beaver.ssh_tunnel
 import beaver.transport
 import beaver.utils
 import beaver.worker
@@ -76,7 +77,7 @@ beaver_config.check_for_deprecated_usage()
 
 failure_count = 0
 
-ssh_tunnel = beaver.worker.create_ssh_tunnel(beaver_config)
+ssh_tunnel = beaver.ssh_tunnel.create_ssh_tunnel(beaver_config)
 if ssh_tunnel is not None:
     logger.info("Proxying transport using through local ssh tunnel")
 
