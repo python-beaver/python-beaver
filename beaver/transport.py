@@ -1,23 +1,23 @@
 import os
 
 
-def create_transport(beaver_config, file_config):
+def create_transport(beaver_config, file_config, logger):
     """Creates and returns a transport object"""
     if beaver_config.get('transport') == 'rabbitmq':
         import beaver.rabbitmq_transport
-        transport = beaver.rabbitmq_transport.RabbitmqTransport(beaver_config, file_config)
+        transport = beaver.rabbitmq_transport.RabbitmqTransport(beaver_config, file_config, logger)
     elif beaver_config.get('transport') == 'redis':
         import beaver.redis_transport
-        transport = beaver.redis_transport.RedisTransport(beaver_config, file_config)
+        transport = beaver.redis_transport.RedisTransport(beaver_config, file_config, logger)
     elif beaver_config.get('transport') == 'stdout':
         import beaver.stdout_transport
-        transport = beaver.stdout_transport.StdoutTransport(beaver_config, file_config)
+        transport = beaver.stdout_transport.StdoutTransport(beaver_config, file_config, logger)
     elif beaver_config.get('transport') == 'udp':
         import beaver.udp_transport
-        transport = beaver.udp_transport.UdpTransport(beaver_config, file_config)
+        transport = beaver.udp_transport.UdpTransport(beaver_config, file_config, logger)
     elif beaver_config.get('transport') == 'zmq':
         import beaver.zmq_transport
-        transport = beaver.zmq_transport.ZmqTransport(beaver_config, file_config)
+        transport = beaver.zmq_transport.ZmqTransport(beaver_config, file_config, logger)
     else:
         raise Exception('Invalid transport {0}'.format(beaver_config.get('transport')))
 
@@ -26,7 +26,7 @@ def create_transport(beaver_config, file_config):
 
 class Transport(object):
 
-    def __init__(self, beaver_config, file_config):
+    def __init__(self, beaver_config, file_config, logger=None):
         """Generic transport configuration
         Will attach the file_config object, setup the
         current hostname, and ensure we have a proper

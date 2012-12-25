@@ -23,7 +23,7 @@ def run(args):
     while 1:
         try:
             logger.debug("Logging using the {0} transport".format(beaver_config.get('transport')))
-            transport = create_transport(beaver_config, file_config)
+            transport = create_transport(beaver_config, file_config, logger=logger)
 
             if REOPEN_FILES:
                 logger.debug("Detected non-linux platform. Files will be reopened for tailing")

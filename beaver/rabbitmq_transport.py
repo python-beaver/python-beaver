@@ -7,8 +7,8 @@ from beaver.transport import TransportException
 
 class RabbitmqTransport(beaver.transport.Transport):
 
-    def __init__(self, beaver_config, file_config):
-        super(RabbitmqTransport, self).__init__(beaver_config, file_config)
+    def __init__(self, beaver_config, file_config, logger=None):
+        super(RabbitmqTransport, self).__init__(beaver_config, file_config, logger=logger)
 
         self._rabbitmq_key = beaver_config.get('rabbitmq_key')
         self._rabbitmq_exchange = beaver_config.get('rabbitmq_exchange')

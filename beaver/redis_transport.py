@@ -8,8 +8,8 @@ import beaver.transport
 
 class RedisTransport(beaver.transport.Transport):
 
-    def __init__(self, beaver_config, file_config):
-        super(RedisTransport, self).__init__(beaver_config, file_config)
+    def __init__(self, beaver_config, file_config, logger=None):
+        super(RedisTransport, self).__init__(beaver_config, file_config, logger=logger)
 
         redis_url = beaver_config.get('redis_url')
         _url = urlparse.urlparse(redis_url, scheme="redis")
