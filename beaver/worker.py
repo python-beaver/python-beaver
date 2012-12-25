@@ -175,16 +175,13 @@ class Worker(object):
         try to read it for the last time in case the
         log rotator has written something in it.
         """
-        lines = None
         try:
-            lines = self.readfile(fid, file)
+            self.readfile(fid, file)
         except IOError:
             # Silently ignore any IOErrors -- file is gone
             pass
         self._logger.info("[{0}] - un-watching logfile {1}".format(fid, file.name))
         del self.files_map[fid]
-        if lines:
-            self.callback(file.name, lines)
 
     def watch(self, fname):
         """Opens a file for log tailing"""
