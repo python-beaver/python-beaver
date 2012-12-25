@@ -51,7 +51,7 @@ class BeaverConfig():
         }
 
         self._configfile = args.config
-        self._beaver_config = self._parse_beaver_config(args)
+        self._beaver_config = self._parse(args)
         for key in self._beaver_config:
             self._logger.debug("[CONFIG] '{0}' => '{1}'".format(key, self._beaver_config.get(key)))
 
@@ -119,7 +119,7 @@ class BeaverConfig():
             warnings.simplefilter('default')
             warnings.warn('ENV Variable support will be removed by version 20. Stop using: {0}'.format(", ".join(deprecated_env_var_usage)), DeprecationWarning)
 
-    def _parse_beaver_config(self, args):
+    def _parse(self, args):
         """Parses the configuration file for beaver configuration info
 
         Configuration priority:
