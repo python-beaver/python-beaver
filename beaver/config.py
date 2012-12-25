@@ -162,6 +162,10 @@ class BeaverConfig():
 
         config['fqdn'] = bool(config['fqdn'])
 
+        config['path'] = os.path.realpath(config['path'])
+        if not os.path.isdir(config['path']):
+            raise LookupError('{0} does not exist'.format(config['path']))
+
         if config.get('hostname') is None:
             if bool(config.get('fqdn')) == True:
                 config['hostname'] = socket.getfqdn()
