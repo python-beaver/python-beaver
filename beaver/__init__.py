@@ -7,7 +7,7 @@ from beaver.transport import TransportException, create_transport
 from beaver.utils import setup_custom_logger, version
 from beaver.worker import Worker, REOPEN_FILES
 
-__version__ = '14'
+__version__ = '15'
 
 
 def run(args):

@@ -21,7 +21,7 @@ git pull -q origin master
 
 echo -e "${YELLOW}--->${COLOR_OFF} Retrieving release versions"
 
-current_version=`cat beaver/__init__.py |grep version|sed 's/[^0-9]//g'`
+current_version=`cat beaver/__init__.py |grep '__version__ ='|sed 's/[^0-9]//g'`
 next_version=$(($current_version + 1));
 
 echo -e  "${YELLOW}   >${COLOR_OFF} ${MAGENTA}${current_version}${COLOR_OFF} -> ${MAGENTA}${next_version}${COLOR_OFF}"
