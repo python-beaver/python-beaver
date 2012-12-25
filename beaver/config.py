@@ -28,7 +28,6 @@ class BeaverConfig():
             'udp_host': os.environ.get('UDP_HOST', '127.0.0.1'),
             'udp_port': os.environ.get('UDP_PORT', '9999'),
             'zeromq_address': os.environ.get('ZEROMQ_ADDRESS', 'tcp://localhost:2120'),
-            'format': os.environ.get('BEAVER_FORMAT', 'json'),
 
             # exponential backoff
             'respawn_delay': '3',
@@ -44,10 +43,18 @@ class BeaverConfig():
             # the following can be passed via argparse
             'zeromq_bind': os.environ.get('BEAVER_MODE', 'bind' if os.environ.get('BIND', False) else 'connect'),
             'files': os.environ.get('BEAVER_FILES', ''),
-            'path': os.environ.get('BEAVER_PATH', '/var/log'),
-            'transport': os.environ.get('BEAVER_TRANSPORT', 'stdout'),  # this needs to be passed to the import class somehow
+            'format': os.environ.get('BEAVER_FORMAT', 'json'),
             'fqdn': '0',
             'hostname': '',
+            'path': os.environ.get('BEAVER_PATH', '/var/log'),
+            'transport': os.environ.get('BEAVER_TRANSPORT', 'stdout'),  # this needs to be passed to the import class somehow
+
+            # the following are parsed before the config file is parsed
+            # but may be useful at runtime
+            'config': '/dev/null',
+            'debug': '0',
+            'daemonize': '0',
+            'pid': '',
         }
 
         self._configfile = args.config
@@ -136,20 +143,18 @@ class BeaverConfig():
             self._logger.debug('[CONFIG] Reading beaver config from file')
             config = dict((x[0], x[1]) for x in _beaver_config.items('beaver'))
 
-        if args.files:
-            config['files'] = args.files
-        if args.format:
-            config['format'] = args.format
-        if args.fqdn:
-            config['fqdn'] = args.fqdn
+        transpose = ['config', 'debug', 'daemonize', 'files', 'format', 'fqdn', 'hostname', 'path', 'pid', 'transport']
+        namspace_dict = vars(args)
+        for key in transpose:
+            if namspace_dict[key] is None:
+                continue
+            if namspace_dict[key] == '':
+                continue
+            if key in namspace_dict:
+                config[key] = namspace_dict[key]
+
         if args.mode:
             config['zeromq_bind'] = args.mode
-        if args.path:
-            config['path'] = args.path
-        if args.transport:
-            config['transport'] = args.transport
-        if args.hostname:
-            config['hostname'] = args.hostname
 
         # HACK: Python 2.6 ConfigParser does not properly
         #       handle non-string values
@@ -157,10 +162,12 @@ class BeaverConfig():
             if config[k] == '':
                 config[k] = None
 
+        config['debug'] = bool(config['debug'])
+        config['daemonize'] = bool(config['daemonize'])
+        config['fqdn'] = bool(config['fqdn'])
+
         if config['files'] is not None:
             config['files'] = config['files'].split(',')
-
-        config['fqdn'] = bool(config['fqdn'])
 
         config['path'] = os.path.realpath(config['path'])
         if not os.path.isdir(config['path']):
