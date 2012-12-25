@@ -4,14 +4,13 @@ import time
 from beaver.config import FileConfig, BeaverConfig
 from beaver.ssh_tunnel import create_ssh_tunnel
 from beaver.transport import TransportException, create_transport
-from beaver.utils import parse_args, setup_custom_logger, version
+from beaver.utils import setup_custom_logger, version
 from beaver.worker import Worker, REOPEN_FILES
 
 __version__ = '14'
 
 
-def run():
-    args = parse_args()
+def run(args):
     version(args)
 
     logger = setup_custom_logger('beaver', args)
