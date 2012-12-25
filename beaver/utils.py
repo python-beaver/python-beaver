@@ -34,6 +34,7 @@ def parse_args():
     parser.add_argument('-F', '--format', help='format to use when sending to transport', default=None, dest='format', choices=['json', 'msgpack', 'string'])
     parser.add_argument('-H', '--hostname', help='manual hostname override for source_host', default=None, dest='hostname')
     parser.add_argument('-m', '--mode', help='bind or connect mode', dest='mode', default=None, choices=['bind', 'connect'])
+    parser.add_argument('-o', '--output', help='file to pipe output to (in addition to stdout)', default=None, dest='output')
     parser.add_argument('-p', '--path', help='path to log files', default=None, dest='path')
     parser.add_argument('-P', '--pid', help='path to pid file', default=None, dest='pid')
     parser.add_argument('-t', '--transport', help='log transport method', dest='transport', default=None, choices=['rabbitmq', 'redis', 'stdout', 'zmq', 'udp'])
@@ -43,21 +44,30 @@ def parse_args():
     return parser.parse_args()
 
 
-def setup_custom_logger(name, args=None, formatter=None):
-    logger = logging.getLogger()
+def setup_custom_logger(name, args=None, output=None, formatter=None):
+    logger = logging.getLogger(name)
+    logger.propagate = False
     if logger.handlers:
         logger.handlers = []
+
+    has_args = args is not None and type(args) == argparse.Namespace
+    is_debug = has_args and args.debug == True
 
     if not logger.handlers:
         if formatter is None:
             formatter = logging.Formatter('[%(asctime)s] %(levelname)-7s %(message)s')
 
         handler = logging.StreamHandler()
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
+        if output is None and has_args and args.daemonize:
+            output = args.output
 
-    has_args = args is not None and type(args) == argparse.Namespace
-    is_debug = has_args and args.debug == True
+        if output is not None:
+            handler = logging.FileHandler(output)
+
+        if formatter is not False:
+            handler.setFormatter(formatter)
+
+        logger.addHandler(handler)
 
     if is_debug:
         logger.setLevel(logging.DEBUG)

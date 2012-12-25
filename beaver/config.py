@@ -46,6 +46,7 @@ class BeaverConfig():
             'format': os.environ.get('BEAVER_FORMAT', 'json'),
             'fqdn': '0',
             'hostname': '',
+            'output': '',
             'path': os.environ.get('BEAVER_PATH', '/var/log'),
             'transport': os.environ.get('BEAVER_TRANSPORT', 'stdout'),  # this needs to be passed to the import class somehow
 
