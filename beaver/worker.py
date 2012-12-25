@@ -20,7 +20,7 @@ class Worker(object):
     >>> l.loop()
     """
 
-    def __init__(self, beaver_config, file_config, callback, logger=None, extensions=["log"], tail_lines=0):
+    def __init__(self, beaver_config, file_config, callback, logger=None, tail_lines=0):
         """Arguments:
 
         (FileConfig) @file_config:
@@ -46,7 +46,6 @@ class Worker(object):
         self.beaver_config = beaver_config
         self.file_config = file_config
         self.callback = callback
-        self.extensions = extensions
         self.files_map = {}
         self._logger = logger
 
@@ -81,11 +80,7 @@ class Worker(object):
         globbling support.
         """
         ls = os.listdir(self.folder)
-        if self.extensions:
-            return [x for x in ls if os.path.splitext(x)[1][1:] \
-                                           in self.extensions]
-        else:
-            return ls
+        return [x for x in ls if os.path.splitext(x)[1][1:] == "log"]
 
     def loop(self, interval=0.1, async=False):
         """Start the loop.
