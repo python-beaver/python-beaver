@@ -28,10 +28,10 @@ Usage
 
 usage::
 
-    beaver [-h] [-c CONFIG] [-d] [-f FILES [FILES ...]]
-              [--format {json,msgpack,string}] [--hostname HOSTNAME]
-              [-m {bind,connect}] [-p PATH]
-              [-t {rabbitmq,redis,stdout,zmq,udp}] [-v] [--fqdn]
+    beaver [-h] [-c CONFIG] [-d] [-D] [-f FILES [FILES ...]]
+           [-F {json,msgpack,string}] [-H HOSTNAME] [-m {bind,connect}]
+           [-o OUTPUT] [-p PATH] [-P PID]
+           [-t {rabbitmq,redis,stdout,zmq,udp}] [-v] [--fqdn]
 
 optional arguments::
 
@@ -39,15 +39,20 @@ optional arguments::
     -c CONFIG, --configfile CONFIG
                           ini config file path
     -d, --debug           enable debug mode
+    -D, --daemonize       daemonize in the background
     -f FILES [FILES ...], --files FILES [FILES ...]
                           space-separated filelist to watch, can include globs
                           (*.log). Overrides --path argument
-    --format {json,msgpack,string}
+    -F {json,msgpack,string}, --format {json,msgpack,string}
                           format to use when sending to transport
-    --hostname HOSTNAME   manual hostname override for source_host
+    -H HOSTNAME, --hostname HOSTNAME
+                          manual hostname override for source_host
     -m {bind,connect}, --mode {bind,connect}
                           bind or connect mode
+    -o OUTPUT, --output OUTPUT
+                          file to pipe output to (in addition to stdout)
     -p PATH, --path PATH  path to log files
+    -P PID, --pid PID     path to pid file
     -t {rabbitmq,redis,stdout,zmq,udp}, --transport {rabbitmq,redis,stdout,zmq,udp}
                           log transport method
     -v, --version         output version and quit
