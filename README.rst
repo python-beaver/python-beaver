@@ -28,8 +28,10 @@ Usage
 
 usage::
 
-    beaver [-h] [-m {bind,connect}] [-p PATH] [-f FILES [FILES ...]]
-              [-t {rabbitmq,redis,stdout,zmq,udp}] [-c CONFIG] [-d DEBUG] [--fqdn]
+    beaver [-h] [-c CONFIG] [-d] [-f FILES [FILES ...]]
+              [--format {json,msgpack,string}] [--hostname HOSTNAME]
+              [-m {bind,connect}] [-p PATH]
+              [-t {rabbitmq,redis,stdout,zmq,udp}] [-v] [--fqdn]
 
 optional arguments::
 
@@ -49,7 +51,7 @@ optional arguments::
     -t {rabbitmq,redis,stdout,zmq,udp}, --transport {rabbitmq,redis,stdout,zmq,udp}
                           log transport method
     -v, --version         output version and quit
-    --fqdn                use the machine's FQDN
+    --fqdn                use the machine's FQDN for source_host
 
 Background
 ==========
@@ -58,7 +60,7 @@ Beaver provides an lightweight method for shipping local log files to Logstash. 
 
 Events are sent in logstash's ``json_event`` format. Options can also be set as environment variables.
 
-NOTE: the redis transport uses a namespace of ``logstash:beaver`` by default.  You will need to update your logstash indexer to match this.
+NOTE: the redis transport uses a namespace of ``logstash:beaver`` by default.  You will need to update your logstash indexer to match this, or you may configure beaver to do otherwise.
 
 Configuration File Options
 --------------------------
@@ -270,10 +272,11 @@ Example 11: UDP transport::
 Todo
 ====
 
+* More documentation
 * Use python threading + subprocess in order to support usage of ``yield`` across all operating systems
-* Fix usage on non-linux platforms - file.readline() does not work as expected on OS X. See above for potential solution
+* ~~Fix usage on non-linux platforms - file.readline() does not work as expected on OS X. See above for potential solution~~
 * More transports
-* ~Ability to specify files, tags, and other metadata within a configuration file~
+* ~~Ability to specify files, tags, and other metadata within a configuration file~~
 
 Caveats
 =======
