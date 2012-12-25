@@ -1,14 +1,9 @@
 import errno
 import os
-import platform
 import stat
-import sys
 import time
 
-from transport import create_transport, TransportException
-from utils import eglob
-
-REOPEN_FILES = 'linux' not in platform.platform().lower()
+from beaver.utils import REOPEN_FILES, eglob
 
 
 class Worker(object):
@@ -33,6 +28,9 @@ class Worker(object):
 
         (BeaverConfig) @beaver_config:
             object containing global configuration
+
+        (Logger) @logger
+            object containing a python logger
 
         (callable) @callback:
             a function which is called every time a new line in a
@@ -68,7 +66,26 @@ class Worker(object):
                     self.callback(file.name, lines)
 
     def __del__(self):
+        """Closes all files"""
         self.close()
+
+    def close(self):
+        """Closes all currently open file pointers"""
+        for id, file in self.files_map.iteritems():
+            file.close()
+        self.files_map.clear()
+
+    def listdir(self):
+        """List directory and filter files by extension.
+        You may want to override this to add extra logic or
+        globbling support.
+        """
+        ls = os.listdir(self.folder)
+        if self.extensions:
+            return [x for x in ls if os.path.splitext(x)[1][1:] \
+                                           in self.extensions]
+        else:
+            return ls
 
     def loop(self, interval=0.1, async=False):
         """Start the loop.
@@ -86,50 +103,18 @@ class Worker(object):
                 return
             time.sleep(interval)
 
-    def listdir(self):
-        """List directory and filter files by extension.
-        You may want to override this to add extra logic or
-        globbling support.
-        """
-        ls = os.listdir(self.folder)
-        if self.extensions:
-            return [x for x in ls if os.path.splitext(x)[1][1:] \
-                                           in self.extensions]
-        else:
-            return ls
-
-    @staticmethod
-    def tail(fname, window):
-        """Read last N lines from file fname."""
-        try:
-            f = open(fname, 'r')
-        except IOError, err:
-            if err.errno == errno.ENOENT:
-                return []
-            else:
-                raise
-        else:
-            BUFSIZ = 1024
-            f.seek(0, os.SEEK_END)
-            fsize = f.tell()
-            block = -1
-            data = ""
-            exit = False
-            while not exit:
-                step = (block * BUFSIZ)
-                if abs(step) >= fsize:
-                    f.seek(0)
-                    exit = True
-                else:
-                    f.seek(step, os.SEEK_END)
-                data = f.read().strip()
-                if data.count('\n') >= window:
-                    break
-                else:
-                    block -= 1
-            return data.splitlines()[-window:]
+    def readfile(self, fid, file):
+        """Read lines from a file and performs a callback against them"""
+        lines = file.readlines()
+        if lines:
+            self.callback(file.name, lines)
 
     def update_files(self):
+        """Ensures all files are properly loaded.
+        Detects new files, file removals, file rotation, and truncation.
+        On non-linux platforms, it will also manually reload the file for tailing.
+        Note that this hack is necessary because EOF is cached on BSD systems.
+        """
         ls = []
         files = []
         if len(self.beaver_config.get('globs')) > 0:
@@ -164,12 +149,10 @@ class Worker(object):
                     raise
             else:
                 if fid != self.get_file_id(st):
-                    # same name but different file (rotation); reload it.
                     self._logger.info("[{0}] - file rotated {1}".format(fid, file.name))
                     self.unwatch(file, fid)
                     self.watch(file.name)
                 elif file.tell() > st.st_size:
-                    # file truncated; reload it
                     self._logger.info("[{0}] - file truncated {1}".format(fid, file.name))
                     self.unwatch(file, fid)
                     self.watch(file.name)
@@ -187,26 +170,11 @@ class Worker(object):
             if fid not in self.files_map:
                 self.watch(fname)
 
-    def readfile(self, fid, file):
-        lines = file.readlines()
-        if lines:
-            self.callback(file.name, lines)
-
-    def watch(self, fname):
-        try:
-            file = open(fname, "r")
-            fid = self.get_file_id(os.stat(fname))
-        except EnvironmentError, err:
-            if err.errno != errno.ENOENT:
-                raise
-        else:
-            self._logger.info("[{0}] - watching logfile {1}".format(fid, fname))
-            self.files_map[fid] = file
-
     def unwatch(self, file, fid):
-        # file no longer exists; if it has been renamed
-        # try to read it for the last time in case the
-        # log rotator has written something in it.
+        """file no longer exists; if it has been renamed
+        try to read it for the last time in case the
+        log rotator has written something in it.
+        """
         lines = None
         try:
             lines = self.readfile(fid, file)
@@ -218,47 +186,49 @@ class Worker(object):
         if lines:
             self.callback(file.name, lines)
 
+    def watch(self, fname):
+        """Opens a file for log tailing"""
+        try:
+            file = open(fname, "r")
+            fid = self.get_file_id(os.stat(fname))
+        except EnvironmentError, err:
+            if err.errno != errno.ENOENT:
+                raise
+        else:
+            self._logger.info("[{0}] - watching logfile {1}".format(fid, fname))
+            self.files_map[fid] = file
+
     @staticmethod
     def get_file_id(st):
         return "%xg%x" % (st.st_dev, st.st_ino)
 
-    def close(self):
-        for id, file in self.files_map.iteritems():
-            file.close()
-        self.files_map.clear()
-
-
-def run_worker(beaver_config, file_config, logger=None):
-    logger.info("Logging using the {0} transport".format(beaver_config.get('transport')))
-    transport = create_transport(beaver_config, file_config)
-
-    if REOPEN_FILES:
-        logger.info("Detected non-linux platform. Files will be reopened for tailing")
-
-    try:
-        logger.info("Starting worker...")
-        l = Worker(beaver_config, file_config, transport.callback, logger)
-        logger.info("Working...")
-        l.loop()
-    except TransportException, e:
-        raise TransportException(e.message)
-    except KeyboardInterrupt:
-        logger.info("Shutting down. Please wait.")
-        transport.interrupt()
-        logger.info("Shutdown complete.")
-        sys.exit(0)
-    except Exception:
-        import traceback
-        exception_list = traceback.format_stack()
-        exception_list = exception_list[:-2]
-        exception_list.extend(traceback.format_tb(sys.exc_info()[2]))
-        exception_list.extend(traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1]))
-        exception_str = "Traceback (most recent call last):\n"
-        exception_str += "".join(exception_list)
-        exception_str = exception_str[:-1]
-
-        logger.info("Unhandled Exception:")
-        logger.info(exception_str)
-
-        transport.unhandled()
-        sys.exit(1)
+    @staticmethod
+    def tail(fname, window):
+        """Read last N lines from file fname."""
+        try:
+            f = open(fname, 'r')
+        except IOError, err:
+            if err.errno == errno.ENOENT:
+                return []
+            else:
+                raise
+        else:
+            BUFSIZ = 1024
+            f.seek(0, os.SEEK_END)
+            fsize = f.tell()
+            block = -1
+            data = ""
+            exit = False
+            while not exit:
+                step = (block * BUFSIZ)
+                if abs(step) >= fsize:
+                    f.seek(0)
+                    exit = True
+                else:
+                    f.seek(step, os.SEEK_END)
+                data = f.read().strip()
+                if data.count('\n') >= window:
+                    break
+                else:
+                    block -= 1
+            return data.splitlines()[-window:]
