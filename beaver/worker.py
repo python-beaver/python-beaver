@@ -37,32 +37,28 @@ class Worker(object):
             file being watched is found;
             this is called with "filename" and "lines" arguments.
 
-        (list) @extensions:
-            only watch files with these extensions
-
         (int) @tail_lines:
             read last N lines from files being watched before starting
         """
-        self.beaver_config = beaver_config
-        self.file_config = file_config
-        self.callback = callback
-        self.files_map = {}
+        self._beaver_config = beaver_config
+        self._callback = callback
+        self._file_config = file_config
+        self._file_map = {}
+        self._folder = self._beaver_config.get('path')
         self._logger = logger
 
-        if self.beaver_config.get('path') is not None:
-            self.folder = os.path.realpath(self.beaver_config.get('path'))
-            assert os.path.isdir(self.folder), "%s does not exists" \
-                                            % self.folder
-        assert callable(callback)
+        if not callable(self._callback):
+            raise RuntimeError("Callback for worker is not callable")
+
         self.update_files()
         # The first time we run the script we move all file markers at EOF.
         # In case of files created afterwards we don't do this.
-        for id, file in self.files_map.iteritems():
+        for id, file in self._file_map.iteritems():
             file.seek(os.path.getsize(file.name))  # EOF
             if tail_lines:
                 lines = self.tail(file.name, tail_lines)
                 if lines:
-                    self.callback(file.name, lines)
+                    self._callback(file.name, lines)
 
     def __del__(self):
         """Closes all files"""
@@ -70,16 +66,16 @@ class Worker(object):
 
     def close(self):
         """Closes all currently open file pointers"""
-        for id, file in self.files_map.iteritems():
+        for id, file in self._file_map.iteritems():
             file.close()
-        self.files_map.clear()
+        self._file_map.clear()
 
     def listdir(self):
         """List directory and filter files by extension.
         You may want to override this to add extra logic or
         globbling support.
         """
-        ls = os.listdir(self.folder)
+        ls = os.listdir(self._folder)
         return [x for x in ls if os.path.splitext(x)[1][1:] == "log"]
 
     def loop(self, interval=0.1, async=False):
@@ -88,7 +84,7 @@ class Worker(object):
         """
         while 1:
             self.update_files()
-            for fid, file in list(self.files_map.iteritems()):
+            for fid, file in list(self._file_map.iteritems()):
                 try:
                     self.readfile(fid, file)
                 except IOError, e:
@@ -102,7 +98,7 @@ class Worker(object):
         """Read lines from a file and performs a callback against them"""
         lines = file.readlines()
         if lines:
-            self.callback(file.name, lines)
+            self._callback(file.name, lines)
 
     def update_files(self):
         """Ensures all files are properly loaded.
@@ -112,14 +108,14 @@ class Worker(object):
         """
         ls = []
         files = []
-        if len(self.beaver_config.get('globs')) > 0:
-            for name in self.beaver_config.get('globs'):
+        if len(self._beaver_config.get('globs')) > 0:
+            for name in self._beaver_config.get('globs'):
                 globbed = [os.path.realpath(filename) for filename in eglob(name)]
                 files.extend(globbed)
-                self.file_config.addglob(name, globbed)
+                self._file_config.addglob(name, globbed)
         else:
             for name in self.listdir():
-                files.append(os.path.realpath(os.path.join(self.folder, name)))
+                files.append(os.path.realpath(os.path.join(self._folder, name)))
 
         for absname in files:
             try:
@@ -134,7 +130,7 @@ class Worker(object):
                 ls.append((fid, absname))
 
         # check existent files
-        for fid, file in list(self.files_map.iteritems()):
+        for fid, file in list(self._file_map.iteritems()):
             try:
                 st = os.stat(file.name)
             except EnvironmentError, err:
@@ -158,11 +154,11 @@ class Worker(object):
                     file.close()
                     file = open(fname, "r")
                     file.seek(position)
-                    self.files_map[fid] = file
+                    self._file_map[fid] = file
 
         # add new ones
         for fid, fname in ls:
-            if fid not in self.files_map:
+            if fid not in self._file_map:
                 self.watch(fname)
 
     def unwatch(self, file, fid):
@@ -176,7 +172,7 @@ class Worker(object):
             # Silently ignore any IOErrors -- file is gone
             pass
         self._logger.info("[{0}] - un-watching logfile {1}".format(fid, file.name))
-        del self.files_map[fid]
+        del self._file_map[fid]
 
     def watch(self, fname):
         """Opens a file for log tailing"""
@@ -188,7 +184,7 @@ class Worker(object):
                 raise
         else:
             self._logger.info("[{0}] - watching logfile {1}".format(fid, fname))
-            self.files_map[fid] = file
+            self._file_map[fid] = file
 
     @staticmethod
     def get_file_id(st):
