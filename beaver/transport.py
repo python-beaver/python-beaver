@@ -1,4 +1,4 @@
-import os
+from beaver.event import Event
 
 
 def create_transport(beaver_config, file_config):
@@ -35,28 +35,42 @@ class Transport(object):
         self._file_config = file_config
         self._current_host = beaver_config.get('hostname')
 
-        if beaver_config.get('format') == 'msgpack':
-            import msgpack
-            packer = msgpack.Packer()
-            self._formatter = packer.pack
-        elif beaver_config.get('format') == 'json':
-            # priority: ujson > simplejson > jsonlib2 > json
-            priority = ['ujson', 'simplejson', 'jsonlib2', 'json']
-            for mod in priority:
-                try:
-                    json = __import__(mod)
-                    self._formatter = json.dumps
-                except ImportError:
-                    pass
-                else:
-                    break
+        if beaver_config.get('format') in ['json', 'msgpack']:
+            if beaver_config.get('format') == 'msgpack':
+                import msgpack
+                packer = msgpack.Packer()
+
+                def msgpack_formatter(event):
+                    return packer.pack(event.to_dict())
+
+                self._formatter = msgpack_formatter
+            elif beaver_config.get('format') == 'json':
+                # priority: ujson > simplejson > jsonlib2 > json
+                priority = ['ujson', 'simplejson', 'jsonlib2', 'json']
+                json = None
+                for mod in priority:
+                    try:
+                        json = __import__(mod)
+                    except ImportError:
+                        json = None
+                        pass
+                    else:
+                        break
+
+                def json_formatter(event):
+                    return json.dumps(event.to_dict())
+
+                self._formatter = json_formatter
+
         elif beaver_config.get('format') == 'string':
-            def string_formatter(self, data):
-                return "[{0}] [{1}] {2}".format(data['@source_host'], data['@timestamp'], data['@message'])
+            def string_formatter(event):
+                return event
+
             self._formatter = string_formatter
         else:
-            def null_formatter(self, data):
-                return data['@message']
+            def null_formatter(event):
+                return event.get('@message')
+
             self._formatter = null_formatter
 
     def callback(self, filename, lines):
@@ -77,16 +91,7 @@ class Transport(object):
 
     def format(self, filename, timestamp, line):
         """Returns a formatted log line"""
-        return self._formatter({
-            '@source': "file://{0}{1}".format(self._current_host, filename),
-            '@type': self._file_config.get('type', filename),
-            '@tags': self._file_config.get('tags', filename),
-            '@fields': self._file_config.get('fields', filename),
-            '@timestamp': timestamp,
-            '@source_host': self._current_host,
-            '@source_path': filename,
-            '@message': line.strip(os.linesep),
-        })
+        return self._formatter(Event(filename, timestamp, line, self._current_host, self._file_config))
 
 
 class TransportException(Exception):
