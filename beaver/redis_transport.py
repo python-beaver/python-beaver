@@ -27,7 +27,7 @@ class RedisTransport(beaver.transport.Transport):
             time.sleep(0.1)
             wait += 1
             try:
-                self.redis.ping()
+                self._redis.ping()
                 break
             except redis.exceptions.ConnectionError:
                 pass
