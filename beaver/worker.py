@@ -20,7 +20,7 @@ class Worker(object):
     >>> l.loop()
     """
 
-    def __init__(self, beaver_config, file_config, callback, logger=None, tail_lines=0):
+    def __init__(self, beaver_config, file_config, queue_consumer_function, callback, logger=None, tail_lines=0):
         """Arguments:
 
         (FileConfig) @file_config:
@@ -42,10 +42,12 @@ class Worker(object):
         """
         self._beaver_config = beaver_config
         self._callback = callback
+        self._create_queue_consumer = queue_consumer_function
         self._file_config = file_config
         self._file_map = {}
         self._folder = self._beaver_config.get('path')
         self._logger = logger
+        self._proc = None
         self._update_time = None
 
         if not callable(self._callback):
@@ -59,7 +61,7 @@ class Worker(object):
             if tail_lines:
                 lines = self.tail(file.name, tail_lines)
                 if lines:
-                    self._callback(file.name, lines)
+                    self._callback(("callback", (file.name, lines)))
 
     def __del__(self):
         """Closes all files"""
@@ -84,6 +86,9 @@ class Worker(object):
         If async is True make one loop then return.
         """
         while 1:
+            if not (self._proc and self._proc.is_alive()):
+                self._proc = self._create_queue_consumer()
+
             if int(time.time()) - self._update_time > self._beaver_config.get('update_file_mapping_time'):
                 self.update_files()
 
@@ -101,7 +106,7 @@ class Worker(object):
         """Read lines from a file and performs a callback against them"""
         lines = file.readlines()
         if lines:
-            self._callback(file.name, lines)
+            self._callback(("callback", (file.name, lines)))
 
     def update_files(self):
         """Ensures all files are properly loaded.
