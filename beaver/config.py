@@ -34,6 +34,9 @@ class BeaverConfig():
             'respawn_delay': '3',
             'max_failure': '7',
 
+            # time in seconds before updating the file mapping
+            'update_file_mapping_time': '10',
+
             # ssh tunnel support
             'ssh_key_file': '',
             'ssh_tunnel': '',
@@ -167,6 +170,8 @@ class BeaverConfig():
         config['debug'] = bool(config['debug'])
         config['daemonize'] = bool(config['daemonize'])
         config['fqdn'] = bool(config['fqdn'])
+
+        config['update_file_mapping_time'] = int(config['update_file_mapping_time'])
 
         if config['files'] is not None:
             config['files'] = config['files'].split(',')

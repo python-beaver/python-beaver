@@ -46,6 +46,7 @@ class Worker(object):
         self._file_map = {}
         self._folder = self._beaver_config.get('path')
         self._logger = logger
+        self._update_time = None
 
         if not callable(self._callback):
             raise RuntimeError("Callback for worker is not callable")
@@ -83,7 +84,9 @@ class Worker(object):
         If async is True make one loop then return.
         """
         while 1:
-            self.update_files()
+            if int(time.time()) - self._update_time > self._beaver_config.get('update_file_mapping_time'):
+                self.update_files()
+
             for fid, file in list(self._file_map.iteritems()):
                 try:
                     self.readfile(fid, file)
@@ -106,6 +109,8 @@ class Worker(object):
         On non-linux platforms, it will also manually reload the file for tailing.
         Note that this hack is necessary because EOF is cached on BSD systems.
         """
+        self._update_time = int(time.time())
+
         ls = []
         files = []
         if len(self._beaver_config.get('globs')) > 0:
