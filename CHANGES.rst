@@ -1,10 +1,70 @@
 Changelog
 =========
 
-15 (2012-12-25)
+16 (2012-12-27)
 ---------------
 
-- Fixed release script. [Jose Diaz-Gonzalez]
+- Specify a max queue size of 100 to limit overrunning memory. [Jose
+  Diaz-Gonzalez]
+
+- Use multiprocessing for handling larger queue sizes. [Jose Diaz-
+  Gonzalez]
+
+  Previously there were issues where files that were updated frequently
+  such as varnish or server logs
+  would overwhelm the naive implementation of file.readlines() within
+  Beaver. This would cause Beaver to slowly read larger and larger
+  portions of a file before processing any of the lines, eventually
+  causing Beaver to take forever to process log lines.
+  
+  This patch adds the ability to use an internal work queue for log
+  lines. Whenever file.readlines() is called, the lines are placed in
+  the queue, which is shared with a child process. The child process
+  creates its own transport, allowing us to potentially create a Process
+  Pool in the future to handle a larger queue size.
+  
+  Note that the limitation of file.readlines() reading in too many lines
+  is still in existence, and may continue to cause issues for certain
+  log files.
+
+- Add default redis_password to BeaverConfig class. [Jose Diaz-Gonzalez]
+
+- Fix missing underscore causing transport to break. [Norman Joyner]
+
+- Implement redis auth support. [Norman Joyner]
+
+- Add beaver init script for daemonization mode. [Jose Diaz-Gonzalez]
+
+- Use python logger when using StdoutTransport. [Jose Diaz-Gonzalez]
+
+- Add short arg flags for hostname and format. [Jose Diaz-Gonzalez]
+
+- Add the ability to daemonize. Closes #79. [Jose Diaz-Gonzalez]
+
+- Pass around a logger instance to all transports. [Jose Diaz-Gonzalez]
+
+- Revert "Added a lightweight Event class" [Jose Diaz-Gonzalez]
+
+  After deliberation, beaver is meant to be "light
+  weight". Lets leave
+  the heavy
+  hitting to the big
+  boys.
+  
+  This reverts commit 1619d33ef4803c3fe910cf4ff197d0dd0039d2eb.
+
+- Added a lightweight Event class. [Jose Diaz-Gonzalez]
+
+  This class's sole responsibility will be the processing of a given
+  line as an event.
+  It's future goal will be to act as a lightweight implementation of the
+  filter system within Logstash
+
+- Remove argparse requirement for python 2.7 and above. [Jose Diaz-
+  Gonzalez]
+
+15 (2012-12-25)
+---------------
 
 - Pull argument parsing out of beaver __init__.py. [Jose Diaz-Gonzalez]
 
@@ -29,17 +89,17 @@ Changelog
 - General code reorganization. [Jose Diaz-Gonzalez]
 
   Move both BeaverConfig and FileConfig into a single class
-
+  
   Consolidated run_worker code with code in beaver binary file. This
   will create a clearer path for Exception handling, as it is now the
   responsibility of the calling class, allowing us to remove duplicative
   exception handling code.
-
+  
   Added docstrings to many fuctions and methods
-
+  
   Moved extra configuration and setup code to beaver.utils module. In
   many cases, code was added hastily before.
-
+  
   Made many logger calls debug as opposed to info. The info level should
   be generally reserved for instances where files are watched,
   unwatched, or some change in the file state has occurred.
@@ -68,7 +128,7 @@ Changelog
 
   We now use a `_formatter` property on the Transport class which
   will properly process the message for output as the user expects.
-
+  
   In the case of string output, we define a custom formatter using an
   anonymous function and specify that as the formatter.
 
@@ -111,7 +171,7 @@ Changelog
 
   This code should allow us to create an ssh tunnel between two distinct
   servers for the purposes of sending and receiving data.
-
+  
   This is useful in certain cases where you would otherwise need to
   whitelist in your Firewall or iptables setup, such as when running in
   two different regions on AWS.
@@ -133,10 +193,10 @@ Changelog
   `file.read()` caches the EOF, therefore causing `readlines()` to only
   work once. This happens to also fail miserably when you are seeking to
   the end before calling readlines.
-
+  
   This fix solves the issue by constantly re
   reading the files changed.
-
+  
   Note that this also causes debug mode to be very noisy on OS X. We all
   have to make sacrifices...
 
@@ -145,7 +205,7 @@ Changelog
   This shifts configuration management into the BeaverConfig class.
   Note that we currently throw a warning if you are using environment
   variables.
-
+  
   Refs #72
   Closes #60
 
@@ -162,19 +222,19 @@ Changelog
   For my setup I need to have the fqdn used at all times since my
   hostnames are the same but the environment (among other things) is
   found in the rest of the FQDN.
-
+  
   Since just changing socket.gethostname to socket.getfqdn has lots of
   potential for breakage, and socket.gethostname doesn't always return
   an
   FQDN, it's now an option to explicitly always use the fqdn.
-
+  
   Fixes #68
 
 - Check for log file truncation fixes #55. [Jeremy Kitchen]
 
   This adds a simple check for log file truncation and resets the watch
   when detected.
-
+  
   There do exist 2 race conditions here:
   1. Any log data written prior to truncation which beaver has not yet
   read and processed is lost. Nothing we can do about that.
@@ -183,7 +243,7 @@ Changelog
   the original file during the sleep interval, beaver won't detect
   this. After some experimentation, this behavior also exists in GNU
   tail, so I'm going to call this a "don't do that then" bug :)
-
+  
   Additionally, the files beaver will most likely be called upon to
   watch which may be truncated are generally going to be large enough
   and slow
@@ -363,22 +423,22 @@ Changelog
 - Add support for type reading from INI config file. [Alexander Fortin]
 
   Add support for symlinks in config file
-
+  
   Add support for file globbing in config file
-
+  
   Add support for tags
-
-
+  
+  
   a little bit of refactoring, move type and tags check down into
   transport class
-
+  
   create config object (reading /dev/null) even if no config file
   has been given via cli
-
+  
   Add documentation for INI file to readme
-
+  
   Remove unused json library
-
+  
   Conflicts:
   README.rst
 
@@ -397,7 +457,7 @@ Changelog
 - Refactor transports. [Jose Diaz-Gonzalez]
 
   Fix the json import to use the fastest json module available
-
+  
   Move formatting into Transport class
 
 - Attempt to fix defaults from env variables. [Jose Diaz-Gonzalez]
