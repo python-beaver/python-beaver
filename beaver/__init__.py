@@ -17,7 +17,7 @@ def run(args):
     beaver_config = BeaverConfig(args, file_config=file_config, logger=logger)
     ssh_tunnel = create_ssh_tunnel(beaver_config)
 
-    queue = multiprocessing.Queue()
+    queue = multiprocessing.Queue(beaver_config.get('max_queue_size'))
 
     def create_queue_consumer():
         process_args = (queue, beaver_config, file_config, logger)

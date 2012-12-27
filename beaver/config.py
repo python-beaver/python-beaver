@@ -34,6 +34,9 @@ class BeaverConfig():
             'respawn_delay': '3',
             'max_failure': '7',
 
+            # interprocess queue max size before puts block
+            'max_queue_size': '100',
+
             # time in seconds before updating the file mapping
             'update_file_mapping_time': '10',
 
@@ -171,6 +174,7 @@ class BeaverConfig():
         config['daemonize'] = bool(config['daemonize'])
         config['fqdn'] = bool(config['fqdn'])
 
+        config['max_queue_size'] = int(config['max_queue_size'])
         config['update_file_mapping_time'] = int(config['update_file_mapping_time'])
 
         if config['files'] is not None:
