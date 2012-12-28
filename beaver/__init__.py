@@ -7,7 +7,7 @@ from beaver.ssh_tunnel import create_ssh_tunnel
 from beaver.utils import setup_custom_logger
 from beaver.worker import Worker, REOPEN_FILES
 
-__version__ = '16'
+__version__ = '17'
 
 
 def run(args):

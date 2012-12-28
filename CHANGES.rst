@@ -1,6 +1,11 @@
 Changelog
 =========
 
+17 (2012-12-28)
+---------------
+
+- Added missing python-daemon requirement. [Jose Diaz-Gonzalez]
+
 16 (2012-12-27)
 ---------------
 
