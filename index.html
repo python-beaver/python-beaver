@@ -47,15 +47,17 @@
 
 <p>From PyPI::</p>
 
-<pre><code>pip install beaver==14
+<pre><code>pip install beaver==16
 </code></pre>
 
 <h1>Usage</h1>
 
 <p>usage::</p>
 
-<pre><code>beaver [-h] [-m {bind,connect}] [-p PATH] [-f FILES [FILES ...]]
-          [-t {rabbitmq,redis,stdout,zmq,udp}] [-c CONFIG] [-d DEBUG] [--fqdn]
+<pre><code>beaver [-h] [-c CONFIG] [-d] [-D] [-f FILES [FILES ...]]
+       [-F {json,msgpack,string}] [-H HOSTNAME] [-m {bind,connect}]
+       [-o OUTPUT] [-p PATH] [-P PID]
+       [-t {rabbitmq,redis,stdout,zmq,udp}] [-v] [--fqdn]
 </code></pre>
 
 <p>optional arguments::</p>
@@ -64,19 +66,24 @@
 -c CONFIG, --configfile CONFIG
                       ini config file path
 -d, --debug           enable debug mode
+-D, --daemonize       daemonize in the background
 -f FILES [FILES ...], --files FILES [FILES ...]
                       space-separated filelist to watch, can include globs
                       (*.log). Overrides --path argument
---format {json,msgpack,string}
+-F {json,msgpack,string}, --format {json,msgpack,string}
                       format to use when sending to transport
---hostname HOSTNAME   manual hostname override for source_host
+-H HOSTNAME, --hostname HOSTNAME
+                      manual hostname override for source_host
 -m {bind,connect}, --mode {bind,connect}
                       bind or connect mode
+-o OUTPUT, --output OUTPUT
+                      file to pipe output to (in addition to stdout)
 -p PATH, --path PATH  path to log files
+-P PID, --pid PID     path to pid file
 -t {rabbitmq,redis,stdout,zmq,udp}, --transport {rabbitmq,redis,stdout,zmq,udp}
                       log transport method
 -v, --version         output version and quit
---fqdn                use the machine's FQDN
+--fqdn                use the machine's FQDN for source_host
 </code></pre>
 
 <h1>Background</h1>
@@ -85,7 +92,7 @@
 
 <p>Events are sent in logstash's <code>json_event</code> format. Options can also be set as environment variables.</p>
 
-<p>NOTE: the redis transport uses a namespace of <code>logstash:beaver</code> by default.  You will need to update your logstash indexer to match this.</p>
+<p>NOTE: the redis transport uses a namespace of <code>logstash:beaver</code> by default.  You will need to update your logstash indexer to match this, or you may configure beaver to do otherwise.</p>
 
 <h2>Configuration File Options</h2>
 
@@ -308,10 +315,11 @@ beaver -c /etc/beaver.conf -t udp
 <h1>Todo</h1>
 
 <ul>
+<li>More documentation</li>
 <li>Use python threading + subprocess in order to support usage of <code>yield</code> across all operating systems</li>
-<li>Fix usage on non-linux platforms - file.readline() does not work as expected on OS X. See above for potential solution</li>
+<li><del>Fix usage on non-linux platforms - file.readline() does not work as expected on OS X. See above for potential solution</del></li>
 <li>More transports</li>
-<li>~Ability to specify files, tags, and other metadata within a configuration file~</li>
+<li><del>Ability to specify files, tags, and other metadata within a configuration file</del></li>
 </ul><h1>Caveats</h1>
 
 <p>When using <code>copytruncate</code> style log rotation, two race conditions can occur:</p>
