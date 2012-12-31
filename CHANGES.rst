@@ -1,8 +1,19 @@
 Changelog
 =========
 
-17 (2012-12-28)
+18 (2012-12-31)
 ---------------
+
+- Add timing debug information to the worker loop. [Jose Diaz-Gonzalez]
+
+- Use redis pipelining when sending events. [Jose Diaz-Gonzalez]
+
+- Formatting. [Jose Diaz-Gonzalez]
+
+- Do not output debug statement for file_config.get call. [Jose Diaz-
+  Gonzalez]
+
+- Pass in logger object to create_ssh_tunnel() [Jose Diaz-Gonzalez]
 
 - Added missing python-daemon requirement. [Jose Diaz-Gonzalez]
 
