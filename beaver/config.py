@@ -252,7 +252,6 @@ class FileConfig():
         self._globbed = []
 
     def get(self, field, filename):
-        self._logger.debug("Retrieving {0} for {1}".format(field, filename))
         return self._files.get(os.path.realpath(filename), self._default_config)[field]
 
     def addglob(self, globname, globbed):
