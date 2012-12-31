@@ -21,6 +21,7 @@ class ZmqTransport(beaver.transport.Transport):
 
     def callback(self, filename, lines):
         timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
         for line in lines:
             self._pub.send(self.format(filename, timestamp, line))
 

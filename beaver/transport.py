@@ -32,8 +32,8 @@ class Transport(object):
         current hostname, and ensure we have a proper
         formatter for the current transport
         """
-        self._file_config = file_config
         self._current_host = beaver_config.get('hostname')
+        self._file_config = file_config
 
         if beaver_config.get('format') == 'msgpack':
             import msgpack
