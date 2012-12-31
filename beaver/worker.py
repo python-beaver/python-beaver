@@ -86,6 +86,7 @@ class Worker(object):
         If async is True make one loop then return.
         """
         while 1:
+            t = time.time()
             if not (self._proc and self._proc.is_alive()):
                 self._proc = self._create_queue_consumer()
 
@@ -100,6 +101,8 @@ class Worker(object):
                         self.unwatch(file, fid)
             if async:
                 return
+
+            self._logger.debug("Iteration took {0}".format(time.time() - t))
             time.sleep(interval)
 
     def readfile(self, fid, file):
