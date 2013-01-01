@@ -177,7 +177,7 @@ class BeaverConfig():
         config['max_queue_size'] = int(config['max_queue_size'])
         config['update_file_mapping_time'] = int(config['update_file_mapping_time'])
 
-        if config['files'] is not None:
+        if config['files'] is not None and type(config['files']) == str:
             config['files'] = config['files'].split(',')
 
         config['path'] = os.path.realpath(config['path'])
