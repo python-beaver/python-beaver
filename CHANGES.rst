@@ -1,6 +1,11 @@
 Changelog
 =========
 
+19 (2012-12-31)
+---------------
+
+- Fix issue with supporting command line args. [Jose Diaz-Gonzalez]
+
 18 (2012-12-31)
 ---------------
 
