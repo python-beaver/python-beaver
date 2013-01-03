@@ -63,6 +63,8 @@ echo -e "${YELLOW}--->${COLOR_OFF} Pushing release and tags to github"
 git push -q origin master && git push -q --tags
 
 echo -e "${YELLOW}--->${COLOR_OFF} Creating python release"
+cp README.rst README
 python setup.py sdist upload > /dev/null
+rm README
 
 echo -e "\n${CYAN}RELEASED VERSION ${next_version}!${COLOR_OFF}\n"
