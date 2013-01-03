@@ -1,7 +1,36 @@
 Changelog
 =========
 
-19 (2012-12-31)
+20 (2013-01-03)
+---------------
+
+- Copy the readme over to avoid pypi packaging warnings. [Jose Diaz-
+  Gonzalez]
+
+- Implement fully recursive file globing. [Brian L. Troutwine]
+
+  Python's base glob.iglob does not operate as if globstar were in
+  effect. To
+  explain, let's say I have an erlang application with lager logs to
+  
+  /var/log/erl_app/lags.log
+  /var/log/erl_app/console/YEAR_MONTH_DAY.log
+  
+  and webmachine logs to
+  
+  /var/log/erl_app/webmachine/access/YEAR_MONTH_DAY.log
+  
+  Prior to this commit, when configured with the path
+  `/var/log/**/*.log` all
+  webmachine logs would be ignored by beaver. This is no longer the
+  case, to an
+  arbitrary depth.
+  
+  Signed
+  off
+  by: Brian L. Troutwine <brian@troutwine.us>
+
+19 (2013-01-01)
 ---------------
 
 - Fix issue with supporting command line args. [Jose Diaz-Gonzalez]

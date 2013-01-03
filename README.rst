@@ -21,7 +21,7 @@ From Github::
 
 From PyPI::
 
-    pip install beaver==19
+    pip install beaver==20
 
 Usage
 =====
