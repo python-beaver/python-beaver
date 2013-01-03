@@ -7,7 +7,7 @@ python daemon that munches on logs and sends their contents to logstash
 Requirements
 ============
 
-* Python 2.7 (untested on other versions)
+* Python 2.6+
 * Optional zeromq support: install libzmq (``brew install zmq`` or ``apt-get install libzmq-dev``) and pyzmq (``pip install pyzmq==2.1.11``)
 
 Installation
