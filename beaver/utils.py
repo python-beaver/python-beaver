@@ -1,5 +1,5 @@
 import argparse
-import glob
+import glob2
 import itertools
 import logging
 import platform
@@ -95,7 +95,7 @@ def eglob(path):
     """Like glob.glob, but supports "/path/**/{a,b,c}.txt" lookup"""
     fi = itertools.chain.from_iterable
     paths = expand_paths(path)
-    return list(fi(glob.iglob(d) for d in paths))
+    return list(fi(glob2.iglob(d) for d in paths))
 
 
 def expand_paths(path):
