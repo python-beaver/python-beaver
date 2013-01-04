@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 import daemon
 
-from beaver import run
-import beaver.pidfile
+from beaver.dispatcher import run
+from beaver.pidfile import PidFile
 from beaver.utils import parse_args, version
 
 args = parse_args()
 version(args)
 
 if args.daemonize:
-    with daemon.DaemonContext(pidfile=beaver.pidfile.PidFile(args.pid),):
+    with daemon.DaemonContext(pidfile=PidFile(args.pid),):
         run(args)
 else:
     run(args)
