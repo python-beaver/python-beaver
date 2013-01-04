@@ -1,6 +1,14 @@
 Changelog
 =========
 
+21 (2013-01-03)
+---------------
+
+- Move runner into a dispatcher class to solve installation issues.
+  [Jose Diaz-Gonzalez]
+
+- Added note for Python 2.6+ support. [Jose Diaz-Gonzalez]
+
 20 (2013-01-03)
 ---------------
 
