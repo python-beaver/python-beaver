@@ -107,9 +107,10 @@ class Worker(object):
 
     def readfile(self, fid, file):
         """Read lines from a file and performs a callback against them"""
-        lines = file.readlines()
-        if lines:
+        lines = file.readlines(4096)
+        while lines:
             self._callback(("callback", (file.name, lines)))
+            lines = file.readlines(4096)
 
     def update_files(self):
         """Ensures all files are properly loaded.
