@@ -2,6 +2,7 @@ import datetime
 import redis
 import time
 import urlparse
+import TransportException
 
 import beaver.transport
 
@@ -30,7 +31,7 @@ class RedisTransport(beaver.transport.Transport):
                 self._redis.ping()
                 break
             except redis.exceptions.ConnectionError:
-                pass
+                raise TransportException("Unspecified exception encountered")
 
         self._pipeline = self._redis.pipeline(transaction=False)
 
