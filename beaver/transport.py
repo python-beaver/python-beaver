@@ -51,11 +51,11 @@ class Transport(object):
                 else:
                     break
         elif beaver_config.get('format') == 'string':
-            def string_formatter(self, data):
+            def string_formatter(data):
                 return "[{0}] [{1}] {2}".format(data['@source_host'], data['@timestamp'], data['@message'])
             self._formatter = string_formatter
         else:
-            def null_formatter(self, data):
+            def null_formatter(data):
                 return data['@message']
             self._formatter = null_formatter
 
