@@ -2,9 +2,9 @@ import datetime
 import redis
 import time
 import urlparse
-import TransportException
 
 import beaver.transport
+from beaver.transport import TransportException
 
 
 class RedisTransport(beaver.transport.Transport):
@@ -30,8 +30,13 @@ class RedisTransport(beaver.transport.Transport):
             try:
                 self._redis.ping()
                 break
-            except redis.exceptions.ConnectionError:
-                raise TransportException("Unspecified exception encountered")
+            except UserWarning:
+                raise TransportException("Connection appears to have been lost")
+            except Exception, e:
+                try:
+                    raise TransportException(e.strerror)
+                except AttributeError:
+                    raise TransportException("Unspecified exception encountered")
 
         self._pipeline = self._redis.pipeline(transaction=False)
 
