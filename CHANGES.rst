@@ -1,7 +1,30 @@
 Changelog
 =========
 
-21 (2013-01-03)
+22 (2013-01-15)
+---------------
+
+- Handle sigterm properly. Refs #87. [Jose Diaz-Gonzalez]
+
+- Add --loglevel as alias for --output. Closes #92. [Jose Diaz-Gonzalez]
+
+- Added logging on connection exception. [Thomas Morse]
+
+- Add '--format raw' to pass through input unchanged. [Stephen Sugden]
+
+- Fix string & null formatters in beaver.transport. [Stephen Sugden]
+
+  the inline definitions were expecting a self parameter, which is *not*
+  passed when you assign a function to an attribute on an object
+  instance.
+
+- Adding exception when redis connection can't be confirmed. [William
+  Jimenez]
+
+- Call file.readlines() with sizehint in a loop to avoid reading in
+  massive files all at once. [Jose Diaz-Gonzalez]
+
+21 (2013-01-04)
 ---------------
 
 - Move runner into a dispatcher class to solve installation issues.
@@ -56,6 +79,9 @@ Changelog
   Gonzalez]
 
 - Pass in logger object to create_ssh_tunnel() [Jose Diaz-Gonzalez]
+
+17 (2012-12-28)
+---------------
 
 - Added missing python-daemon requirement. [Jose Diaz-Gonzalez]
 
