@@ -1,3 +1,4 @@
+import signal
 import sys
 import time
 
@@ -5,6 +6,10 @@ from transport import TransportException, create_transport
 
 
 def run_queue(queue, beaver_config, file_config, logger=None):
+    signal.signal(signal.SIGTERM, signal.SIG_DFL)
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+    signal.signal(signal.SIGQUIT, signal.SIG_DFL)
+
     transport = None
     try:
         logger.debug("Logging using the {0} transport".format(beaver_config.get('transport')))
@@ -31,6 +36,8 @@ def run_queue(queue, beaver_config, file_config, logger=None):
                         transport.interrupt()
 
                         sys.exit(0)
+            elif command == "exit":
+                break
     except KeyboardInterrupt:
         logger.debug("Queue Interruped")
         if transport is not None:
