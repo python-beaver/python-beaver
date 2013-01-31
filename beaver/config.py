@@ -1,4 +1,5 @@
 import ConfigParser
+import logging
 import os
 import socket
 import warnings
@@ -9,7 +10,7 @@ from beaver.utils import eglob
 class BeaverConfig():
 
     def __init__(self, args, file_config=None, logger=None):
-        self._logger = logger
+        self._logger = logger or logging.getLogger(__name__)
         self._logger.debug('Processing beaver portion of config file %s' % args.config)
 
         self._beaver_defaults = {
@@ -141,7 +142,7 @@ class BeaverConfig():
             argparse > configfile > env var
         """
         _beaver_config = ConfigParser.ConfigParser(self._beaver_defaults)
-        if len(_beaver_config.read(self._configfile)) != 1:
+        if self._configfile and len(_beaver_config.read(self._configfile)) != 1:
             raise Exception('Could not parse config file "%s"' % self._configfile)
 
         if not _beaver_config.has_section('beaver'):
@@ -154,12 +155,13 @@ class BeaverConfig():
         transpose = ['config', 'debug', 'daemonize', 'files', 'format', 'fqdn', 'hostname', 'path', 'pid', 'transport']
         namspace_dict = vars(args)
         for key in transpose:
+            if key not in namspace_dict:
+                continue
             if namspace_dict[key] is None:
                 continue
             if namspace_dict[key] == '':
                 continue
-            if key in namspace_dict:
-                config[key] = namspace_dict[key]
+            config[key] = namspace_dict[key]
 
         if args.mode:
             config['zeromq_bind'] = args.mode
