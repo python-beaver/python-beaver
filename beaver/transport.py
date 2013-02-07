@@ -3,23 +3,21 @@ import os
 
 def create_transport(beaver_config, file_config, logger):
     """Creates and returns a transport object"""
-    if beaver_config.get('transport') == 'rabbitmq':
-        import beaver.rabbitmq_transport
-        transport = beaver.rabbitmq_transport.RabbitmqTransport(beaver_config, file_config, logger)
-    elif beaver_config.get('transport') == 'redis':
-        import beaver.redis_transport
-        transport = beaver.redis_transport.RedisTransport(beaver_config, file_config, logger)
-    elif beaver_config.get('transport') == 'stdout':
-        import beaver.stdout_transport
-        transport = beaver.stdout_transport.StdoutTransport(beaver_config, file_config, logger)
-    elif beaver_config.get('transport') == 'udp':
-        import beaver.udp_transport
-        transport = beaver.udp_transport.UdpTransport(beaver_config, file_config, logger)
-    elif beaver_config.get('transport') == 'zmq':
-        import beaver.zmq_transport
-        transport = beaver.zmq_transport.ZmqTransport(beaver_config, file_config, logger)
+    transport_str = beaver_config.get('transport')
+    if '.' not in transport_str:
+        # allow simple names like 'redis' to load a beaver built-in transport
+        module_path = 'beaver.%s_transport' % transport_str.lower()
+        class_name = '%sTransport' % transport_str.title()
     else:
-        raise Exception('Invalid transport {0}'.format(beaver_config.get('transport')))
+        # allow dotted path names to load a custom transport class
+        try:
+            module_path, class_name = transport_str.rsplit('.', 1)
+        except ValueError:
+            raise Exception('Invalid transport {0}'.format(beaver_config.get('transport')))
+
+    _module = __import__(module_path, globals(), locals(), class_name, -1)
+    transport_class = getattr(_module, class_name)
+    transport = transport_class(beaver_config, file_config, logger)
 
     return transport
 
