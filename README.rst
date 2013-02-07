@@ -78,7 +78,7 @@ Beaver can optionally get data from a ``configfile`` using the ``-c`` flag. This
 * rabbitmq_username: Default ``guest``
 * rabbitmq_password: Default ``guest``
 * rabbitmq_queue: Default ``logstash-queue``.
-* rabbitmq_exchange: Default ``direct``.
+* rabbitmq_exchange_type: Default ``direct``.
 * rabbitmq_exchange_durable: Default ``0``.
 * rabbitmq_key: Default ``logstash-key``.
 * rabbitmq_exchange: Default ``logstash-exchange``.
