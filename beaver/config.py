@@ -179,6 +179,8 @@ class BeaverConfig():
 
         config['max_queue_size'] = int(config['max_queue_size'])
         config['update_file_mapping_time'] = int(config['update_file_mapping_time'])
+        if config['zeromq_hwm'] is not None:
+            config['zeromq_hwm'] = int(config['zeromq_hwm'])
 
         if config['files'] is not None and type(config['files']) == str:
             config['files'] = config['files'].split(',')

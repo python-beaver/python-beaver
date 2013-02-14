@@ -16,7 +16,7 @@ class ZmqTransport(beaver.transport.Transport):
 
         zeromq_hwm = beaver_config.get('zeromq_hwm')
         if zeromq_hwm:
-            self._pub.hwm = int(zeromq_hwm)
+            self._pub.hwm = zeromq_hwm
 
         if (beaver_config.get('mode') == "bind"):
             self._pub.bind(zeromq_address)
