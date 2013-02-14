@@ -102,7 +102,7 @@ class Worker(object):
             if async:
                 return
 
-            self._logger.debug("Iteration took {0}".format(time.time() - t))
+            self._logger.debug("Iteration took {0:.6f}".format(time.time() - t))
             time.sleep(interval)
 
     def readfile(self, fid, file):
