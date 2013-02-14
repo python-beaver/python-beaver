@@ -87,6 +87,7 @@ Beaver can optionally get data from a ``configfile`` using the ``-c`` flag. This
 * udp_host: Default ``127.0.0.1``. UDP Host
 * udp_port: Default ``9999``. UDP Port
 * zeromq_address: Default ``tcp://localhost:2120``. Zeromq URL
+* zeromq_hwm: Default None. Zeromq HighWaterMark socket option
 * zeromq_bind: Default ``bind``. Whether to bind to zeromq host or simply connect
 
 The following are used for instances when a TransportException is thrown - Transport dependent

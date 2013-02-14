@@ -30,6 +30,7 @@ class BeaverConfig():
             'udp_host': os.environ.get('UDP_HOST', '127.0.0.1'),
             'udp_port': os.environ.get('UDP_PORT', '9999'),
             'zeromq_address': os.environ.get('ZEROMQ_ADDRESS', 'tcp://localhost:2120'),
+            'zeromq_hwm': os.environ.get('ZEROMQ_HWM', ''),
 
             # exponential backoff
             'respawn_delay': '3',
@@ -178,6 +179,8 @@ class BeaverConfig():
 
         config['max_queue_size'] = int(config['max_queue_size'])
         config['update_file_mapping_time'] = int(config['update_file_mapping_time'])
+        if config['zeromq_hwm'] is not None:
+            config['zeromq_hwm'] = int(config['zeromq_hwm'])
 
         if config['files'] is not None and type(config['files']) == str:
             config['files'] = config['files'].split(',')
