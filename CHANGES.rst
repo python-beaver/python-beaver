@@ -1,6 +1,27 @@
 Changelog
 =========
 
+23 (2013-02-20)
+---------------
+
+- Worker: pretty format debug message "Iteration took %.6f" [Sergey
+  Shepelev]
+
+- Zeromq_hwm int() conversion moved to config. [Denis Orlikhin]
+
+- Zeromq_hwm config entry. [Denis Orlikhin]
+
+- Zeromq_hwm support. [Denis Orlikhin]
+
+- Rabbitmq_exchange_type option fixed in the README. [Xabier de Zuazo]
+
+- Add test requirements to setup. [Paul Garner]
+
+- Allow beaver to accept custom transport classes. [Paul Garner]
+
+- Make beaver slightly more amenable to test mocking and sort of fix the
+  broken zmq test. [Paul Garner]
+
 22 (2013-01-15)
 ---------------
 
