@@ -29,9 +29,9 @@ Usage
 usage::
 
     beaver [-h] [-c CONFIG] [-d] [-D] [-f FILES [FILES ...]]
-           [-F {json,msgpack,string}] [-H HOSTNAME] [-m {bind,connect}]
-           [-o OUTPUT] [-p PATH] [-P PID]
-           [-t {rabbitmq,redis,stdout,zmq,udp}] [-v] [--fqdn]
+            [-F {json,msgpack,string,raw}] [-H HOSTNAME] [-m {bind,connect}]
+            [-l OUTPUT] [-p PATH] [-P PID]
+            [-t {rabbitmq,redis,stdout,zmq,udp}] [-v] [--fqdn]
 
 optional arguments::
 
@@ -43,13 +43,13 @@ optional arguments::
     -f FILES [FILES ...], --files FILES [FILES ...]
                           space-separated filelist to watch, can include globs
                           (*.log). Overrides --path argument
-    -F {json,msgpack,string}, --format {json,msgpack,string}
+    -F {json,msgpack,string,raw}, --format {json,msgpack,string,raw}
                           format to use when sending to transport
     -H HOSTNAME, --hostname HOSTNAME
                           manual hostname override for source_host
     -m {bind,connect}, --mode {bind,connect}
                           bind or connect mode
-    -o OUTPUT, --output OUTPUT
+    -l OUTPUT, --logfile OUTPUT, -o OUTPUT, --output OUTPUT
                           file to pipe output to (in addition to stdout)
     -p PATH, --path PATH  path to log files
     -P PID, --pid PID     path to pid file
