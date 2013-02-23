@@ -169,18 +169,26 @@ class BeaverConfig():
 
         # HACK: Python 2.6 ConfigParser does not properly
         #       handle non-string values
-        for k in config:
-            if config[k] == '':
-                config[k] = None
+        for key in config:
+            if config[key] == '':
+                config[key] = None
 
-        config['debug'] = bool(config['debug'])
-        config['daemonize'] = bool(config['daemonize'])
-        config['fqdn'] = bool(config['fqdn'])
+        require_bool = ['debug', 'daemonize', 'fqdn', 'rabbitmq_exchange_durable']
 
-        config['max_queue_size'] = int(config['max_queue_size'])
-        config['update_file_mapping_time'] = int(config['update_file_mapping_time'])
-        if config['zeromq_hwm'] is not None:
-            config['zeromq_hwm'] = int(config['zeromq_hwm'])
+        for key in require_bool:
+            config[key] = bool(config[key])
+
+        require_int = [
+            'max_failure',
+            'max_queue_size',
+            'rabbitmq_port',
+            'respawn_delay',
+            'udp_port',
+            'update_file_mapping_time',
+            'zeromq_hwm',
+        ]
+        for key in require_int:
+            config[key] = int(config[key])
 
         if config['files'] is not None and type(config['files']) == str:
             config['files'] = config['files'].split(',')
@@ -190,7 +198,7 @@ class BeaverConfig():
             raise LookupError('{0} does not exist'.format(config['path']))
 
         if config.get('hostname') is None:
-            if bool(config.get('fqdn')) == True:
+            if config.get('fqdn') == True:
                 config['hostname'] = socket.getfqdn()
             else:
                 config['hostname'] = socket.gethostname()

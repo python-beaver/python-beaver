@@ -11,7 +11,7 @@ class UdpTransport(beaver.transport.Transport):
 
         self._sock = socket.socket(socket.AF_INET,  # Internet
             socket.SOCK_DGRAM)  # UDP
-        self._address = (beaver_config.get('udp_host'), int(beaver_config.get('udp_port')))
+        self._address = (beaver_config.get('udp_host'), beaver_config.get('udp_port'))
 
     def callback(self, filename, lines):
         timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")

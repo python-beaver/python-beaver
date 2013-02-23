@@ -21,7 +21,7 @@ class RabbitmqTransport(beaver.transport.Transport):
         parameters = pika.connection.ConnectionParameters(
             credentials=credentials,
             host=beaver_config.get('rabbitmq_host'),
-            port=int(beaver_config.get('rabbitmq_port')),
+            port=beaver_config.get('rabbitmq_port'),
             virtual_host=beaver_config.get('rabbitmq_vhost')
         )
         self._connection = pika.adapters.BlockingConnection(parameters)
@@ -32,7 +32,7 @@ class RabbitmqTransport(beaver.transport.Transport):
         self._channel.exchange_declare(
             exchange=self._rabbitmq_exchange,
             exchange_type=beaver_config.get('rabbitmq_exchange_type'),
-            durable=bool(beaver_config.get('rabbitmq_exchange_durable'))
+            durable=beaver_config.get('rabbitmq_exchange_durable')
         )
         self._channel.queue_bind(
             exchange=self._rabbitmq_exchange,

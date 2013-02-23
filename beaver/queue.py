@@ -23,8 +23,8 @@ def run_queue(queue, beaver_config, file_config, logger=None):
                     transport.callback(*data)
                 except TransportException:
                     failure_count = failure_count + 1
-                    if failure_count > int(beaver_config.get('max_failure')):
-                        failure_count = int(beaver_config.get('max_failure'))
+                    if failure_count > beaver_config.get('max_failure'):
+                        failure_count = beaver_config.get('max_failure')
 
                     sleep_time = int(beaver_config.get('respawn_delay')) ** failure_count
                     logger.info("Caught transport exception, respawning in %d seconds" % sleep_time)
