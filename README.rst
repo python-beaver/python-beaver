@@ -106,7 +106,7 @@ The following configuration keys are for building an SSH Tunnel that can be used
 The following can also be passed via argparse. Argparse will override all options in the configfile, when specified.
 
 * format: Default ``json``. Options ``[ json, msgpack, string ]``. Format to use when sending to transport
-* files: Default ``files``. Space-separated list of files to tail.
+* files: Default ``files``. Space-separated list of files to tail. (Comma separated if specified in the config file)
 * path: Default ``/var/log``. Path glob to tail.
 * transport: Default ``stdout``. Transport to use when log changes are detected
 * fqdn: Default ``False``. Whether to use the machine's FQDN in transport output
