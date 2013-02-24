@@ -86,6 +86,9 @@ class Transport(object):
             '@message': line.strip(os.linesep),
         })
 
+    def addglob(self, globname, globbed):
+        self._file_config.addglob(globname, globbed)
+
 
 class TransportException(Exception):
     pass

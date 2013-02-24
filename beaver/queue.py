@@ -36,6 +36,8 @@ def run_queue(queue, beaver_config, file_config, logger=None):
                         transport.interrupt()
 
                         sys.exit(0)
+            elif command == "addglob":
+                transport.addglob(*data)
             elif command == "exit":
                 break
     except KeyboardInterrupt:
