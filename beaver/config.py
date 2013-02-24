@@ -184,12 +184,19 @@ class BeaverConfig():
             'rabbitmq_port',
             'respawn_delay',
             'udp_port',
-            'update_file_mapping_time',
             'zeromq_hwm',
         ]
         for key in require_int:
             if config[key] is not None:
                 config[key] = int(config[key])
+
+        require_float = [
+            'update_file_mapping_time',
+        ]
+
+        for key in require_float:
+            if config[key] is not None:
+                config[key] = float(config[key])
 
         if config['files'] is not None and type(config['files']) == str:
             config['files'] = config['files'].split(',')
