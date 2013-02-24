@@ -188,7 +188,8 @@ class BeaverConfig():
             'zeromq_hwm',
         ]
         for key in require_int:
-            config[key] = int(config[key])
+            if config[key] is not None:
+                config[key] = int(config[key])
 
         if config['files'] is not None and type(config['files']) == str:
             config['files'] = config['files'].split(',')
