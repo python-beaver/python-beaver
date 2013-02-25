@@ -33,6 +33,7 @@ class Transport(object):
         self._current_host = beaver_config.get('hostname')
         self._file_config = file_config
         self._is_valid = True
+        self._logger = logger
 
         if beaver_config.get('format') == 'msgpack':
             import msgpack

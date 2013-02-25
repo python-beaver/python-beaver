@@ -29,9 +29,9 @@ Usage
 usage::
 
     beaver [-h] [-c CONFIG] [-d] [-D] [-f FILES [FILES ...]]
-            [-F {json,msgpack,string,raw}] [-H HOSTNAME] [-m {bind,connect}]
-            [-l OUTPUT] [-p PATH] [-P PID]
-            [-t {rabbitmq,redis,stdout,zmq,udp}] [-v] [--fqdn]
+           [-F {json,msgpack,string,raw}] [-H HOSTNAME] [-m {bind,connect}]
+           [-l OUTPUT] [-p PATH] [-P PID]
+           [-t {rabbitmq,redis,sqs,stdout,udp,zmq}] [-v] [--fqdn]
 
 optional arguments::
 
@@ -53,7 +53,7 @@ optional arguments::
                           file to pipe output to (in addition to stdout)
     -p PATH, --path PATH  path to log files
     -P PID, --pid PID     path to pid file
-    -t {rabbitmq,redis,stdout,zmq,udp}, --transport {rabbitmq,redis,stdout,zmq,udp}
+    -t {rabbitmq,redis,stdout,zmq,udp,sqs}, --transport {rabbitmq,redis,stdout,zmq,udp,sqs}
                           log transport method
     -v, --version         output version and quit
     --fqdn                use the machine's FQDN for source_host
@@ -84,6 +84,10 @@ Beaver can optionally get data from a ``configfile`` using the ``-c`` flag. This
 * rabbitmq_exchange: Default ``logstash-exchange``.
 * redis_url: Default ``redis://localhost:6379/0``. Redis URL
 * redis_namespace: Default ``logstash:beaver``. Redis key namespace
+* sqs_aws_access_key: Can be left blank to use IAM Roles or AWS_ACCESS_KEY_ID environment variable (see: https://github.com/boto/boto#getting-started-with-boto)
+* sqs_aws_secret_key: Can be left blank to use IAM Roles or AWS_SECRET_ACCESS_KEY environment variable (see: https://github.com/boto/boto#getting-started-with-boto)
+* sqs_aws_region: Default ``us-east-1``. AWS Region
+* sqs_aws_queue: SQS queue (must exist)
 * udp_host: Default ``127.0.0.1``. UDP Host
 * udp_port: Default ``9999``. UDP Port
 * zeromq_address: Default ``tcp://localhost:2120``. Zeromq URL
@@ -274,6 +278,30 @@ Example 11: UDP transport::
 
     # From the commandline
     beaver -c /etc/beaver.conf -t udp
+
+Example 12: SQS Transport::
+
+    # /etc/beaver.conf
+    [beaver]
+    sqs_aws_region: us-east-1
+    sqs_aws_queue: logstash-input
+    sqs_aws_access_key: <access_key>
+    sqs_aws_secret_access_key: <secret_key>
+
+    # logstash indexer config:
+    input {
+      sqs_fillz {
+        queue => "logstash-input"
+        type => "shipper-input"
+        format => "json_event"
+        access_key => "<access_key>"
+        secret_key => "<secret_key>"
+      }
+    }
+    output { stdout { debug => true } }
+
+    # From the commandline
+    beaver -c /etc/beaver.conf -t sqs
 
 Todo
 ====
