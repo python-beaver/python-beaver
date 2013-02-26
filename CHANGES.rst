@@ -1,6 +1,18 @@
 Changelog
 =========
 
+24 (2013-02-26)
+---------------
+
+- Ensure new files are added to a transports configuration. Closes #96.
+  Closes #101. [Jose Diaz-Gonzalez]
+
+- Allow float numbers for update_file_mapping_time. [Jose Diaz-Gonzalez]
+
+- Fix invalid casting of boolean values. [Jose Diaz-Gonzalez]
+
+- Perform all conversions in config.py. Closes #99. [Jose Diaz-Gonzalez]
+
 23 (2013-02-20)
 ---------------
 
