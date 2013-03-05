@@ -1,6 +1,13 @@
 Changelog
 =========
 
+25 (2013-03-05)
+---------------
+
+- Use True instead of 1 for while check. [Jose Diaz-Gonzalez]
+
+- Fix orphan child processes. Closes #103. [Jose Diaz-Gonzalez]
+
 24 (2013-02-26)
 ---------------
 
