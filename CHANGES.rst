@@ -1,6 +1,23 @@
 Changelog
 =========
 
+26 (2013-03-05)
+---------------
+
+- Add optional reconnect support for transports. Refs #93. [Jose Diaz-
+  Gonzalez]
+
+- Add a method for checking the validity of a Transport. Refs #93. [Jose
+  Diaz-Gonzalez]
+
+- Added a configurable subprocess poll sleep. [Jose Diaz-Gonzalez]
+
+- Add a deafult sleep timeout to BeaverSubprocess polling. [Jose Diaz-
+  Gonzalez]
+
+- Use a larger sleep time to get around redis over ssh connection
+  issues. [Jose Diaz-Gonzalez]
+
 25 (2013-03-05)
 ---------------
 
