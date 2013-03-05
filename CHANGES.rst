@@ -1,6 +1,12 @@
 Changelog
 =========
 
+28 (2013-03-05)
+---------------
+
+- BeaverSubprocess is now a new-style class. Fixes ssh_tunneling. [Jose
+  Diaz-Gonzalez]
+
 27 (2013-03-05)
 ---------------
 
