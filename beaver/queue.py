@@ -51,6 +51,7 @@ def run_queue(queue, beaver_config, file_config, logger=None):
 
                     try:
                         time.sleep(sleep_time)
+                        transport.reconnect()
                     except KeyboardInterrupt:
                         logger.info("User cancelled respawn.")
                         transport.interrupt()

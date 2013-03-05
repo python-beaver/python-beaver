@@ -62,6 +62,11 @@ class Transport(object):
         """Processes a set of lines for a filename"""
         return True
 
+    def reconnect(self):
+        """Allows reconnection from when a handled
+        TransportException is thrown"""
+        return True
+
     def interrupt(self):
         """Allows keyboard interrupts to be
         handled properly by the transport
