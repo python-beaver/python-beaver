@@ -25,7 +25,7 @@ class RedisTransport(beaver.transport.Transport):
             if wait == 20:
                 break
 
-            time.sleep(0.1)
+            time.sleep(1)
             wait += 1
             try:
                 self._redis.ping()
