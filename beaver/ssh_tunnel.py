@@ -1,6 +1,7 @@
 import os
 import signal
 import subprocess
+import time
 
 
 def create_ssh_tunnel(beaver_config, logger=None):
@@ -29,6 +30,7 @@ class BeaverSubprocess:
         """Poll attached subprocess until it is available"""
         if self._subprocess is not None:
             self._subprocess.poll()
+        time.sleep(1)
 
     def close(self):
         """Close child subprocess"""
