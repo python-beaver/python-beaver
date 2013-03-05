@@ -1,6 +1,12 @@
 Changelog
 =========
 
+27 (2013-03-05)
+---------------
+
+- Fix issue where super method was not called in BeaverSshTunnel. [Jose
+  Diaz-Gonzalez]
+
 26 (2013-03-05)
 ---------------
 
