@@ -85,7 +85,7 @@ class Worker(object):
         """Start the loop.
         If async is True make one loop then return.
         """
-        while 1:
+        while True:
             t = time.time()
             if not (self._proc and self._proc.is_alive()):
                 self._proc = self._create_queue_consumer()
