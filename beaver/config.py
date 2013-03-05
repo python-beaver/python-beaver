@@ -42,6 +42,12 @@ class BeaverConfig():
             # time in seconds before updating the file mapping
             'update_file_mapping_time': '10',
 
+            # time in seconds from last command sent before a queue kills itself
+            'queue_timeout': '60',
+
+            # time in seconds to wait on queue.get() block before raising Queue.Empty exception
+            'wait_timeout': '5',
+
             # ssh tunnel support
             'ssh_key_file': '',
             'ssh_tunnel': '',
@@ -181,9 +187,11 @@ class BeaverConfig():
         require_int = [
             'max_failure',
             'max_queue_size',
+            'queue_timeout',
             'rabbitmq_port',
             'respawn_delay',
             'udp_port',
+            'wait_timeout',
             'zeromq_hwm',
         ]
         for key in require_int:

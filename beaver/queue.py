@@ -1,3 +1,4 @@
+import Queue
 import signal
 import sys
 import time
@@ -10,6 +11,10 @@ def run_queue(queue, beaver_config, file_config, logger=None):
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     signal.signal(signal.SIGQUIT, signal.SIG_DFL)
 
+    last_update_time = int(time.time())
+    queue_timeout = beaver_config.get('queue_timeout')
+    wait_timeout = beaver_config.get('wait_timeout')
+
     transport = None
     try:
         logger.debug("Logging using the {0} transport".format(beaver_config.get('transport')))
@@ -17,7 +22,18 @@ def run_queue(queue, beaver_config, file_config, logger=None):
 
         failure_count = 0
         while True:
-            command, data = queue.get()
+            if int(time.time()) - last_update_time > queue_timeout:
+                logger.info("Queue timeout of '{0}' seconds exceeded, stopping queue".format(queue_timeout))
+                break
+
+            try:
+                command, data = queue.get(block=True, timeout=wait_timeout)
+                last_update_time = int(time.time())
+                logger.debug("Last update time now {0}".format(last_update_time))
+            except Queue.Empty:
+                logger.debug("No data")
+                continue
+
             if command == "callback":
                 try:
                     transport.callback(*data)
