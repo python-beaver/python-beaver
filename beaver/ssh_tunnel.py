@@ -45,6 +45,8 @@ class BeaverSshTunnel(BeaverSubprocess):
     """SSH Tunnel Subprocess Wrapper"""
 
     def __init__(self, beaver_config):
+        super(BeaverSshTunnel, self).__init__(beaver_config)
+
         key_file = beaver_config.get('ssh_key_file')
         tunnel = beaver_config.get('ssh_tunnel')
         tunnel_port = beaver_config.get('ssh_tunnel_port')
