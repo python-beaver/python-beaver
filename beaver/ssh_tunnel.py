@@ -24,13 +24,15 @@ class BeaverSubprocess:
         This will allow us to attach a session id to the spawned child, allowing
         us to send a SIGTERM to the process on close
         """
+        self._beaver_config = beaver_config
         self._subprocess = None
 
     def poll(self):
         """Poll attached subprocess until it is available"""
         if self._subprocess is not None:
             self._subprocess.poll()
-        time.sleep(1)
+
+        time.sleep(self._beaver_config.get('subprocess_poll_sleep'))
 
     def close(self):
         """Close child subprocess"""

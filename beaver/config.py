@@ -54,6 +54,7 @@ class BeaverConfig():
             'ssh_tunnel_port': '',
             'ssh_remote_host': '',
             'ssh_remote_port': '',
+            'subprocess_poll_sleep': '1',
 
             # the following can be passed via argparse
             'zeromq_bind': os.environ.get('BEAVER_MODE', 'bind' if os.environ.get('BIND', False) else 'connect'),
@@ -190,6 +191,7 @@ class BeaverConfig():
             'queue_timeout',
             'rabbitmq_port',
             'respawn_delay',
+            'subprocess_poll_sleep',
             'udp_port',
             'wait_timeout',
             'zeromq_hwm',
