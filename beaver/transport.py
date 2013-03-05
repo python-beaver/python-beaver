@@ -32,6 +32,7 @@ class Transport(object):
         """
         self._current_host = beaver_config.get('hostname')
         self._file_config = file_config
+        self._is_valid = True
 
         if beaver_config.get('format') == 'msgpack':
             import msgpack
@@ -88,6 +89,9 @@ class Transport(object):
 
     def addglob(self, globname, globbed):
         self._file_config.addglob(globname, globbed)
+
+    def valid(self):
+        return self._is_valid
 
 
 class TransportException(Exception):
