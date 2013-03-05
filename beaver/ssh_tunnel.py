@@ -13,7 +13,7 @@ def create_ssh_tunnel(beaver_config, logger=None):
     return BeaverSshTunnel(beaver_config)
 
 
-class BeaverSubprocess:
+class BeaverSubprocess(object):
     """General purpose subprocess wrapper"""
 
     def __init__(self, beaver_config):
