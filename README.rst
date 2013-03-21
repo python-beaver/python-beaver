@@ -61,7 +61,7 @@ optional arguments::
 Background
 ==========
 
-Beaver provides an lightweight method for shipping local log files to Logstash. It does this using either redis, stdin, zeromq as the transport. This means you'll need a redis, stdin, zeromq input somewhere down the road to get the events.
+Beaver provides an lightweight method for shipping local log files to Logstash. It does this using redis, zeromq, udp, rabbit or stdout as the transport. This means you'll need a redis, zeromq, udp, amqp or stdin input somewhere down the road to get the events.
 
 Events are sent in logstash's ``json_event`` format. Options can also be set as environment variables.
 
