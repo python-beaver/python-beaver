@@ -14,6 +14,11 @@ class BeaverConfig():
         self._logger.debug('Processing beaver portion of config file %s' % args.config)
 
         self._beaver_defaults = {
+            'mqtt_clientid': 'mosquitto',
+            'mqtt_host': 'localhost',
+            'mqtt_port': '1883',
+            'mqtt_topic': '/logstash',
+            'mqtt_keepalive': '60',
             'rabbitmq_host': os.environ.get('RABBITMQ_HOST', 'localhost'),
             'rabbitmq_port': os.environ.get('RABBITMQ_PORT', '5672'),
             'rabbitmq_vhost': os.environ.get('RABBITMQ_VHOST', '/'),

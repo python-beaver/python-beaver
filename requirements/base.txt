@@ -4,3 +4,4 @@ redis==2.4.11
 ujson>=1.9
 glob2==0.3
 boto==2.8.0
+mosquitto>=1.1

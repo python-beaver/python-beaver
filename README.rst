@@ -31,7 +31,7 @@ usage::
     beaver [-h] [-c CONFIG] [-d] [-D] [-f FILES [FILES ...]]
            [-F {json,msgpack,raw,rawjson,string}] [-H HOSTNAME] [-m {bind,connect}]
            [-l OUTPUT] [-p PATH] [-P PID]
-           [-t {rabbitmq,redis,sqs,stdout,udp,zmq}] [-v] [--fqdn]
+           [-t {mqtt,rabbitmq,redis,sqs,stdout,udp,zmq}] [-v] [--fqdn]
 
 optional arguments::
 
@@ -53,7 +53,7 @@ optional arguments::
                           file to pipe output to (in addition to stdout)
     -p PATH, --path PATH  path to log files
     -P PID, --pid PID     path to pid file
-    -t {rabbitmq,redis,stdout,zmq,udp,sqs}, --transport {rabbitmq,redis,stdout,zmq,udp,sqs}
+    -t {mqtt,rabbitmq,redis,stdout,udp,zmq}, --transport {mqtt,rabbitmq,redis,sqs,stdout,udp,zmq}
                           log transport method
     -v, --version         output version and quit
     --fqdn                use the machine's FQDN for source_host
@@ -72,8 +72,13 @@ Configuration File Options
 
 Beaver can optionally get data from a ``configfile`` using the ``-c`` flag. This file is in ``ini`` format. Global configuration will be under the ``beaver`` stanza. The following are global beaver configuration keys with their respective meanings:
 
-* rabbitmq_host: Defaults ``localhost``. Host for RabbitMQ.
-* rabbitmq_port: Defaults ``5672``. Port for RabbitMQ.
+* mqtt_host: Default ``localhost``. Host for mosquitto
+* mqtt_port: Default ``1883``. Port for mosquitto
+* mqtt_clientid: Default ``mosquitto``. Mosquitto client id
+* mqtt_keepalive: Default ``60``. mqtt keepalive ping
+* mqtt_topic: Default ``/logstash``. Topic to publish to
+* rabbitmq_host: Defaults ``localhost``. Host for RabbitMQ
+* rabbitmq_port: Defaults ``5672``. Port for RabbitMQ
 * rabbitmq_vhost: Default ``/``
 * rabbitmq_username: Default ``guest``
 * rabbitmq_password: Default ``guest``
@@ -306,6 +311,30 @@ Example 12: SQS Transport::
 Example 13: [Raw Json Support](http://blog.pkhamre.com/2012/08/23/logging-to-logstash-json-format-in-nginx/::
 
     beaver --format rawjson
+
+Example 14: Mqtt transport using Mosquitto::
+
+    # /etc/beaver.conf
+    [beaver]
+    mqtt_client_id: 'beaver_client'
+    mqtt_topic: '/logstash'
+    mqtt_host: '127.0.0.1'
+    mqtt_port: '1318'
+    mqtt_keepalive: '60'
+
+    # logstash indexer config:
+    input {
+      mqtt {
+        host => '127.0.0.1'
+        data_type => 'list'
+        key => 'app:unmappable'
+        type => 'app:unmappable'
+      }
+    }
+    output { stdout { debug => true } }
+
+    # From the commandline
+    beaver -c /etc/beaver.conf -f /var/log/unmappable.log -t redis
 
 Todo
 ====
