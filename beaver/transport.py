@@ -59,7 +59,8 @@ class Transport(object):
                     def rawjson_formatter(data):
                         json_data = json.loads(data['@message'])
                         for field in {'@source', '@type', '@tags', '@source_host', '@source_path'}:
-                            json_data[field] = data[field]
+                            if  field in data:
+                                json_data[field] = data[field]
                         return json.dumps(json_data)
                     self._formatter = rawjson_formatter
                 except ImportError:
