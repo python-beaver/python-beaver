@@ -276,7 +276,8 @@ class FileConfig():
             'sincedb_write_interval': '15',
             'stat_interval': '1',
             'tags': '',
-            'type': ''
+            'type': '',
+            'encoding': 'utf_8',
         }
 
         self._configfile = args.config

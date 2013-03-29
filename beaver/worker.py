@@ -2,6 +2,7 @@ import errno
 import os
 import stat
 import time
+import io
 
 from beaver.utils import REOPEN_FILES, eglob
 
@@ -167,7 +168,7 @@ class Worker(object):
                     position = file.tell()
                     fname = file.name
                     file.close()
-                    file = open(fname, "r")
+                    file = io.open(fname, "r", encoding=self._file_config.get('encoding', fname))
                     file.seek(position)
                     self._file_map[fid] = file
 
@@ -192,7 +193,7 @@ class Worker(object):
     def watch(self, fname):
         """Opens a file for log tailing"""
         try:
-            file = open(fname, "r")
+            file = io.open(fname, "r", encoding=self._file_config.get('encoding', fname))
             fid = self.get_file_id(os.stat(fname))
         except EnvironmentError, err:
             if err.errno != errno.ENOENT:
@@ -209,7 +210,7 @@ class Worker(object):
     def tail(fname, window):
         """Read last N lines from file fname."""
         try:
-            f = open(fname, 'r')
+            f = io.open(fname, "r", encoding=self._file_config.get('encoding', fname))
         except IOError, err:
             if err.errno == errno.ENOENT:
                 return []
