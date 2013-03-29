@@ -50,6 +50,22 @@ class Transport(object):
                     pass
                 else:
                     break
+        elif beaver_config.get('format') == 'rawjson':
+            # priority: ujson > simplejson > jsonlib2 > json
+            priority = ['ujson', 'simplejson', 'jsonlib2', 'json']
+            for mod in priority:
+                try:
+                    json = __import__(mod)
+                    def rawjson_formatter(data):
+                        json_data = json.loads(data['@message'])
+                        for field in {'@source', '@type', '@tags', '@source_host', '@source_path'}:
+                            json_data[field] = data[field]
+                        return json.dumps(json_data)
+                    self._formatter = rawjson_formatter
+                except ImportError:
+                    pass
+                else:
+                    break
         elif beaver_config.get('format') == 'string':
             def string_formatter(data):
                 return "[{0}] [{1}] {2}".format(data['@source_host'], data['@timestamp'], data['@message'])

@@ -29,7 +29,7 @@ Usage
 usage::
 
     beaver [-h] [-c CONFIG] [-d] [-D] [-f FILES [FILES ...]]
-           [-F {json,msgpack,string,raw}] [-H HOSTNAME] [-m {bind,connect}]
+           [-F {json,msgpack,raw,rawjson,string}] [-H HOSTNAME] [-m {bind,connect}]
            [-l OUTPUT] [-p PATH] [-P PID]
            [-t {rabbitmq,redis,sqs,stdout,udp,zmq}] [-v] [--fqdn]
 
@@ -43,7 +43,7 @@ optional arguments::
     -f FILES [FILES ...], --files FILES [FILES ...]
                           space-separated filelist to watch, can include globs
                           (*.log). Overrides --path argument
-    -F {json,msgpack,string,raw}, --format {json,msgpack,string,raw}
+    -F {json,msgpack,raw,rawjson,string}, --format {json,msgpack,raw,rawjson,string}
                           format to use when sending to transport
     -H HOSTNAME, --hostname HOSTNAME
                           manual hostname override for source_host
@@ -303,14 +303,18 @@ Example 12: SQS Transport::
     # From the commandline
     beaver -c /etc/beaver.conf -t sqs
 
+Example 13: [Raw Json Support](http://blog.pkhamre.com/2012/08/23/logging-to-logstash-json-format-in-nginx/::
+
+    beaver --format rawjson
+
 Todo
 ====
 
 * More documentation
-* Use python threading + subprocess in order to support usage of ``yield`` across all operating systems
-* ~~Fix usage on non-linux platforms - file.readline() does not work as expected on OS X. See above for potential solution~~
+* <del>Use python threading + subprocess in order to support usage of ``yield`` across all operating systems</del>
+* <del>Fix usage on non-linux platforms - file.readline() does not work as expected on OS X. See above for potential solution</del>
 * More transports
-* ~~Ability to specify files, tags, and other metadata within a configuration file~~
+* <del>Ability to specify files, tags, and other metadata within a configuration file</del>
 
 Caveats
 =======
