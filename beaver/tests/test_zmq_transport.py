@@ -20,14 +20,14 @@ class ZmqTests(unittest.TestCase):
         self.beaver_config = BeaverConfig(mock.Mock(config=None))
 
     def test_pub(self):
-        os.environ["ZEROMQ_ADDRESS"] = "tcp://localhost:2120"
+        self.beaver_config.set('zeromq_address', 'tcp://localhost:2120')
         transport = ZmqTransport(self.beaver_config, self.file_config)
         transport.interrupt()
         #assert not transport.zeromq_bind
 
     def test_bind(self):
-        self.beaver_config.mode = "bind"
-        os.environ["ZEROMQ_ADDRESS"] = "tcp://*:2120"
+        self.beaver_config.set('zeromq_bind', 'bind')
+        self.beaver_config.set('zeromq_address', 'tcp://localhost:2120')
         transport = ZmqTransport(self.beaver_config, self.file_config)
         #assert transport.zeromq_bind
 
