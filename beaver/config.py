@@ -69,7 +69,7 @@ class BeaverConfig():
             'debug': '0',
             'daemonize': '0',
             'pid': '',
-            }
+        }
 
         self._configfile = args.config
         self._beaver_config = self._parse(args)
@@ -97,7 +97,7 @@ class BeaverConfig():
             'ssh_tunnel_port',
             'ssh_remote_host',
             'ssh_remote_port',
-            ]
+        ]
 
         has = len(filter(lambda x: self.get(x) != None, required))
         if has > 0 and has != len(required):
@@ -107,27 +107,27 @@ class BeaverConfig():
 
     def _check_for_deprecated_usage(self):
         env_vars = [
-            'RABBITMQ_HOST',
-            'RABBITMQ_PORT',
-            'RABBITMQ_VHOST',
-            'RABBITMQ_USERNAME',
-            'RABBITMQ_PASSWORD',
-            'RABBITMQ_QUEUE',
-            'RABBITMQ_EXCHANGE_TYPE',
-            'RABBITMQ_EXCHANGE_DURABLE',
-            'RABBITMQ_KEY',
-            'RABBITMQ_EXCHANGE',
-            'REDIS_URL',
-            'REDIS_NAMESPACE',
-            'UDP_HOST',
-            'UDP_PORT',
-            'ZEROMQ_ADDRESS',
-            'BEAVER_FILES',
-            'BEAVER_FORMAT',
-            'BEAVER_MODE',
-            'BEAVER_PATH',
-            'BEAVER_TRANSPORT',
-            ]
+          'RABBITMQ_HOST',
+          'RABBITMQ_PORT',
+          'RABBITMQ_VHOST',
+          'RABBITMQ_USERNAME',
+          'RABBITMQ_PASSWORD',
+          'RABBITMQ_QUEUE',
+          'RABBITMQ_EXCHANGE_TYPE',
+          'RABBITMQ_EXCHANGE_DURABLE',
+          'RABBITMQ_KEY',
+          'RABBITMQ_EXCHANGE',
+          'REDIS_URL',
+          'REDIS_NAMESPACE',
+          'UDP_HOST',
+          'UDP_PORT',
+          'ZEROMQ_ADDRESS',
+          'BEAVER_FILES',
+          'BEAVER_FORMAT',
+          'BEAVER_MODE',
+          'BEAVER_PATH',
+          'BEAVER_TRANSPORT',
+        ]
 
         deprecated_env_var_usage = []
 
