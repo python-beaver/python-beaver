@@ -281,7 +281,9 @@ class FileConfig():
             'sincedb_path': '',
             'sincedb_write_interval': '15',
             'stat_interval': '1',
+            'start_position': 'end',
             'tags': '',
+            'tail_lines': '0',
             'type': '',
             'encoding': 'utf_8',
         }

@@ -55,14 +55,7 @@ class Worker(object):
             raise RuntimeError("Callback for worker is not callable")
 
         self.update_files()
-        # The first time we run the script we move all file markers at EOF.
-        # In case of files created afterwards we don't do this.
-        for id, file in self._file_map.iteritems():
-            file.seek(os.path.getsize(file.name))  # EOF
-            if tail_lines:
-                lines = self.tail(file.name, tail_lines)
-                if lines:
-                    self._callback(("callback", (file.name, lines)))
+        self.seek_to_end()
 
     def __del__(self):
         """Closes all files"""
@@ -112,6 +105,33 @@ class Worker(object):
         while lines:
             self._callback(("callback", (file.name, lines)))
             lines = file.readlines(4096)
+
+    def seek_to_end(self):
+        # The first time we run the script we move all file markers at EOF.
+        # In case of files created afterwards we don't do this.
+        for id, file in self._file_map.iteritems():
+            start_position = self._file_config.get('start_position', file.name)
+            if start_position != "end":
+                continue
+
+            line_count = 0
+            try:
+                while file.next():
+                    line_count += 1
+            except StopIteration:
+                pass
+
+            tail_lines = self._file_config.get('tail_lines', file.name)
+            tail_lines = int(tail_lines)
+            if not tail_lines:
+                continue
+
+            encoding = self._file_config.get('encoding', file.name)
+
+            lines = self.tail(file.name, encoding=encoding, window=tail_lines)
+            if lines:
+                self._callback(("callback", (file.name, lines)))
+
 
     def update_files(self):
         """Ensures all files are properly loaded.
@@ -207,10 +227,10 @@ class Worker(object):
         return "%xg%x" % (st.st_dev, st.st_ino)
 
     @staticmethod
-    def tail(fname, window):
+    def tail(fname, encoding, window):
         """Read last N lines from file fname."""
         try:
-            f = io.open(fname, "r", encoding=self._file_config.get('encoding', fname))
+            f = io.open(fname, "r", encoding=encoding)
         except IOError, err:
             if err.errno == errno.ENOENT:
                 return []
