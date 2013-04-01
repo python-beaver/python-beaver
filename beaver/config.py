@@ -196,7 +196,7 @@ class BeaverConfig():
         require_bool = ['debug', 'daemonize', 'fqdn', 'rabbitmq_exchange_durable']
 
         for key in require_bool:
-            config[key] = bool(config[key])
+            config[key] = bool(int(config[key]))
 
         require_int = [
             'max_failure',
