@@ -1,11 +1,12 @@
 import errno
+import gzip
 import io
 import os
 import sqlite3
 import stat
 import time
 
-from beaver.utils import REOPEN_FILES, eglob
+from beaver.utils import IS_GZIPPED_FILE, REOPEN_FILES, eglob
 
 
 class Worker(object):
@@ -327,7 +328,10 @@ class Worker(object):
     def watch(self, fname):
         """Opens a file for log tailing"""
         try:
-            file = io.open(fname, "r", encoding=self._file_config.get('encoding', fname))
+            if IS_GZIPPED_FILE.search(fname):
+                file = gzip.open(fname, "rb")
+            else:
+                file = io.open(fname, "r", encoding=self._file_config.get('encoding', fname))
             fid = self.get_file_id(os.stat(fname))
         except EnvironmentError, err:
             if err.errno != errno.ENOENT:

@@ -11,6 +11,7 @@ import beaver
 logging.basicConfig()
 
 MAGIC_BRACKETS = re.compile("({([^}]+)})")
+IS_GZIPPED_FILE = re.compile(".gz$")
 REOPEN_FILES = 'linux' not in platform.platform().lower()
 
 
