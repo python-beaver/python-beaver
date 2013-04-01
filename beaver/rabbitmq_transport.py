@@ -40,8 +40,8 @@ class RabbitmqTransport(beaver.transport.Transport):
             routing_key=self._rabbitmq_key
         )
 
-    def callback(self, filename, lines):
-        timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    def callback(self, filename, lines, **kwargs):
+        timestamp = self.get_timestamp(**kwargs)
 
         for line in lines:
             try:

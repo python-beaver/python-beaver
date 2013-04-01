@@ -26,8 +26,8 @@ class ZmqTransport(beaver.transport.Transport):
         else:
             self._pub.connect(zeromq_address)
 
-    def callback(self, filename, lines):
-        timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    def callback(self, filename, lines, **kwargs):
+        timestamp = self.get_timestamp(**kwargs)
 
         for line in lines:
             self._pub.send(self.format(filename, timestamp, line))

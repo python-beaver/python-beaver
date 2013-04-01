@@ -34,8 +34,9 @@ class SqsTransport(beaver.transport.Transport):
         except Exception, e:
             raise TransportException(e.message)
 
-    def callback(self, filename, lines):
-        timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    def callback(self, filename, lines, **kwargs):
+        timestamp = self.get_timestamp(**kwargs)
+
         message_batch = []
         for line in lines:
             message_batch.append((uuid.uuid4(), self.format(filename, timestamp, line), 0))

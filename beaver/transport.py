@@ -97,6 +97,13 @@ class Transport(object):
         """
         return True
 
+    def get_timestamp(self, **kwargs):
+        timestamp = kwargs.get('timestamp')
+        if not timestamp:
+            timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+        return timestamp
+
     def format(self, filename, timestamp, line):
         """Returns a formatted log line"""
         return self._formatter({

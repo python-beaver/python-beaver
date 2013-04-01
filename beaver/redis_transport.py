@@ -42,8 +42,8 @@ class RedisTransport(beaver.transport.Transport):
 
         self._pipeline = self._redis.pipeline(transaction=False)
 
-    def callback(self, filename, lines):
-        timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    def callback(self, filename, lines, **kwargs):
+        timestamp = self.get_timestamp(**kwargs)
 
         for line in lines:
             self._pipeline.rpush(

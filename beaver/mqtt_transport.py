@@ -31,11 +31,10 @@ class MosquittoTransport(beaver.transport.Transport):
 
         self._client.on_disconnect = on_disconnect
 
-    def callback(self, filename, lines):
-        """
-        publishes lines one by one to the given topic
-        """
-        timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    def callback(self, filename, lines, **kwargs):
+        """publishes lines one by one to the given topic"""
+        timestamp = self.get_timestamp(**kwargs)
+
         for line in lines:
             try:
                 import warnings

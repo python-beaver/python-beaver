@@ -13,8 +13,8 @@ class UdpTransport(beaver.transport.Transport):
             socket.SOCK_DGRAM)  # UDP
         self._address = (beaver_config.get('udp_host'), beaver_config.get('udp_port'))
 
-    def callback(self, filename, lines):
-        timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    def callback(self, filename, lines, **kwargs):
+        timestamp = self.get_timestamp(**kwargs)
 
         for line in lines:
             formatted = self.format(filename, timestamp, line)
