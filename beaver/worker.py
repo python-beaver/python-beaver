@@ -1,8 +1,9 @@
 import errno
+import io
 import os
+import sqlite3
 import stat
 import time
-import io
 
 from beaver.utils import REOPEN_FILES, eglob
 
@@ -63,8 +64,8 @@ class Worker(object):
 
     def close(self):
         """Closes all currently open file pointers"""
-        for id, file in self._file_map.iteritems():
-            file.close()
+        for id, data in self._file_map.iteritems():
+            data['file'].close()
         self._file_map.clear()
 
     def listdir(self):
@@ -87,12 +88,12 @@ class Worker(object):
             if int(time.time()) - self._update_time > self._beaver_config.get('update_file_mapping_time'):
                 self.update_files()
 
-            for fid, file in list(self._file_map.iteritems()):
+            for fid, data in self._file_map.iteritems():
                 try:
-                    self.readfile(fid, file)
+                    self.readfile(fid, data['file'])
                 except IOError, e:
                     if e.errno == errno.ESTALE:
-                        self.unwatch(file, fid)
+                        self.unwatch(data['file'], fid)
             if async:
                 return
 
@@ -109,29 +110,28 @@ class Worker(object):
     def seek_to_end(self):
         # The first time we run the script we move all file markers at EOF.
         # In case of files created afterwards we don't do this.
-        for id, file in self._file_map.iteritems():
-            start_position = self._file_config.get('start_position', file.name)
-            if start_position != "end":
+        for fid, data in self._file_map.iteritems():
+            start_position = self._file_config.get('start_position', data['file'].name)
+
+            if start_position == "beginning":
                 continue
 
             line_count = 0
             try:
-                while file.next():
+                while data['file'].next():
                     line_count += 1
             except StopIteration:
+                self._logger.debug("[{0}] - line count {1} for {2}".format(fid, line_count, data['file'].name))
                 pass
 
-            tail_lines = self._file_config.get('tail_lines', file.name)
+            tail_lines = self._file_config.get('tail_lines', data['file'].name)
             tail_lines = int(tail_lines)
-            if not tail_lines:
-                continue
+            if tail_lines:
+                encoding = self._file_config.get('encoding', data['file'].name)
 
-            encoding = self._file_config.get('encoding', file.name)
-
-            lines = self.tail(file.name, encoding=encoding, window=tail_lines)
-            if lines:
-                self._callback(("callback", (file.name, lines)))
-
+                lines = self.tail(data['file'].name, encoding=encoding, window=tail_lines)
+                if lines:
+                    self._callback(("callback", (data['file'].name, lines)))
 
     def update_files(self):
         """Ensures all files are properly loaded.
@@ -166,31 +166,31 @@ class Worker(object):
                 ls.append((fid, absname))
 
         # check existent files
-        for fid, file in list(self._file_map.iteritems()):
+        for fid, data in self._file_map.iteritems():
             try:
-                st = os.stat(file.name)
+                st = os.stat(data['file'].name)
             except EnvironmentError, err:
                 if err.errno == errno.ENOENT:
-                    self.unwatch(file, fid)
+                    self.unwatch(data['file'], fid)
                 else:
                     raise
             else:
                 if fid != self.get_file_id(st):
-                    self._logger.info("[{0}] - file rotated {1}".format(fid, file.name))
-                    self.unwatch(file, fid)
-                    self.watch(file.name)
-                elif file.tell() > st.st_size:
-                    self._logger.info("[{0}] - file truncated {1}".format(fid, file.name))
-                    self.unwatch(file, fid)
-                    self.watch(file.name)
+                    self._logger.info("[{0}] - file rotated {1}".format(fid, data['file'].name))
+                    self.unwatch(data['file'], fid)
+                    self.watch(data['file'].name)
+                elif data['file'].tell() > st.st_size:
+                    self._logger.info("[{0}] - file truncated {1}".format(fid, data['file'].name))
+                    self.unwatch(data['file'], fid)
+                    self.watch(data['file'].name)
                 elif REOPEN_FILES:
-                    self._logger.debug("[{0}] - file reloaded (non-linux) {1}".format(fid, file.name))
-                    position = file.tell()
-                    fname = file.name
-                    file.close()
+                    self._logger.debug("[{0}] - file reloaded (non-linux) {1}".format(fid, data['file'].name))
+                    position = data['file'].tell()
+                    fname = data['file'].name
+                    data['file'].close()
                     file = io.open(fname, "r", encoding=self._file_config.get('encoding', fname))
                     file.seek(position)
-                    self._file_map[fid] = file
+                    self._file_map[fid]['file'] = file
 
         # add new ones
         for fid, fname in ls:
@@ -220,7 +220,9 @@ class Worker(object):
                 raise
         else:
             self._logger.info("[{0}] - watching logfile {1}".format(fid, fname))
-            self._file_map[fid] = file
+            self._file_map[fid] = {
+                'file': file,
+            }
 
     @staticmethod
     def get_file_id(st):
