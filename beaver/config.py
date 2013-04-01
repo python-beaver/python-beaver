@@ -58,6 +58,9 @@ class BeaverConfig():
             # time in seconds to wait on queue.get() block before raising Queue.Empty exception
             'wait_timeout': '5',
 
+            # path to sincedb sqlite db
+            'sincedb_path': '',
+
             # ssh tunnel support
             'ssh_key_file': '',
             'ssh_tunnel': '',
@@ -278,7 +281,6 @@ class FileConfig():
             'exclude': '',
             'format': '',
             'message_format': '',
-            'sincedb_path': '',
             'sincedb_write_interval': '15',
             'stat_interval': '1',
             'start_position': 'end',

@@ -50,6 +50,7 @@ class Worker(object):
         self._folder = self._beaver_config.get('path')
         self._logger = logger
         self._proc = None
+        self._sincedb_path = self._beaver_config.get('sincedb_path')
         self._update_time = None
 
         if not callable(self._callback):
@@ -103,9 +104,18 @@ class Worker(object):
     def readfile(self, fid, file):
         """Read lines from a file and performs a callback against them"""
         lines = file.readlines(4096)
+        line_count = 0
         while lines:
+            if self._sincedb_path:
+                current_line_count = len(lines)
+                if not self._sincedb_update_position(file, fid=fid, lines=current_line_count):
+                    line_count += current_line_count
+
             self._callback(("callback", (file.name, lines)))
             lines = file.readlines(4096)
+
+        if line_count > 0:
+            self._sincedb_update_position(file, fid=fid, lines=line_count, force_update=True)
 
     def seek_to_end(self):
         # The first time we run the script we move all file markers at EOF.
@@ -113,16 +123,32 @@ class Worker(object):
         for fid, data in self._file_map.iteritems():
             start_position = self._file_config.get('start_position', data['file'].name)
 
+            if self._sincedb_path:
+                sincedb_start_position = self._sincedb_start_position(data['file'], fid=fid)
+                if sincedb_start_position:
+                    start_position = sincedb_start_position
+
             if start_position == "beginning":
                 continue
 
             line_count = 0
             try:
-                while data['file'].next():
-                    line_count += 1
+                if start_position == "end":
+                    self._logger.debug("[{0}] - getting end position for {1}".format(fid, data['file'].name))
+                    while data['file'].next():
+                        line_count += 1
+                else:
+                    self._logger.debug("[{0}] - going to start position {1} for {2}".format(fid, start_position, data['file'].name))
+                    start_position = int(start_position)
+                    while line_count <= start_position:
+                        data['file'].next()
+                        if line_count < start_position:
+                            line_count += 1
             except StopIteration:
                 self._logger.debug("[{0}] - line count {1} for {2}".format(fid, line_count, data['file'].name))
                 pass
+
+            self._sincedb_update_position(data['file'], fid=fid, lines=line_count, force_update=True)
 
             tail_lines = self._file_config.get('tail_lines', data['file'].name)
             tail_lines = int(tail_lines)
@@ -132,6 +158,94 @@ class Worker(object):
                 lines = self.tail(data['file'].name, encoding=encoding, window=tail_lines)
                 if lines:
                     self._callback(("callback", (data['file'].name, lines)))
+
+    def _sincedb_init(self):
+        """Initializes the sincedb schema in an sqlite db"""
+        if not self._sincedb_path:
+            return
+
+        if not os.path.exists(self._sincedb_path):
+            self._logger.debug('Initializing sincedb sqlite schema')
+            conn = sqlite3.connect(self._sincedb_path, isolation_level=None)
+            conn.execute("""
+            create table sincedb (
+                fid      text primary key,
+                filename text,
+                position integer default 1
+            );
+            """)
+            conn.close()
+
+    def _sincedb_update_position(self, file, fid=None, lines=0, force_update=False):
+        """Retrieves the starting position from the sincedb sql db for a given file
+        Returns a boolean representing whether or not it updated the record
+        """
+        if not self._sincedb_path:
+            return False
+
+        if not fid:
+            fid = self.get_file_id(os.stat(file.name))
+
+        current_time = int(time.time())
+        update_time = self._file_map[fid]['update_time']
+        if not force_update:
+            sincedb_write_interval = self._file_config.get('sincedb_write_interval', file.name)
+            if update_time and current_time - update_time <= sincedb_write_interval:
+                return False
+
+            if lines == 0:
+                return False
+
+        self._sincedb_init()
+
+        old_count = self._file_map[fid]['line']
+        self._file_map[fid]['update_time'] = current_time
+        self._file_map[fid]['line'] = old_count + lines
+        lines = self._file_map[fid]['line']
+
+        self._logger.debug("[{0}] - updating sincedb for logfile {1} from {2} to {3}".format(fid, file.name, old_count, lines))
+
+        conn = sqlite3.connect(self._sincedb_path, isolation_level=None)
+        cursor = conn.cursor()
+        query = "insert or ignore into sincedb (fid, filename) values (:fid, :filename);"
+        cursor.execute(query, {
+            'fid': fid,
+            'filename': file.name
+        })
+
+        query = "update sincedb set position = :position where fid = :fid and filename = :filename"
+        cursor.execute(query, {
+            'fid': fid,
+            'filename': file.name,
+            'position': int(lines),
+        })
+        conn.close()
+
+        return True
+
+    def _sincedb_start_position(self, file, fid=None):
+        """Retrieves the starting position from the sincedb sql db
+        for a given file
+        """
+        if not self._sincedb_path:
+            return None
+
+        if not fid:
+            fid = self.get_file_id(os.stat(file.name))
+
+        self._sincedb_init()
+        conn = sqlite3.connect(self._sincedb_path, isolation_level=None)
+        cursor = conn.cursor()
+        cursor.execute("select position from sincedb where fid = :fid and filename = :filename", {
+            'fid': fid,
+            'filename': file.name
+        })
+
+        start_position = None
+        for row in cursor.fetchall():
+            start_position, = row
+
+        return start_position
 
     def update_files(self):
         """Ensures all files are properly loaded.
@@ -222,6 +336,8 @@ class Worker(object):
             self._logger.info("[{0}] - watching logfile {1}".format(fid, fname))
             self._file_map[fid] = {
                 'file': file,
+                'line': 0,
+                'update_time': None,
             }
 
     @staticmethod

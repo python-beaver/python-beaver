@@ -104,6 +104,10 @@ The following are used for instances when a TransportException is thrown - Trans
 * respawn_delay: Default ``3``. Initial respawn delay for exponential backoff
 * max_failure: Default ``7``. Max failures before exponential backoff terminates
 
+The following configuration keys are for SinceDB support. Specifying these will enable saving the current line number in an sqlite database. This is useful for cases where you may be restarting the beaver process, such as during a logrotate.
+
+* sincedb_path: Default ``None``. Full path to an ``sqlite3`` database. Will be created at this path if it does not exist. Beaver process must have read and write access
+
 The following configuration keys are for building an SSH Tunnel that can be used to proxy from the current host to a desired server. This proxy is torn down when Beaver halts in all cases.
 
 * ssh_key_file: Default ``None``. Full path to ``id_rsa`` key file
@@ -335,6 +339,23 @@ Example 14: Mqtt transport using Mosquitto::
 
     # From the commandline
     beaver -c /etc/beaver.conf -f /var/log/unmappable.log -t redis
+
+Example 15: Sincedb support using and sqlite3 db
+
+Note that this will require R/W permissions on the file at sincedb path, as Beaver will store the current line for a given filename/file id.::
+
+    # /etc/beaver.conf
+    [beaver]
+    sincedb_path: /etc/beaver/since.db
+
+    [/var/log/syslog]
+    type: syslog
+    tags: sys,main
+    sincedb_write_interval: 3 ; time in seconds
+
+    # From the commandline
+    beaver -c /etc/beaver.conf -t redis
+
 
 Todo
 ====
