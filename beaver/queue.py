@@ -1,3 +1,4 @@
+import os
 import Queue
 import signal
 import sys
@@ -40,6 +41,21 @@ def run_queue(queue, beaver_config, file_config, logger=None):
 
             if command == "callback":
                 try:
+                    if file_config.get('ignore_empty', data['filename']):
+                        logger.debug("removing empty lines")
+                        lines = data['lines']
+                        new_lines = []
+                        for line in lines:
+                            message = line.strip(os.linesep)
+                            if len(message) == 0:
+                                continue
+                            new_lines.append(message)
+                        data['lines'] = new_lines
+
+                    if len(data['lines']) == 0:
+                        logger.debug("0 active lines sent from worker")
+                        continue
+
                     transport.callback(**data)
                 except TransportException:
                     failure_count = failure_count + 1

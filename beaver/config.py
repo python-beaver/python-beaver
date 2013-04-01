@@ -280,6 +280,10 @@ class FileConfig():
             'discover_interval': '15',
             'exclude': '',
             'format': '',
+
+            # throw out empty lines instead of shipping them
+            'ignore_empty': '0',
+
             'message_format': '',
             'sincedb_write_interval': '15',
             'stat_interval': '1',
@@ -358,6 +362,8 @@ class FileConfig():
             config['type'] = file_type
         except:
             config['type'] = "file"
+
+        config['ignore_empty'] = bool(int(config['ignore_empty']))
 
         return config
 
