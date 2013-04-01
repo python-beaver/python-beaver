@@ -40,7 +40,7 @@ def run_queue(queue, beaver_config, file_config, logger=None):
 
             if command == "callback":
                 try:
-                    transport.callback(*data)
+                    transport.callback(**data)
                 except TransportException:
                     failure_count = failure_count + 1
                     if failure_count > beaver_config.get('max_failure'):

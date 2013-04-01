@@ -1,3 +1,4 @@
+import datetime
 import errno
 import gzip
 import io
@@ -112,7 +113,12 @@ class Worker(object):
                 if not self._sincedb_update_position(file, fid=fid, lines=current_line_count):
                     line_count += current_line_count
 
-            self._callback(("callback", (file.name, lines)))
+            self._callback(("callback", {
+                'filename': file.name,
+                'lines': lines,
+                'timestamp': datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+            }))
+
             lines = file.readlines(4096)
 
         if line_count > 0:
