@@ -376,6 +376,8 @@ class FileConfig():
                 self._logger.debug('Skipping glob due to no files found: %s' % filename)
                 continue
 
+            config = self._gen_config(config)
+
             for globbed_file in globs:
                 files[os.path.realpath(globbed_file)] = config
 
