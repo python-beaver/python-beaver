@@ -58,6 +58,7 @@ def run_queue(queue, beaver_config, file_config, logger=None):
 
                         sys.exit(0)
             elif command == "addglob":
+                file_config.addglob(*data)
                 transport.addglob(*data)
             elif command == "exit":
                 break
