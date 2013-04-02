@@ -9,6 +9,7 @@ args = parse_args()
 version(args)
 
 if args.daemonize:
+    assert args.pid, "A pid path must be specified in the beaver config or via the -P flag"
     with daemon.DaemonContext(pidfile=PidFile(args.pid),):
         run(args)
 else:
