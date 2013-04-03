@@ -1,13 +1,11 @@
 import fakeredis
 import logging
 import mock
-import os
 import unittest
 
 import beaver
 from beaver.config import BeaverConfig, FileConfig
 from beaver.transport import create_transport, Transport
-from beaver.utils import setup_custom_logger
 
 
 class DummyTransport(Transport):

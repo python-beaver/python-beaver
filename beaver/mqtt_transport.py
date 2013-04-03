@@ -1,4 +1,3 @@
-import datetime
 from mosquitto import Mosquitto
 
 import beaver.transport
@@ -33,7 +32,6 @@ class MosquittoTransport(beaver.transport.Transport):
 
     def callback(self, filename, lines, **kwargs):
         """publishes lines one by one to the given topic"""
-        timestamp = self.get_timestamp(**kwargs)
 
         for line in lines:
             try:

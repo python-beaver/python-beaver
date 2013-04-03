@@ -1,5 +1,3 @@
-import datetime
-
 import beaver.transport
 import beaver.utils
 

@@ -1,5 +1,4 @@
 import mock
-import os
 import unittest
 
 from beaver.config import BeaverConfig, FileConfig
@@ -28,6 +27,5 @@ class ZmqTests(unittest.TestCase):
     def test_bind(self):
         self.beaver_config.set('zeromq_bind', 'bind')
         self.beaver_config.set('zeromq_address', 'tcp://localhost:2120')
-        transport = ZmqTransport(self.beaver_config, self.file_config)
+        ZmqTransport(self.beaver_config, self.file_config)
         #assert transport.zeromq_bind
-

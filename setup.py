@@ -5,6 +5,7 @@ from beaver import __version__
 
 try:
     from setuptools import setup
+    setup  # workaround for pyflakes issue #13
 except ImportError:
     from distutils.core import setup
 
