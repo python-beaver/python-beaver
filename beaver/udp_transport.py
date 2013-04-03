@@ -1,4 +1,3 @@
-import datetime
 import socket
 
 import beaver.transport

@@ -1,7 +1,6 @@
 import beaver.transport
 from beaver.transport import TransportException
 import boto.sqs
-import datetime
 import uuid
 
 
