@@ -1,4 +1,3 @@
-import datetime
 import pika
 
 import beaver.transport

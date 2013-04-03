@@ -1,4 +1,3 @@
-import datetime
 import redis
 import time
 import urlparse

@@ -1,4 +1,3 @@
-import datetime
 import zmq
 
 import beaver.transport
