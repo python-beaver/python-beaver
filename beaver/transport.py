@@ -116,7 +116,7 @@ class Transport(object):
             '@timestamp': timestamp,
             '@source_host': self._current_host,
             '@source_path': filename,
-            '@message': line.strip(os.linesep),
+            '@message': line,
         })
 
     def addglob(self, globname, globbed):

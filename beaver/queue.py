@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-import os
 import Queue
 import signal
 import sys
 import time
 
 from transport import TransportException, create_transport
+from unicode_dammit import unicode_dammit
 
 
 def run_queue(queue, beaver_config, file_config, logger=None):
@@ -47,7 +47,7 @@ def run_queue(queue, beaver_config, file_config, logger=None):
                         lines = data['lines']
                         new_lines = []
                         for line in lines:
-                            message = line.strip(os.linesep)
+                            message = unicode_dammit(line)
                             if len(message) == 0:
                                 continue
                             new_lines.append(message)
