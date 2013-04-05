@@ -160,9 +160,9 @@ class Worker(object):
                         if line_count < start_position:
                             line_count += 1
             except StopIteration:
-                self._logger.debug("[{0}] - line count {1} for {2}".format(fid, line_count, data['file'].name))
                 pass
 
+            self._logger.debug("[{0}] - line count {1} for {2}".format(fid, line_count, data['file'].name))
             self._sincedb_update_position(data['file'], fid=fid, lines=line_count, force_update=True)
 
             tail_lines = self._file_config.get('tail_lines', data['file'].name)
