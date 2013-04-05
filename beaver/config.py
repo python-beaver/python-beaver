@@ -365,6 +365,7 @@ class FileConfig():
             config['type'] = "file"
 
         config['ignore_empty'] = bool(int(config['ignore_empty']))
+        config['sincedb_write_interval'] = int(config['sincedb_write_interval'])
 
         return config
 
