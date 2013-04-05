@@ -9,6 +9,7 @@ import stat
 import time
 
 from beaver.utils import IS_GZIPPED_FILE, REOPEN_FILES, eglob
+from beaver.unicode_dammit import ENCODINGS
 
 
 class Worker(object):
@@ -140,8 +141,17 @@ class Worker(object):
             try:
                 if start_position == "end":
                     self._logger.debug("[{0}] - getting end position for {1}".format(fid, data['file'].name))
-                    while data['file'].next():
-                        line_count += 1
+                    for encoding in ENCODINGS:
+                        line_count = 0
+                        try:
+                            while data['file'].next():
+                                line_count += 1
+                            break
+                        except UnicodeDecodeError:
+                            line_count = 0
+                            data['file'] = self.open(data['file'].name, encoding=encoding)
+                            data['encoding'] = encoding
+
                 else:
                     self._logger.debug("[{0}] - going to start position {1} for {2}".format(fid, start_position, data['file'].name))
                     start_position = int(start_position)
@@ -158,7 +168,7 @@ class Worker(object):
             tail_lines = self._file_config.get('tail_lines', data['file'].name)
             tail_lines = int(tail_lines)
             if tail_lines:
-                encoding = self._file_config.get('encoding', data['file'].name)
+                encoding = data['encoding']
 
                 lines = self.tail(data['file'].name, encoding=encoding, window=tail_lines)
                 if lines:
@@ -311,7 +321,7 @@ class Worker(object):
                     position = data['file'].tell()
                     fname = data['file'].name
                     data['file'].close()
-                    file = self.open(fname, encoding=self._file_config.get('encoding', fname))
+                    file = self.open(fname, encoding=data['encoding'])
                     file.seek(position)
                     self._file_map[fid]['file'] = file
 
@@ -344,6 +354,7 @@ class Worker(object):
         else:
             self._logger.info("[{0}] - watching logfile {1}".format(fid, fname))
             self._file_map[fid] = {
+                'encoding': self._file_config.get('encoding', fname),
                 'file': file,
                 'line': 0,
                 'update_time': None,
