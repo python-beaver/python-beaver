@@ -21,11 +21,11 @@ class Worker(object):
     >>> def callback(filename, lines):
     ...     print filename, lines
     ...
-    >>> l = Worker(args, callback, ["log", "txt"], tail_lines=0)
+    >>> l = Worker(args, callback, ["log", "txt"])
     >>> l.loop()
     """
 
-    def __init__(self, beaver_config, file_config, queue_consumer_function, callback, logger=None, tail_lines=0):
+    def __init__(self, beaver_config, file_config, queue_consumer_function, callback, logger=None):
         """Arguments:
 
         (FileConfig) @file_config:
@@ -41,9 +41,6 @@ class Worker(object):
             a function which is called every time a new line in a
             file being watched is found;
             this is called with "filename" and "lines" arguments.
-
-        (int) @tail_lines:
-            read last N lines from files being watched before starting
         """
         self._beaver_config = beaver_config
         self._callback = callback
