@@ -311,7 +311,7 @@ class Worker(object):
                     position = data['file'].tell()
                     fname = data['file'].name
                     data['file'].close()
-                    file = io.open(fname, "r", encoding=self._file_config.get('encoding', fname))
+                    file = self.open(fname, encoding=self._file_config.get('encoding', fname))
                     file.seek(position)
                     self._file_map[fid]['file'] = file
 
@@ -336,10 +336,7 @@ class Worker(object):
     def watch(self, fname):
         """Opens a file for log tailing"""
         try:
-            if IS_GZIPPED_FILE.search(fname):
-                file = gzip.open(fname, "rb")
-            else:
-                file = io.open(fname, "r", encoding=self._file_config.get('encoding', fname))
+            file = self.open(fname, encoding=self._file_config.get('encoding', fname))
             fid = self.get_file_id(os.stat(fname))
         except EnvironmentError, err:
             if err.errno != errno.ENOENT:
@@ -351,6 +348,19 @@ class Worker(object):
                 'line': 0,
                 'update_time': None,
             }
+
+    @classmethod
+    def open(cls, fname, encoding=None):
+        """Opens a file with the appropriate call"""
+        if IS_GZIPPED_FILE.search(fname):
+            file = gzip.open(fname, "rb")
+        else:
+            if encoding:
+                file = io.open(fname, "r", encoding=encoding)
+            else:
+                file = io.open(fname, "r")
+
+        return file
 
     @staticmethod
     def get_file_id(st):
