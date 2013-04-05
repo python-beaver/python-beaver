@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import argparse
 import glob2
 import itertools

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import beaver.transport
 import beaver.utils
 

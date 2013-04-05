@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from mosquitto import Mosquitto
 
 import beaver.transport

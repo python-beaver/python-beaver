@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import beaver.transport
 from beaver.transport import TransportException
 import boto.sqs

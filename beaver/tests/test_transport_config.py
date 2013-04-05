@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import fakeredis
 import logging
 import mock

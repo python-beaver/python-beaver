@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import ConfigParser
 import logging
 import os
