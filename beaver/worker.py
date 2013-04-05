@@ -162,7 +162,11 @@ class Worker(object):
 
                 lines = self.tail(data['file'].name, encoding=encoding, window=tail_lines)
                 if lines:
-                    self._callback(("callback", (data['file'].name, lines)))
+                    self._callback(("callback", {
+                        'filename': data['file'].name,
+                        'lines': lines,
+                        'timestamp': datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+                    }))
 
     def _sincedb_init(self):
         """Initializes the sincedb schema in an sqlite db"""
