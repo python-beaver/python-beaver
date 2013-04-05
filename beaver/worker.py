@@ -162,6 +162,7 @@ class Worker(object):
             except StopIteration:
                 pass
 
+            current_position = data['file'].tell()
             self._logger.debug("[{0}] - line count {1} for {2}".format(fid, line_count, data['file'].name))
             self._sincedb_update_position(data['file'], fid=fid, lines=line_count, force_update=True)
 
@@ -170,7 +171,7 @@ class Worker(object):
             if tail_lines:
                 encoding = data['encoding']
 
-                lines = self.tail(data['file'].name, encoding=encoding, window=tail_lines)
+                lines = self.tail(data['file'].name, encoding=encoding, window=tail_lines, position=current_position)
                 if lines:
                     self._callback(("callback", {
                         'filename': data['file'].name,
@@ -377,33 +378,57 @@ class Worker(object):
     def get_file_id(st):
         return "%xg%x" % (st.st_dev, st.st_ino)
 
-    @staticmethod
-    def tail(fname, encoding, window):
+    @classmethod
+    def tail(cls, fname, encoding, window, position=None):
         """Read last N lines from file fname."""
-        try:
-            f = io.open(fname, "r", encoding=encoding)
-        except IOError, err:
-            if err.errno == errno.ENOENT:
-                return []
-            else:
+        if window <= 0:
+            raise ValueError('invalid window %r' % window)
+
+        encodings = ENCODINGS
+        if encoding:
+            encodings = [encoding] + ENCODINGS
+
+        for enc in encodings:
+            try:
+                f = cls.open(fname, encoding=enc)
+                return cls.tail_read(f, window, position=position)
+            except IOError, err:
+                if err.errno == errno.ENOENT:
+                    return []
                 raise
-        else:
-            BUFSIZ = 1024
-            f.seek(0, os.SEEK_END)
-            fsize = f.tell()
-            block = -1
-            data = ""
-            exit = False
-            while not exit:
-                step = (block * BUFSIZ)
-                if abs(step) >= fsize:
-                    f.seek(0)
-                    exit = True
-                else:
-                    f.seek(step, os.SEEK_END)
-                data = f.read().strip()
-                if data.count('\n') >= window:
-                    break
-                else:
-                    block -= 1
-            return data.splitlines()[-window:]
+            except UnicodeDecodeError:
+                pass
+
+    @classmethod
+    def tail_read(cls, f, window, position=None):
+        BUFSIZ = 1024
+        # open() was overridden and file was opened in text
+        # mode; read() will return a string instead bytes.
+        encoded = getattr(f, 'encoding', False)
+        CR = '\n' if encoded else b'\n'
+        data = '' if encoded else b''
+        f.seek(0, os.SEEK_END)
+        if position is None:
+            position = f.tell()
+
+        block = -1
+        exit = False
+        read = BUFSIZ
+
+        while not exit:
+            step = (block * BUFSIZ) + position
+            if step < 0:
+                step = 0
+                read = ((block + 1) * BUFSIZ) + position
+                exit = True
+
+            f.seek(step, os.SEEK_SET)
+            newdata = f.read(read)
+
+            data = newdata + data
+            if data.count(CR) > window:
+                break
+            else:
+                block -= 1
+
+        return data.splitlines()[-window:]
