@@ -235,15 +235,22 @@ class BeaverConfig():
             else:
                 config['hostname'] = socket.gethostname()
 
+        config['globs'] = {}
+
         return config
 
     def _update_files(self, config):
         globs = self.get('files', default=[])
         files = self.get('files', default=[])
 
+        if globs:
+            globs = dict(zip(globs, [None]*len(globs)))
+        else:
+            globs = {}
+
         try:
             files.extend(config.getfilepaths())
-            globs.extend(config.getglobs())
+            globs.update(config.getglobs())
         except AttributeError:
             files = config.getfilepaths()
             globs = config.getglobs()
@@ -279,6 +286,8 @@ class FileConfig():
             'add_field': '',
             'debug': '',
             'discover_interval': '15',
+
+            # should be a python regex of files to remove
             'exclude': '',
             'format': '',
 
@@ -324,7 +333,9 @@ class FileConfig():
         return self._files.keys()
 
     def getglobs(self):
-        return self._globs.keys()
+        globs = []
+        [globs.extend([name, self._globs[name].get('exclude')]) for name in self._globs]
+        return dict(zip(globs[0::2], globs[1::2]))
 
     def _gen_config(self, config):
         fields = config.get('add_field', '')
@@ -379,7 +390,7 @@ class FileConfig():
             config = dict((x[0], x[1]) for x in self._config.items(filename))
             glob_paths[filename] = config
 
-            globs = eglob(filename)
+            globs = eglob(filename, config.get('exclude', ''))
             if not globs:
                 self._logger.debug('Skipping glob due to no files found: %s' % filename)
                 continue

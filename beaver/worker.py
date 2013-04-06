@@ -278,8 +278,8 @@ class Worker(object):
         ls = []
         files = []
         if len(self._beaver_config.get('globs')) > 0:
-            for name in self._beaver_config.get('globs'):
-                globbed = [os.path.realpath(filename) for filename in eglob(name)]
+            for name, exclude in self._beaver_config.get('globs').items():
+                globbed = [os.path.realpath(filename) for filename in eglob(name, exclude)]
                 files.extend(globbed)
                 self._file_config.addglob(name, globbed)
                 self._callback(("addglob", (name, globbed)))
