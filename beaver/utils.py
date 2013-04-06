@@ -15,6 +15,8 @@ MAGIC_BRACKETS = re.compile("({([^}]+)})")
 IS_GZIPPED_FILE = re.compile(".gz$")
 REOPEN_FILES = 'linux' not in platform.platform().lower()
 
+cached_regices = {}
+
 
 def parse_args():
     epilog_example = """
@@ -93,11 +95,18 @@ def version(args):
         sys.exit(0)
 
 
-def eglob(path):
+def eglob(path, exclude=None):
     """Like glob.glob, but supports "/path/**/{a,b,c}.txt" lookup"""
     fi = itertools.chain.from_iterable
-    paths = expand_paths(path)
-    return list(fi(glob2.iglob(d) for d in paths))
+    paths = list(fi(glob2.iglob(d) for d in expand_paths(path)))
+    print paths
+    if exclude:
+        cached_regex = cached_regices.get(exclude, None)
+        if not cached_regex:
+            cached_regex = cached_regices[exclude] = re.compile(exclude)
+        paths = [x for x in paths if not cached_regex.search(x)]
+
+    return paths
 
 
 def expand_paths(path):
