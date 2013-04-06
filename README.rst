@@ -150,16 +150,7 @@ Example 4: Sending logs from /var/log files to a redis list::
     # From the commandline
     beaver  -c /etc/beaver.conf -t redis
 
-Example 5: Use environment variables to send logs from /var/log files to a redis list::
-
-    # /etc/beaver.conf
-    [beaver]
-    redis_url: redis://localhost:6379/0
-
-    # From the commandline
-    beaver  -c /etc/beaver.conf -p '/var/log' -t redis
-
-Example 6: Zeromq listening on port 5556 (all interfaces)::
+Example 5: Zeromq listening on port 5556 (all interfaces)::
 
     # /etc/beaver.conf
     [beaver]
@@ -180,7 +171,7 @@ Example 6: Zeromq listening on port 5556 (all interfaces)::
     beaver  -c /etc/beaver.conf -m bind -t zmq
 
 
-Example 7: Zeromq connecting to remote port 5556 on indexer::
+Example 6: Zeromq connecting to remote port 5556 on indexer::
 
     # /etc/beaver.conf
     [beaver]
@@ -200,7 +191,7 @@ Example 7: Zeromq connecting to remote port 5556 on indexer::
     # on the commandline
     beaver -c /etc/beaver.conf -m connect -t zmq
 
-Example 8: Real-world usage of Redis as a transport::
+Example 7: Real-world usage of Redis as a transport::
 
     # in /etc/hosts
     192.168.0.10 redis-internal
@@ -224,9 +215,7 @@ Example 8: Real-world usage of Redis as a transport::
     # From the commandline
     beaver -c /etc/beaver.conf -f /var/log/unmappable.log -t redis
 
-As you can see, ``beaver`` is pretty flexible as to how you can use/abuse it in production.
-
-Example 9: RabbitMQ connecting to defaults on remote broker::
+Example 8: RabbitMQ connecting to defaults on remote broker::
 
     # /etc/beaver.conf
     [beaver]
@@ -249,26 +238,30 @@ Example 9: RabbitMQ connecting to defaults on remote broker::
     # From the commandline
     beaver -c /etc/beaver.conf -t rabbitmq
 
-Example 10: Read config from config.ini and put to stdout::
+Example 9: Read config from config.ini and put to stdout::
 
     # /etc/beaver.conf:
+    ; follow a single file, add a type, some tags and fields
     [/tmp/somefile]
     type: mytype
     tags: tag1,tag2
     add_field: fieldname1,fieldvalue1[,fieldname2,fieldvalue2, ...]
 
+    ; follow all logs in /var/log except those with `messages` or `secure` in the name
     [/var/log/*log]
     type: syslog
     tags: sys
+    exclude: (messages,secure)
 
-    [/var/log/{secure,messages}.log]
+    ; follow /var/log/messages.log and /var/log/secure.log using file globbing
+    [/var/log/{messages,secure}.log]
     type: syslog
     tags: sys
 
     # From the commandline
     beaver -c /etc/beaver.conf -t stdout
 
-Example 11: UDP transport::
+Example 10: UDP transport::
 
     # /etc/beaver.conf
     [beaver]
@@ -288,7 +281,7 @@ Example 11: UDP transport::
     # From the commandline
     beaver -c /etc/beaver.conf -t udp
 
-Example 12: SQS Transport::
+Example 11: SQS Transport::
 
     # /etc/beaver.conf
     [beaver]
@@ -312,11 +305,11 @@ Example 12: SQS Transport::
     # From the commandline
     beaver -c /etc/beaver.conf -t sqs
 
-Example 13: [Raw Json Support](http://blog.pkhamre.com/2012/08/23/logging-to-logstash-json-format-in-nginx/::
+Example 12: [Raw Json Support](http://blog.pkhamre.com/2012/08/23/logging-to-logstash-json-format-in-nginx/::
 
     beaver --format rawjson
 
-Example 14: Mqtt transport using Mosquitto::
+Example 13: Mqtt transport using Mosquitto::
 
     # /etc/beaver.conf
     [beaver]
@@ -340,7 +333,7 @@ Example 14: Mqtt transport using Mosquitto::
     # From the commandline
     beaver -c /etc/beaver.conf -f /var/log/unmappable.log -t redis
 
-Example 15: Sincedb support using and sqlite3 db
+Example 14: Sincedb support using and sqlite3 db
 
 Note that this will require R/W permissions on the file at sincedb path, as Beaver will store the current line for a given filename/file id.::
 
@@ -355,6 +348,9 @@ Note that this will require R/W permissions on the file at sincedb path, as Beav
 
     # From the commandline
     beaver -c /etc/beaver.conf -t redis
+
+
+As you can see, ``beaver`` is pretty flexible as to how you can use/abuse it in production.
 
 
 Todo
