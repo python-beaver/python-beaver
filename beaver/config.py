@@ -116,7 +116,7 @@ class BeaverConfig():
             'ssh_remote_port',
         ]
 
-        has = len(filter(lambda x: self.get(x) != None, required))
+        has = len(filter(lambda x: self.get(x) is not None, required))
         if has > 0 and has != len(required):
             self._logger.warning("Missing {0} of {1} required config variables for ssh".format(len(required) - has, len(required)))
 
@@ -230,7 +230,7 @@ class BeaverConfig():
             raise LookupError('{0} does not exist'.format(config['path']))
 
         if config.get('hostname') is None:
-            if config.get('fqdn') == True:
+            if config.get('fqdn') is True:
                 config['hostname'] = socket.getfqdn()
             else:
                 config['hostname'] = socket.gethostname()

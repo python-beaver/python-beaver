@@ -53,7 +53,7 @@ def setup_custom_logger(name, args=None, output=None, formatter=None):
         logger.handlers = []
 
     has_args = args is not None and type(args) == argparse.Namespace
-    is_debug = has_args and args.debug == True
+    is_debug = has_args and args.debug is True
 
     if not logger.handlers:
         if formatter is None:
