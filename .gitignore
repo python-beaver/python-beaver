@@ -2,6 +2,7 @@
 *.egg
 *.egg-info
 *.swp
+*.db
 build
 dist
 pkg
