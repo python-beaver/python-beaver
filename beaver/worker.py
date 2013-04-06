@@ -127,6 +127,7 @@ class Worker(object):
         # The first time we run the script we move all file markers at EOF.
         # In case of files created afterwards we don't do this.
         for fid, data in self._file_map.iteritems():
+            self._logger.debug("[{0}] - getting start position {1}".format(fid, data['file'].name))
             start_position = self._file_config.get('start_position', data['file'].name)
 
             if self._sincedb_path:
