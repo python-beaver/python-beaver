@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import multiprocessing
+import Queue
 import signal
 import sys
 
@@ -26,7 +27,10 @@ def run(args):
         logger.info("{0} detected".format(sig_name))
         logger.info("Shutting down. Please wait...")
 
-        queue.put(("exit", ()))
+        try:
+            queue.put_nowait(("exit", ()))
+        except Queue.Full:
+            pass
 
         if worker is not None:
             logger.info("Closing worker...")
