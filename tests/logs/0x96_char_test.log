@@ -1,0 +1,3 @@
+Mar 6, 2013 6:46:06 AM amdocs.iamcust.dlv.pf.pfflow.activity.CalculatePriorityAndAssigneeActivity _runActivity
+SEVERE: Error in CalculatePriorityAndAssigneeActivity. Exception occurred is ?amdocs.mvcinfra.model.exceptions.ApplicationException
+amdocs.mvcinfra.model.exceptions.ApplicationException

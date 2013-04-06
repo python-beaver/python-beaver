@@ -1,0 +1,3 @@
+[./tests/logs/*.log] ; paths are relative to your current path
+type: logs
+exclude: invalid_chars
