@@ -141,30 +141,40 @@ class Worker(object):
             line_count = 0
 
             if str(start_position).isdigit():
-                try:
-                    self._logger.debug("[{0}] - going to start position {1} for {2}".format(fid, start_position, data['file'].name))
-                    start_position = int(start_position)
-                    while line_count <= start_position:
-                        data['file'].next()
-                        if line_count < start_position:
+                self._logger.debug("[{0}] - going to start position {1} for {2}".format(fid, start_position, data['file'].name))
+                start_position = int(start_position)
+                for encoding in ENCODINGS:
+                    try:
+                        line_count = 0
+                        while data['file'].readline():
                             line_count += 1
-                except StopIteration:
+                            if line_count == start_position:
+                                break
+                    except UnicodeDecodeError:
+                        self._logger.debug("[{0}] - UnicodeDecodeError raised for {1} with encoding {2}".format(fid, data['file'].name, data['encoding']))
+                        data['file'] = self.open(data['file'].name, encoding=encoding)
+                        data['encoding'] = encoding
+
                     if line_count != start_position:
-                        start_position = "end"
+                        self._logger.debug("[{0}] - file at different position than {1}, assuming manual truncate for {2}".format(fid, start_position, data['file'].name))
+                        data['file'].seek(0, os.SEEK_SET)
+                        start_position == "beginning"
+
+            if start_position == "beginning":
+                continue
 
             if start_position == "end":
                 self._logger.debug("[{0}] - getting end position for {1}".format(fid, data['file'].name))
                 for encoding in ENCODINGS:
                     try:
                         line_count = 0
-                        while data['file'].next():
+                        while data['file'].readline():
                             line_count += 1
                         break
                     except UnicodeDecodeError:
+                        self._logger.debug("[{0}] - UnicodeDecodeError raised for {1} with encoding {2}".format(fid, data['file'].name, data['encoding']))
                         data['file'] = self.open(data['file'].name, encoding=encoding)
                         data['encoding'] = encoding
-                    except StopIteration:
-                        pass
 
             current_position = data['file'].tell()
             self._logger.debug("[{0}] - line count {1} for {2}".format(fid, line_count, data['file'].name))
