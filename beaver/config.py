@@ -235,6 +235,9 @@ class BeaverConfig():
             else:
                 config['hostname'] = socket.gethostname()
 
+        if config.get('sincedb_path'):
+            config['sincedb_path'] = os.path.realpath(config.get('sincedb_path'))
+
         config['globs'] = {}
 
         return config
