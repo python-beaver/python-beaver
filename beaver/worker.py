@@ -140,7 +140,7 @@ class Worker(object):
 
             line_count = 0
 
-            if start_position.isdigit():
+            if str(start_position).isdigit():
                 try:
                     self._logger.debug("[{0}] - going to start position {1} for {2}".format(fid, start_position, data['file'].name))
                     start_position = int(start_position)
