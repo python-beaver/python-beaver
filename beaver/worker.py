@@ -138,29 +138,32 @@ class Worker(object):
                 continue
 
             line_count = 0
-            try:
-                if start_position == "end":
-                    self._logger.debug("[{0}] - getting end position for {1}".format(fid, data['file'].name))
-                    for encoding in ENCODINGS:
-                        line_count = 0
-                        try:
-                            while data['file'].next():
-                                line_count += 1
-                            break
-                        except UnicodeDecodeError:
-                            line_count = 0
-                            data['file'] = self.open(data['file'].name, encoding=encoding)
-                            data['encoding'] = encoding
 
-                else:
+            if start_position.isdigit():
+                try:
                     self._logger.debug("[{0}] - going to start position {1} for {2}".format(fid, start_position, data['file'].name))
                     start_position = int(start_position)
                     while line_count <= start_position:
                         data['file'].next()
                         if line_count < start_position:
                             line_count += 1
-            except StopIteration:
-                pass
+                except StopIteration:
+                    if line_count != start_position:
+                        start_position = "end"
+
+            if start_position == "end":
+                self._logger.debug("[{0}] - getting end position for {1}".format(fid, data['file'].name))
+                for encoding in ENCODINGS:
+                    try:
+                        line_count = 0
+                        while data['file'].next():
+                            line_count += 1
+                        break
+                    except UnicodeDecodeError:
+                        data['file'] = self.open(data['file'].name, encoding=encoding)
+                        data['encoding'] = encoding
+                    except StopIteration:
+                        pass
 
             current_position = data['file'].tell()
             self._logger.debug("[{0}] - line count {1} for {2}".format(fid, line_count, data['file'].name))
