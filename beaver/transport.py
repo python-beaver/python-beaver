@@ -2,6 +2,21 @@
 import os
 import datetime
 
+# priority: ujson > simplejson > jsonlib2 > json
+priority = ['ujson', 'simplejson', 'jsonlib2', 'json']
+for mod in priority:
+    try:
+        json = __import__(mod)
+    except ImportError:
+        pass
+    else:
+        break
+
+try:
+    import msgpack
+except ImportError:
+    import msgpack_pure as msgpack
+
 
 def create_transport(beaver_config, file_config, logger):
     """Creates and returns a transport object"""
@@ -33,50 +48,32 @@ class Transport(object):
         formatter for the current transport
         """
         self._current_host = beaver_config.get('hostname')
+        self._default_formatter = beaver_config.get('format', 'null')
+        self._formatters = {}
         self._file_config = file_config
         self._is_valid = True
         self._logger = logger
 
-        if beaver_config.get('format') == 'msgpack':
-            import msgpack
-            packer = msgpack.Packer()
-            self._formatter = packer.pack
-        elif beaver_config.get('format') == 'json':
-            # priority: ujson > simplejson > jsonlib2 > json
-            priority = ['ujson', 'simplejson', 'jsonlib2', 'json']
-            for mod in priority:
-                try:
-                    json = __import__(mod)
-                    self._formatter = json.dumps
-                except ImportError:
-                    pass
-                else:
-                    break
-        elif beaver_config.get('format') == 'rawjson':
-            # priority: ujson > simplejson > jsonlib2 > json
-            priority = ['ujson', 'simplejson', 'jsonlib2', 'json']
-            for mod in priority:
-                try:
-                    json = __import__(mod)
-                    def rawjson_formatter(data):
-                        json_data = json.loads(data['@message'])
-                        for field in ['@source', '@type', '@tags', '@source_host', '@source_path']:
-                            if  field in data:
-                                json_data[field] = data[field]
-                        return json.dumps(json_data)
-                    self._formatter = rawjson_formatter
-                except ImportError:
-                    pass
-                else:
-                    break
-        elif beaver_config.get('format') == 'string':
-            def string_formatter(data):
-                return "[{0}] [{1}] {2}".format(data['@source_host'], data['@timestamp'], data['@message'])
-            self._formatter = string_formatter
-        else:
-            def null_formatter(data):
-                return data['@message']
-            self._formatter = null_formatter
+        msgpack_formatter = msgpack.Packer()
+
+        def null_formatter(data):
+            return data['@message']
+
+        def rawjson_formatter(data):
+            json_data = json.loads(data['@message'])
+            for field in ['@source', '@type', '@tags', '@source_host', '@source_path']:
+                if field in data:
+                    json_data[field] = data[field]
+            return json.dumps(json_data)
+
+        def string_formatter(data):
+            return "[{0}] [{1}] {2}".format(data['@source_host'], data['@timestamp'], data['@message'])
+
+        self._formatters['json'] = json.dumps
+        self._formatters['msgpack'] = msgpack_formatter.pack
+        self._formatters['null'] = null_formatter
+        self._formatters['rawjson'] = rawjson_formatter
+        self._formatters['string'] = string_formatter
 
     def callback(self, filename, lines):
         """Processes a set of lines for a filename"""
@@ -108,7 +105,11 @@ class Transport(object):
 
     def format(self, filename, timestamp, line):
         """Returns a formatted log line"""
-        return self._formatter({
+        formatter = self._file_config.get('message_format', filename)
+        if formatter not in self._formatters:
+            formatter = self._default_formatter
+
+        return self._formatters[formatter]({
             '@source': "file://{0}{1}".format(self._current_host, filename),
             '@type': self._file_config.get('type', filename),
             '@tags': self._file_config.get('tags', filename),
