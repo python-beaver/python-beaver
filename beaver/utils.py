@@ -99,7 +99,6 @@ def eglob(path, exclude=None):
     """Like glob.glob, but supports "/path/**/{a,b,c}.txt" lookup"""
     fi = itertools.chain.from_iterable
     paths = list(fi(glob2.iglob(d) for d in expand_paths(path)))
-    print paths
     if exclude:
         cached_regex = cached_regices.get(exclude, None)
         if not cached_regex:
