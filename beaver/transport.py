@@ -99,7 +99,7 @@ class Transport(object):
     def get_timestamp(self, **kwargs):
         timestamp = kwargs.get('timestamp')
         if not timestamp:
-            timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+            timestamp = datetime.datetime.utcnow().isoformat() + "Z"
 
         return timestamp
 

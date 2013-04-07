@@ -115,7 +115,7 @@ class Worker(object):
             self._callback(("callback", {
                 'filename': file.name,
                 'lines': lines,
-                'timestamp': datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+                'timestamp': datetime.datetime.utcnow().isoformat() + "Z",
             }))
 
             lines = file.readlines(4096)
@@ -190,7 +190,7 @@ class Worker(object):
                     self._callback(("callback", {
                         'filename': data['file'].name,
                         'lines': lines,
-                        'timestamp': datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+                        'timestamp': datetime.datetime.utcnow().isoformat() + "Z",
                     }))
 
     def _sincedb_init(self):
