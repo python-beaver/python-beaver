@@ -48,14 +48,15 @@ def parse_args():
     return parser.parse_args()
 
 
-def setup_custom_logger(name, args=None, output=None, formatter=None):
+def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None):
     logger = logging.getLogger(name)
     logger.propagate = False
     if logger.handlers:
         logger.handlers = []
 
     has_args = args is not None and type(args) == argparse.Namespace
-    is_debug = has_args and args.debug is True
+    if debug is None:
+        debug = has_args and args.debug is True
 
     if not logger.handlers:
         if formatter is None:
@@ -73,7 +74,7 @@ def setup_custom_logger(name, args=None, output=None, formatter=None):
 
         logger.addHandler(handler)
 
-    if is_debug:
+    if debug:
         logger.setLevel(logging.DEBUG)
         if hasattr(logging, 'captureWarnings'):
             logging.captureWarnings(True)
