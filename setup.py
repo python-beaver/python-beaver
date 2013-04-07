@@ -21,7 +21,7 @@ setup(
     version=__version__,
     author='Jose Diaz-Gonzalez',
     author_email='support@savant.be',
-    packages=['beaver', 'beaver.tests'],
+    packages=['beaver', 'beaver.tests', 'beaver.transports'],
     scripts=['bin/beaver'],
     url='http://github.com/josegonzalez/beaver',
     license=open('LICENSE.txt').read(),

@@ -5,7 +5,7 @@ import unittest
 from beaver.config import BeaverConfig, FileConfig
 
 try:
-    from beaver.zmq_transport import ZmqTransport
+    from beaver.transport.zmq_transport import ZmqTransport
     skip = False
 except ImportError, e:
     if e.message == "No module named zmq":

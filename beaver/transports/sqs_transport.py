@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-import beaver.transport
-from beaver.transport import TransportException
 import boto.sqs
 import uuid
 
+from beaver.transports.base_transport import BaseTransport
+from beaver.transports.transport import TransportException
 
-class SqsTransport(beaver.transport.Transport):
+
+class SqsTransport(BaseTransport):
 
     def __init__(self, beaver_config, file_config, logger=None):
         super(SqsTransport, self).__init__(beaver_config, file_config, logger=logger)

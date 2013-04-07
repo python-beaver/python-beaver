@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from mosquitto import Mosquitto
 
-import beaver.transport
-from beaver.transport import TransportException
+from beaver.transports.base_transport import BaseTransport
+from beaver.transports.transport import TransportException
 
 
-class MosquittoTransport(beaver.transport.Transport):
+class MosquittoTransport(BaseTransport):
 
     def __init__(self, beaver_config, file_config, logger=None):
         """

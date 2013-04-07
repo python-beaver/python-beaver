@@ -6,10 +6,11 @@ import unittest
 
 import beaver
 from beaver.config import BeaverConfig, FileConfig
-from beaver.transport import create_transport, Transport
+from beaver.transports import create_transport
+from beaver.transports.base_transport import BaseTransport
 
 
-class DummyTransport(Transport):
+class DummyTransport(BaseTransport):
     pass
 
 

@@ -3,11 +3,11 @@ import redis
 import time
 import urlparse
 
-import beaver.transport
-from beaver.transport import TransportException
+from beaver.transports.base_transport import BaseTransport
+from beaver.transports.transport import TransportException
 
 
-class RedisTransport(beaver.transport.Transport):
+class RedisTransport(BaseTransport):
 
     def __init__(self, beaver_config, file_config, logger=None):
         super(RedisTransport, self).__init__(beaver_config, file_config, logger=logger)

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 import pika
 
-import beaver.transport
-from beaver.transport import TransportException
+from beaver.transports.base_transport import BaseTransport
+from beaver.transports.transport import TransportException
 
 
-class RabbitmqTransport(beaver.transport.Transport):
+class RabbitmqTransport(BaseTransport):
 
     def __init__(self, beaver_config, file_config, logger=None):
         super(RabbitmqTransport, self).__init__(beaver_config, file_config, logger=logger)

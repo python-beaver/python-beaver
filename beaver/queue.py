@@ -4,7 +4,8 @@ import signal
 import sys
 import time
 
-from transport import TransportException, create_transport
+from beaver.transports import create_transport
+from beaver.transports.transport import TransportException
 from unicode_dammit import unicode_dammit
 
 
