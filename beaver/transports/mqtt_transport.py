@@ -34,6 +34,8 @@ class MosquittoTransport(BaseTransport):
     def callback(self, filename, lines, **kwargs):
         """publishes lines one by one to the given topic"""
         timestamp = self.get_timestamp(**kwargs)
+        if kwargs.get('timestamp', False):
+            del kwargs['timestamp']
 
         for line in lines:
             try:

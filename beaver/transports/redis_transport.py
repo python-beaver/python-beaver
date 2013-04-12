@@ -44,6 +44,8 @@ class RedisTransport(BaseTransport):
 
     def callback(self, filename, lines, **kwargs):
         timestamp = self.get_timestamp(**kwargs)
+        if kwargs.get('timestamp', False):
+            del kwargs['timestamp']
 
         for line in lines:
             self._pipeline.rpush(

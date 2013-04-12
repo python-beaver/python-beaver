@@ -28,6 +28,8 @@ class ZmqTransport(BaseTransport):
 
     def callback(self, filename, lines, **kwargs):
         timestamp = self.get_timestamp(**kwargs)
+        if kwargs.get('timestamp', False):
+            del kwargs['timestamp']
 
         for line in lines:
             self._pub.send(self.format(filename, line, timestamp, **kwargs))
