@@ -83,7 +83,7 @@ class BaseTransport(object):
 
     def format(self, filename, timestamp, line):
         """Returns a formatted log line"""
-        formatter = self._file_config.get('message_format', filename)
+        formatter = self._file_config.get('format', filename)
         if formatter not in self._formatters:
             formatter = self._default_formatter
 
