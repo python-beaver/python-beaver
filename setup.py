@@ -27,7 +27,7 @@ setup(
     packages=['beaver', 'beaver.dispatcher', 'beaver.tests', 'beaver.transports', 'beaver.worker'],
     scripts=['bin/beaver'],
     url='http://github.com/josegonzalez/beaver',
-    license=open('LICENSE.txt').read(),
+    license='LICENSE.txt',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: System Administrators',
