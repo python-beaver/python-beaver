@@ -17,5 +17,4 @@ class UdpTransport(BaseTransport):
         timestamp = self.get_timestamp(**kwargs)
 
         for line in lines:
-            formatted = self.format(filename, timestamp, line)
-            self._sock.sendto(formatted, self._address)
+            self._sock.sendto(self.format(filename, line, timestamp, **kwargs), self._address)

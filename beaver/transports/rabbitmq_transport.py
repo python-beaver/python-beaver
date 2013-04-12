@@ -51,7 +51,7 @@ class RabbitmqTransport(BaseTransport):
                     self._channel.basic_publish(
                         exchange=self._rabbitmq_exchange,
                         routing_key=self._rabbitmq_key,
-                        body=self.format(filename, timestamp, line),
+                        body=self.format(filename, line, timestamp, **kwargs),
                         properties=pika.BasicProperties(
                             content_type='text/json',
                             delivery_mode=1

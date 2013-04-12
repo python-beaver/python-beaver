@@ -30,7 +30,7 @@ class ZmqTransport(BaseTransport):
         timestamp = self.get_timestamp(**kwargs)
 
         for line in lines:
-            self._pub.send(self.format(filename, timestamp, line))
+            self._pub.send(self.format(filename, line, timestamp, **kwargs))
 
     def interrupt(self):
         self._pub.close()

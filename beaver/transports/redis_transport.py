@@ -48,7 +48,7 @@ class RedisTransport(BaseTransport):
         for line in lines:
             self._pipeline.rpush(
                 self._redis_namespace,
-                self.format(filename, timestamp, line)
+                self.format(filename, line, timestamp, **kwargs)
             )
 
         self._pipeline.execute()

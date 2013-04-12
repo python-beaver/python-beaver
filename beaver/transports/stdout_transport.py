@@ -13,4 +13,4 @@ class StdoutTransport(BaseTransport):
         timestamp = self.get_timestamp(**kwargs)
 
         for line in lines:
-            self._stdout.info(self.format(filename, timestamp, line))
+            self._stdout.info(self.format(filename, line, timestamp, **kwargs))

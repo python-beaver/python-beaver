@@ -81,7 +81,7 @@ class BaseTransport(object):
 
         return timestamp
 
-    def format(self, filename, timestamp, line):
+    def format(self, filename, line, timestamp, **kwargs):
         """Returns a formatted log line"""
         formatter = self._file_config.get('format', filename)
         if formatter not in self._formatters:
@@ -89,9 +89,9 @@ class BaseTransport(object):
 
         return self._formatters[formatter]({
             '@source': 'file://{0}{1}'.format(self._current_host, filename),
-            '@type': self._file_config.get('type', filename),
-            '@tags': self._file_config.get('tags', filename),
-            '@fields': self._file_config.get('fields', filename),
+            '@type': kwargs.get('type'),
+            '@tags': kwargs.get('tags'),
+            '@fields': kwargs.get('fields'),
             '@timestamp': timestamp,
             '@source_host': self._current_host,
             '@source_path': filename,

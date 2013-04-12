@@ -40,7 +40,7 @@ class SqsTransport(BaseTransport):
 
         message_batch = []
         for line in lines:
-            message_batch.append((uuid.uuid4(), self.format(filename, timestamp, line), 0))
+            message_batch.append((uuid.uuid4(), self.format(filename, line, timestamp, **kwargs), 0))
             if len(message_batch) == 10:  # SQS can only handle up to 10 messages in batch send
                 self._logger.debug('Flushing 10 messages to SQS queue')
                 self._send_message_batch(message_batch)
