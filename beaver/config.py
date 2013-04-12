@@ -297,6 +297,7 @@ class FileConfig():
             'add_field': '',
             'debug': '0',
             'discover_interval': '15',
+            'encoding': 'utf_8',
 
             # should be a python regex of files to remove
             'exclude': '',
@@ -312,7 +313,6 @@ class FileConfig():
             'tags': '',
             'tail_lines': '0',
             'type': '',
-            'encoding': 'utf_8',
         }
 
         self._configfile = args.config
