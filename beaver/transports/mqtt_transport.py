@@ -33,13 +33,14 @@ class MosquittoTransport(BaseTransport):
 
     def callback(self, filename, lines, **kwargs):
         """publishes lines one by one to the given topic"""
+        timestamp = self.get_timestamp(**kwargs)
 
         for line in lines:
             try:
                 import warnings
                 with warnings.catch_warnings():
                     warnings.simplefilter('error')
-                    self._client.publish(self._topic, line, 0)
+                    self._client.publish(self._topic, self.format(filename, line, timestamp, **kwargs), 0)
             except Exception, e:
                 try:
                     raise TransportException(e.strerror)
