@@ -11,10 +11,13 @@ except ImportError:
     from distutils.core import setup
 
 
+requirements = []
 if sys.version_info[:2] <= (2, 6):
-    requirements = open('requirements/base26.txt').readlines()
+    with open('requirements/base26.txt') as f:
+        requirements = f.read().splitlines()
 else:
-    requirements = open('requirements/base.txt').readlines()
+    with open('requirements/base.txt') as f:
+        requirements = f.read().splitlines()
 
 setup(
     name='Beaver',
