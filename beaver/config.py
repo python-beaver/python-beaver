@@ -306,6 +306,9 @@ class FileConfig():
             # throw out empty lines instead of shipping them
             'ignore_empty': '0',
 
+            # allow ignoring copytruncate results
+            'ignore_truncate': '0',
+
             'message_format': '',
             'sincedb_write_interval': '15',
             'stat_interval': '1',
@@ -388,6 +391,8 @@ class FileConfig():
 
         config['debug'] = bool(int(config['debug']))
         config['ignore_empty'] = bool(int(config['ignore_empty']))
+        config['ignore_truncate'] = bool(int(config['ignore_truncate']))
+
         config['sincedb_write_interval'] = int(config['sincedb_write_interval'])
         config['stat_interval'] = int(config['stat_interval'])
         config['tail_lines'] = int(config['tail_lines'])

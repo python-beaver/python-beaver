@@ -37,6 +37,7 @@ class Tail(BaseLog):
         self._fields = file_config.get('fields', filename)
         self._format = file_config.get('format', filename)
         self._ignore_empty = file_config.get('ignore_empty', filename)
+        self._ignore_truncate = file_config.get('ignore_truncate', filename)
         self._message_format = file_config.get('message_format', filename)  # TODO: Implement me
         self._sincedb_write_interval = file_config.get('sincedb_write_interval', filename)
         self._start_position = file_config.get('start_position', filename)
@@ -112,6 +113,13 @@ class Tail(BaseLog):
             self._log_info('file rotated')
             self.close()
         elif self._file.tell() > st.st_size:
+            if st.st_size == 0 and self._ignore_truncate:
+                self._logger.info("[{0}] - file size is 0 {1}. ".format(fid, self._filename) +
+                                  "If you use another tool (i.e. logrotate) to truncate " +
+                                  "the file, your application may continue to write to " +
+                                  "the offset it last wrote later. In such a case, we'd " +
+                                  "better do nothing here")
+                return
             self._log_info('file truncated')
             self._update_file(seek_to_end=False)
         elif REOPEN_FILES:

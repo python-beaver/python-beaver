@@ -328,6 +328,13 @@ class Worker(object):
                     self.unwatch(data['file'], fid)
                     self.watch(data['file'].name)
                 elif data['file'].tell() > st.st_size:
+                    if st.st_size == 0 and self._file_config.get('ignore_truncate', data['file'].name):
+                        self._logger.info("[{0}] - file size is 0 {1}. ".format(fid, data['file'].name) +
+                                          "If you use another tool (i.e. logrotate) to truncate " +
+                                          "the file, your application may continue to write to " +
+                                          "the offset it last wrote later. In such a case, we'd " +
+                                          "better do nothing here")
+                        continue
                     self._logger.info("[{0}] - file truncated {1}".format(fid, data['file'].name))
                     self.unwatch(data['file'], fid)
                     self.watch(data['file'].name)
