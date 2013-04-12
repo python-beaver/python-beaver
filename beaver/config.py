@@ -51,7 +51,8 @@ class BeaverConfig():
             'max_queue_size': '100',
 
             # time in seconds before updating the file mapping
-            'update_file_mapping_time': '10',
+            'update_file_mapping_time': '',  # deprecated
+            'discover_interval': '15',
 
             # time in seconds from last command sent before a queue kills itself
             'queue_timeout': '60',
@@ -157,6 +158,12 @@ class BeaverConfig():
             warnings.simplefilter('default')
             warnings.warn('ENV Variable support will be removed by version 20. Stop using: {0}'.format(", ".join(deprecated_env_var_usage)), DeprecationWarning)
 
+        update_file_mapping_time = self.get('update_file_mapping_time')
+        if update_file_mapping_time:
+            self.set('discover_interval', update_file_mapping_time)
+            warnings.simplefilter('default')
+            warnings.warn('"update_file_mapping_time" has been supersceded by "discover_interval". Stop using: "update_file_mapping_time', DeprecationWarning)
+
     def _parse(self, args):
         """Parses the configuration file for beaver configuration info
 
@@ -216,6 +223,7 @@ class BeaverConfig():
 
         require_float = [
             'update_file_mapping_time',
+            'discover_interval',
         ]
 
         for key in require_float:
