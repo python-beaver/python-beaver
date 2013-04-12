@@ -295,7 +295,7 @@ class FileConfig():
 
         self._defaults = {
             'add_field': '',
-            'debug': '',
+            'debug': '0',
             'discover_interval': '15',
 
             # should be a python regex of files to remove
@@ -386,6 +386,7 @@ class FileConfig():
         except:
             config['type'] = "file"
 
+        config['debug'] = bool(int(config['debug']))
         config['ignore_empty'] = bool(int(config['ignore_empty']))
         config['sincedb_write_interval'] = int(config['sincedb_write_interval'])
 
