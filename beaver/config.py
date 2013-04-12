@@ -389,6 +389,8 @@ class FileConfig():
         config['debug'] = bool(int(config['debug']))
         config['ignore_empty'] = bool(int(config['ignore_empty']))
         config['sincedb_write_interval'] = int(config['sincedb_write_interval'])
+        config['stat_interval'] = int(config['stat_interval'])
+        config['tail_lines'] = int(config['tail_lines'])
 
         return config
 
