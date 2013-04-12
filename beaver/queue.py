@@ -5,7 +5,7 @@ import sys
 import time
 
 from beaver.transports import create_transport
-from beaver.transports.transport import TransportException
+from beaver.transports.exception import TransportException
 from unicode_dammit import unicode_dammit
 
 

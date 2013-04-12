@@ -3,7 +3,7 @@ import boto.sqs
 import uuid
 
 from beaver.transports.base_transport import BaseTransport
-from beaver.transports.transport import TransportException
+from beaver.transports.exception import TransportException
 
 
 class SqsTransport(BaseTransport):

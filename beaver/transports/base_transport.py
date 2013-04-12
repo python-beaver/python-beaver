@@ -103,7 +103,3 @@ class BaseTransport(object):
 
     def valid(self):
         return self._is_valid
-
-
-class TransportException(Exception):
-    pass

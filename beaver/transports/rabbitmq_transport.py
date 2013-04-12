@@ -2,7 +2,7 @@
 import pika
 
 from beaver.transports.base_transport import BaseTransport
-from beaver.transports.transport import TransportException
+from beaver.transports.exception import TransportException
 
 
 class RabbitmqTransport(BaseTransport):
