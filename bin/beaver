@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 import daemon
 
-from beaver.dispatcher import run
+from beaver.dispatcher.tail import run as tail_run
+from beaver.dispatcher.worker import run as worker_run
 from beaver.pidfile import PidFile
 from beaver.utils import parse_args, version
 
@@ -12,6 +13,12 @@ version(args)
 if args.daemonize:
     assert args.pid, "A pid path must be specified in the beaver config or via the -P flag"
     with daemon.DaemonContext(pidfile=PidFile(args.pid),):
-        run(args)
+        if args.experimental:
+            tail_run(args)
+        else:
+            worker_run(args)
 else:
-    run(args)
+    if args.experimental:
+        tail_run(args)
+    else:
+        worker_run(args)

@@ -46,6 +46,7 @@ class Tail(BaseLog):
         self._type = file_config.get('type', filename)
 
         self._update_file()
+        self._log_info("watching logfile")
 
     def __del__(self):
         """Closes all files"""
