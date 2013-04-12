@@ -54,7 +54,9 @@ class BeaverSshTunnel(BeaverSubprocess):
         remote_host = beaver_config.get('ssh_remote_host')
         remote_port = beaver_config.get('ssh_remote_port')
 
-        self._subprocess = subprocess.Popen(["ssh", "-i", key_file, "-f", tunnel, "-L",
-            "{0}:{1}:{2}".format(tunnel_port, remote_host, remote_port),
-            "sleep 5"], stdout=subprocess.PIPE, preexec_fn=os.setsid)
+        self._subprocess = subprocess.Popen(["/bin/sh", "-c",
+            "while true; do ssh -n -N -o BatchMode=yes -i '{3}' '{4}' -L '{0}:{1}:{2}'; sleep 10; done"
+                .format(tunnel_port, remote_host, remote_port, key_file, tunnel)
+            ], preexec_fn=os.setsid)
+
         self.poll()
