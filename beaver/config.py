@@ -40,7 +40,7 @@ class BeaverConfig():
             'udp_host': os.environ.get('UDP_HOST', '127.0.0.1'),
             'udp_port': os.environ.get('UDP_PORT', '9999'),
             'zeromq_address': os.environ.get('ZEROMQ_ADDRESS', 'tcp://localhost:2120'),
-            'zeromq_pattern': "push",
+            'zeromq_pattern': 'push',
             'zeromq_hwm': os.environ.get('ZEROMQ_HWM', ''),
 
             # exponential backoff
@@ -92,7 +92,7 @@ class BeaverConfig():
         self._configfile = args.config
         self._beaver_config = self._parse(args)
         for key in self._beaver_config:
-            self._logger.debug("[CONFIG] '{0}' => '{1}'".format(key, self._beaver_config.get(key)))
+            self._logger.debug('[CONFIG] "{0}" => "{1}"'.format(key, self._beaver_config.get(key)))
 
         if file_config is not None:
             self._update_files(file_config)
@@ -119,7 +119,7 @@ class BeaverConfig():
 
         has = len(filter(lambda x: self.get(x) is not None, required))
         if has > 0 and has != len(required):
-            self._logger.warning("Missing {0} of {1} required config variables for ssh".format(len(required) - has, len(required)))
+            self._logger.warning('Missing {0} of {1} required config variables for ssh'.format(len(required) - has, len(required)))
 
         return has == len(required)
 
@@ -156,7 +156,7 @@ class BeaverConfig():
 
         if len(deprecated_env_var_usage) > 0:
             warnings.simplefilter('default')
-            warnings.warn('ENV Variable support will be removed by version 20. Stop using: {0}'.format(", ".join(deprecated_env_var_usage)), DeprecationWarning)
+            warnings.warn('ENV Variable support will be removed by version 20. Stop using: {0}'.format(', '.join(deprecated_env_var_usage)), DeprecationWarning)
 
         update_file_mapping_time = self.get('update_file_mapping_time')
         if update_file_mapping_time:
@@ -327,12 +327,12 @@ class FileConfig():
 
     def addglob(self, globname, globbed):
         if globname not in self._globbed:
-            self._logger.debug("Adding glob {0}".format(globname))
+            self._logger.debug('Adding glob {0}'.format(globname))
             config = self._globs.get(globname, self._defaults)
             config = self._gen_config(config)
             self._globs[globname] = config
             for key in config:
-                self._logger.debug("Config: {0} => {1}".format(key, config[key]))
+                self._logger.debug('Config: "{0}" => "{1}"'.format(key, config[key]))
         else:
             config = self._globs.get(globname)
 
@@ -384,7 +384,7 @@ class FileConfig():
                 file_type = 'file'
             config['type'] = file_type
         except:
-            config['type'] = "file"
+            config['type'] = 'file'
 
         config['debug'] = bool(int(config['debug']))
         config['ignore_empty'] = bool(int(config['ignore_empty']))

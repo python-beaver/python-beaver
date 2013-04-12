@@ -2,11 +2,11 @@
 import os
 import codecs
 
-CHARSET_ALIASES = {"macintosh": "mac-roman", "x-sjis": "shift-jis"}
+CHARSET_ALIASES = {'macintosh': 'mac-roman', 'x-sjis': 'shift-jis'}
 ENCODINGS = [
-    "windows-1252",
-    "iso-8859-1",
-    "iso-8859-2",
+    'windows-1252',
+    'iso-8859-1',
+    'iso-8859-2',
 ]
 
 
@@ -23,7 +23,7 @@ def unicode_dammit(string, logger=None):
     return string
 
 
-def _convert_from(markup, proposed, errors="strict"):
+def _convert_from(markup, proposed, errors='strict'):
     proposed = _find_codec(proposed)
 
     try:
@@ -35,7 +35,7 @@ def _convert_from(markup, proposed, errors="strict"):
     return markup
 
 
-def _to_unicode(self, data, encoding, errors="strict"):
+def _to_unicode(self, data, encoding, errors='strict'):
     '''Given a string and its encoding, decodes the string into Unicode.
     %encoding is a string recognized by encodings.aliases'''
 
@@ -61,8 +61,8 @@ def _to_unicode(self, data, encoding, errors="strict"):
 
 def _find_codec(self, charset):
     return _codec(CHARSET_ALIASES.get(charset, charset)) \
-        or (charset and self._codec(charset.replace("-", ""))) \
-        or (charset and self._codec(charset.replace("-", "_"))) \
+        or (charset and self._codec(charset.replace('-', ''))) \
+        or (charset and self._codec(charset.replace('-', '_'))) \
         or charset
 
 

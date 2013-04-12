@@ -8,11 +8,11 @@ try:
     from beaver.transport.zmq_transport import ZmqTransport
     skip = False
 except ImportError, e:
-    if e.message == "No module named zmq":
+    if e.message == 'No module named zmq':
         skip = True
 
 
-@unittest.skipIf(skip, "zmq not installed")
+@unittest.skipIf(skip, 'zmq not installed')
 class ZmqTests(unittest.TestCase):
 
     def setUp(self):

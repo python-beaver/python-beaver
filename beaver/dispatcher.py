@@ -24,23 +24,23 @@ def run(args):
     def cleanup(signalnum, frame):
         sig_name = tuple((v) for v, k in signal.__dict__.iteritems() if k == signalnum)[0]
 
-        logger.info("{0} detected".format(sig_name))
-        logger.info("Shutting down. Please wait...")
+        logger.info('{0} detected'.format(sig_name))
+        logger.info('Shutting down. Please wait...')
 
         try:
-            queue.put_nowait(("exit", ()))
+            queue.put_nowait(('exit', ()))
         except Queue.Full:
             pass
 
         if worker is not None:
-            logger.info("Closing worker...")
+            logger.info('Closing worker...')
             worker.close()
 
         if ssh_tunnel is not None:
-            logger.info("Closing ssh tunnel...")
+            logger.info('Closing ssh tunnel...')
             ssh_tunnel.close()
 
-        logger.info("Shutdown complete.")
+        logger.info('Shutdown complete.')
         return sys.exit(signalnum)
 
     signal.signal(signal.SIGTERM, cleanup)
@@ -51,19 +51,19 @@ def run(args):
         process_args = (queue, beaver_config, file_config, logger)
         proc = multiprocessing.Process(target=run_queue, args=process_args)
 
-        logger.info("Starting queue consumer")
+        logger.info('Starting queue consumer')
         proc.start()
         return proc
 
     while 1:
         try:
             if REOPEN_FILES:
-                logger.debug("Detected non-linux platform. Files will be reopened for tailing")
+                logger.debug('Detected non-linux platform. Files will be reopened for tailing')
 
-            logger.info("Starting worker...")
+            logger.info('Starting worker...')
             worker = Worker(beaver_config, file_config, queue_consumer_function=create_queue_consumer, callback=queue.put, logger=logger)
 
-            logger.info("Working...")
+            logger.info('Working...')
             worker.loop()
 
         except KeyboardInterrupt:

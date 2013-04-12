@@ -25,9 +25,9 @@ class MosquittoTransport(BaseTransport):
 
         def on_disconnect(mosq, obj, rc):
             if rc == 0:
-                logger.debug("Mosquitto has successfully disconnected")
+                logger.debug('Mosquitto has successfully disconnected')
             else:
-                logger.debug("Mosquitto unexpectedly disconnected")
+                logger.debug('Mosquitto unexpectedly disconnected')
 
         self._client.on_disconnect = on_disconnect
 
@@ -38,13 +38,13 @@ class MosquittoTransport(BaseTransport):
             try:
                 import warnings
                 with warnings.catch_warnings():
-                    warnings.simplefilter("error")
+                    warnings.simplefilter('error')
                     self._client.publish(self._topic, line, 0)
             except Exception, e:
                 try:
                     raise TransportException(e.strerror)
                 except AttributeError:
-                    raise TransportException("Unspecified exception encountered")
+                    raise TransportException('Unspecified exception encountered')
 
     def interrupt(self):
         if self._client:

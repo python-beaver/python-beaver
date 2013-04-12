@@ -47,25 +47,25 @@ class RabbitmqTransport(BaseTransport):
             try:
                 import warnings
                 with warnings.catch_warnings():
-                    warnings.simplefilter("error")
+                    warnings.simplefilter('error')
                     self._channel.basic_publish(
                         exchange=self._rabbitmq_exchange,
                         routing_key=self._rabbitmq_key,
                         body=self.format(filename, timestamp, line),
                         properties=pika.BasicProperties(
-                            content_type="text/json",
+                            content_type='text/json',
                             delivery_mode=1
                         )
                     )
             except UserWarning:
                 self._is_valid = False
-                raise TransportException("Connection appears to have been lost")
+                raise TransportException('Connection appears to have been lost')
             except Exception, e:
                 self._is_valid = False
                 try:
                     raise TransportException(e.strerror)
                 except AttributeError:
-                    raise TransportException("Unspecified exception encountered")  # TRAP ALL THE THINGS!
+                    raise TransportException('Unspecified exception encountered')  # TRAP ALL THE THINGS!
 
     def interrupt(self):
         if self._connection:

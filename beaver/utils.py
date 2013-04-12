@@ -11,8 +11,8 @@ import beaver
 
 logging.basicConfig()
 
-MAGIC_BRACKETS = re.compile("({([^}]+)})")
-IS_GZIPPED_FILE = re.compile(".gz$")
+MAGIC_BRACKETS = re.compile('({([^}]+)})')
+IS_GZIPPED_FILE = re.compile('.gz$')
 REOPEN_FILES = 'linux' not in platform.platform().lower()
 
 cached_regices = {}
@@ -43,7 +43,7 @@ def parse_args():
     parser.add_argument('-P', '--pid', help='path to pid file', default=None, dest='pid')
     parser.add_argument('-t', '--transport', help='log transport method', dest='transport', default=None, choices=['rabbitmq', 'redis', 'sqs', 'stdout', 'udp', 'zmq'])
     parser.add_argument('-v', '--version', help='output version and quit', dest='version', default=False, action='store_true')
-    parser.add_argument('--fqdn', help="use the machine's FQDN for source_host", dest="fqdn", default=False, action='store_true')
+    parser.add_argument('--fqdn', help='use the machine\'s FQDN for source_host', dest='fqdn', default=False, action='store_true')
 
     return parser.parse_args()
 
@@ -113,24 +113,26 @@ def expand_paths(path):
     """When given a path with brackets, expands it to return all permutations
        of the path with expanded brackets, similar to ant.
 
-       >>> expand_paths("../{a,b}/{c,d}")
+       >>> expand_paths('../{a,b}/{c,d}')
        ['../a/c', '../a/d', '../b/c', '../b/d']
-       >>> expand_paths("../{a,b}/{a,b}.py")
+       >>> expand_paths('../{a,b}/{a,b}.py')
        ['../a/a.py', '../a/b.py', '../b/a.py', '../b/b.py']
-       >>> expand_paths("../{a,b,c}/{a,b,c}")
+       >>> expand_paths('../{a,b,c}/{a,b,c}')
        ['../a/a', '../a/b', '../a/c', '../b/a', '../b/b', '../b/c', '../c/a', '../c/b', '../c/c']
-       >>> expand_paths("test")
+       >>> expand_paths('test')
        ['test']
-       >>> expand_paths("")
+       >>> expand_paths('')
     """
     pr = itertools.product
     parts = MAGIC_BRACKETS.findall(path)
-    if path == "":
+
+    if not path:
         return
-    elif not parts:
+
+    if not parts:
         return [path]
 
-    permutations = [[(p[0], i, 1) for i in p[1].split(",")] for p in parts]
+    permutations = [[(p[0], i, 1) for i in p[1].split(',')] for p in parts]
     return [_replace_all(path, i) for i in pr(*permutations)]
 
 

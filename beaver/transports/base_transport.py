@@ -45,7 +45,7 @@ class BaseTransport(object):
             return json.dumps(json_data)
 
         def string_formatter(data):
-            return "[{0}] [{1}] {2}".format(data['@source_host'], data['@timestamp'], data['@message'])
+            return '[{0}] [{1}] {2}'.format(data['@source_host'], data['@timestamp'], data['@message'])
 
         self._formatters['json'] = json.dumps
         self._formatters['msgpack'] = msgpack_formatter.pack
@@ -77,7 +77,7 @@ class BaseTransport(object):
     def get_timestamp(self, **kwargs):
         timestamp = kwargs.get('timestamp')
         if not timestamp:
-            timestamp = datetime.datetime.utcnow().isoformat() + "Z"
+            timestamp = datetime.datetime.utcnow().isoformat() + 'Z'
 
         return timestamp
 
@@ -88,7 +88,7 @@ class BaseTransport(object):
             formatter = self._default_formatter
 
         return self._formatters[formatter]({
-            '@source': "file://{0}{1}".format(self._current_host, filename),
+            '@source': 'file://{0}{1}'.format(self._current_host, filename),
             '@type': self._file_config.get('type', filename),
             '@tags': self._file_config.get('tags', filename),
             '@fields': self._file_config.get('fields', filename),

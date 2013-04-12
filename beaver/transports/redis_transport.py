@@ -14,8 +14,8 @@ class RedisTransport(BaseTransport):
 
         redis_url = beaver_config.get('redis_url')
         redis_password = beaver_config.get('redis_password')
-        _url = urlparse.urlparse(redis_url, scheme="redis")
-        _, _, _db = _url.path.rpartition("/")
+        _url = urlparse.urlparse(redis_url, scheme='redis')
+        _, _, _db = _url.path.rpartition('/')
 
         self._redis = redis.StrictRedis(host=_url.hostname, port=_url.port, password=redis_password, db=int(_db), socket_timeout=10)
         self._redis_namespace = beaver_config.get('redis_namespace')
@@ -32,13 +32,13 @@ class RedisTransport(BaseTransport):
                 break
             except UserWarning:
                 self._is_valid = False
-                raise TransportException("Connection appears to have been lost")
+                raise TransportException('Connection appears to have been lost')
             except Exception, e:
                 self._is_valid = False
                 try:
                     raise TransportException(e.strerror)
                 except AttributeError:
-                    raise TransportException("Unspecified exception encountered")
+                    raise TransportException('Unspecified exception encountered')
 
         self._pipeline = self._redis.pipeline(transaction=False)
 
