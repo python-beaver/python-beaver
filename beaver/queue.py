@@ -43,7 +43,7 @@ def run_queue(queue, beaver_config, file_config, logger=None):
 
             if command == "callback":
                 try:
-                    if file_config.get('ignore_empty', data['filename']):
+                    if data.get('ignore_empty', False):
                         logger.debug("removing empty lines")
                         lines = data['lines']
                         new_lines = []
