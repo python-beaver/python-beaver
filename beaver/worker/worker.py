@@ -87,7 +87,7 @@ class Worker(object):
             if not (self._proc and self._proc.is_alive()):
                 self._proc = self._create_queue_consumer()
 
-            if int(time.time()) - self._update_time > self._beaver_config.get('update_file_mapping_time'):
+            if int(time.time()) - self._update_time > self._beaver_config.get('discover_interval'):
                 self.update_files()
 
             for fid, data in self._file_map.iteritems():

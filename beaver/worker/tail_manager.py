@@ -1,0 +1,117 @@
+# -*- coding: utf-8 -*-
+import errno
+import os
+import stat
+import time
+
+from beaver.utils import eglob
+from beaver.worker.base_log import BaseLog
+from beaver.worker.tail import Tail
+
+
+class TailManager(BaseLog):
+
+    def __init__(self, paths, beaver_config, file_config, queue_consumer_function, callback, logger=None):
+        super(TailManager, self).__init__(logger=logger)
+        self._active = False
+        self._beaver_config = beaver_config
+        self._file_config = file_config
+        self._folder = self._beaver_config.get('path')
+        self._callback = callback
+        self._create_queue_consumer = queue_consumer_function
+        self._discover_interval = beaver_config.get('discover_interval', 15)
+        self._log_template = "[TailManager] - {0}"
+        self._proc = None
+        self._tails = {}
+        self._update_time = None
+
+        self._active = True
+        self.watch(paths)
+
+    def listdir(self):
+        """HACK around not having a file_config stanza
+        TODO: Convert this to a glob"""
+        ls = os.listdir(self._folder)
+        return [x for x in ls if os.path.splitext(x)[1][1:] == "log"]
+
+    def watch(self, paths=[]):
+        for path in paths:
+            if not self._active:
+                break
+
+            tail = Tail(
+                filename=path,
+                beaver_config=self._beaver_config,
+                file_config=self._file_config,
+                callback=self._callback,
+                logger=self._logger
+            )
+
+            self._tails[tail.fid()] = tail
+
+    def run(self):
+        while self._active:
+            for fid in self._tails.keys():
+                if not (self._proc and self._proc.is_alive()):
+                    self._proc = self._create_queue_consumer()
+
+                self.update_files()
+
+                self._log_debug("Processing {0}".format(fid))
+                if not self._active:
+                    break
+
+                self._tails[fid].run(once=True)
+
+                if not self._tails[fid].active():
+                    del self._tails[fid]
+
+    def update_files(self):
+        """Ensures all files are properly loaded.
+        Detects new files, file removals, file rotation, and truncation.
+        On non-linux platforms, it will also manually reload the file for tailing.
+        Note that this hack is necessary because EOF is cached on BSD systems.
+        """
+        if self._update_time and int(time.time()) - self._update_time < self._discover_interval:
+            return
+
+        self._update_time = int(time.time())
+
+        possible_files = []
+        files = []
+        if len(self._beaver_config.get('globs')) > 0:
+            for name, exclude in self._beaver_config.get('globs').items():
+                globbed = [os.path.realpath(filename) for filename in eglob(name, exclude)]
+                files.extend(globbed)
+                self._file_config.addglob(name, globbed)
+                self._callback(("addglob", (name, globbed)))
+        else:
+            for name in self.listdir():
+                files.append(os.path.realpath(os.path.join(self._folder, name)))
+
+        for absname in files:
+            try:
+                st = os.stat(absname)
+            except EnvironmentError, err:
+                if err.errno != errno.ENOENT:
+                    raise
+            else:
+                if not stat.S_ISREG(st.st_mode):
+                    continue
+                fid = self.get_file_id(st)
+                possible_files.append((fid, absname))
+
+        # add new ones
+        new_files = [fname for fid, fname in possible_files if fid not in self._tails]
+        self.watch(new_files)
+
+    def close(self):
+        """Closes all currently open Tail objects"""
+        self._log_debug("Closing all tail objects")
+        self._active = False
+        for fid in self._tails:
+            self._tails[fid].close()
+
+    @staticmethod
+    def get_file_id(st):
+        return "%xg%x" % (st.st_dev, st.st_ino)

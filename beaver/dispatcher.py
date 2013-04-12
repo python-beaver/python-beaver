@@ -8,7 +8,7 @@ from beaver.config import FileConfig, BeaverConfig
 from beaver.queue import run_queue
 from beaver.ssh_tunnel import create_ssh_tunnel
 from beaver.utils import setup_custom_logger, REOPEN_FILES
-from beaver.worker import Worker
+from beaver.worker.worker import Worker
 
 
 def run(args):
