@@ -112,11 +112,7 @@ class Worker(object):
                 if not self._sincedb_update_position(file, fid=fid, lines=current_line_count):
                     line_count += current_line_count
 
-            self._callback(("callback", {
-                'filename': file.name,
-                'lines': lines,
-                'timestamp': datetime.datetime.utcnow().isoformat() + "Z",
-            }))
+            self._callback_wrapper(filename=file.name, lines=lines)
 
             lines = file.readlines(4096)
 
@@ -187,11 +183,19 @@ class Worker(object):
 
                 lines = self.tail(data['file'].name, encoding=encoding, window=tail_lines, position=current_position)
                 if lines:
-                    self._callback(("callback", {
-                        'filename': data['file'].name,
-                        'lines': lines,
-                        'timestamp': datetime.datetime.utcnow().isoformat() + "Z",
-                    }))
+                    self._callback_wrapper(filename=data['file'].name, lines=lines)
+
+    def _callback_wrapper(self, filename, lines):
+        self._callback(('callback', {
+            'fields': self._file_config.get('fields', filename),
+            'filename': filename,
+            'format': self._file_config.get('format', filename),
+            'ignore_empty': self._file_config.get('ignore_empty', filename),
+            'lines': lines,
+            'timestamp': datetime.datetime.utcnow().isoformat() + "Z",
+            'tags': self._file_config.get('tags', filename),
+            'type': self._file_config.get('type', filename),
+        }))
 
     def _sincedb_init(self):
         """Initializes the sincedb schema in an sqlite db"""
