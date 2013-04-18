@@ -32,19 +32,19 @@ class Tail(BaseLog):
 
         self._sincedb_path = beaver_config.get('sincedb_path')
 
-        self._debug = file_config.get('debug', filename)  # TODO: Implement me
-        self._encoding = file_config.get('encoding', filename)
-        self._fields = file_config.get('fields', filename)
-        self._format = file_config.get('format', filename)
-        self._ignore_empty = file_config.get('ignore_empty', filename)
-        self._ignore_truncate = file_config.get('ignore_truncate', filename)
-        self._message_format = file_config.get('message_format', filename)  # TODO: Implement me
-        self._sincedb_write_interval = file_config.get('sincedb_write_interval', filename)
-        self._start_position = file_config.get('start_position', filename)
-        self._stat_interval = file_config.get('stat_interval', filename)
-        self._tail_lines = file_config.get('tail_lines', filename)
-        self._tags = file_config.get('tags', filename)
-        self._type = file_config.get('type', filename)
+        self._debug = beaver_config.get_field('debug', filename)  # TODO: Implement me
+        self._encoding = beaver_config.get_field('encoding', filename)
+        self._fields = beaver_config.get_field('fields', filename)
+        self._format = beaver_config.get_field('format', filename)
+        self._ignore_empty = beaver_config.get_field('ignore_empty', filename)
+        self._ignore_truncate = beaver_config.get_field('ignore_truncate', filename)
+        self._message_format = beaver_config.get_field('message_format', filename)  # TODO: Implement me
+        self._sincedb_write_interval = beaver_config.get_field('sincedb_write_interval', filename)
+        self._start_position = beaver_config.get_field('start_position', filename)
+        self._stat_interval = beaver_config.get_field('stat_interval', filename)
+        self._tail_lines = beaver_config.get_field('tail_lines', filename)
+        self._tags = beaver_config.get_field('tags', filename)
+        self._type = beaver_config.get_field('type', filename)
 
         self._update_file()
         self._log_info("watching logfile")

@@ -26,7 +26,7 @@ class Worker(object):
     >>> l.loop()
     """
 
-    def __init__(self, beaver_config, file_config, queue_consumer_function, callback, logger=None):
+    def __init__(self, beaver_config, queue_consumer_function, callback, logger=None):
         """Arguments:
 
         (FileConfig) @file_config:
@@ -46,7 +46,6 @@ class Worker(object):
         self._beaver_config = beaver_config
         self._callback = callback
         self._create_queue_consumer = queue_consumer_function
-        self._file_config = file_config
         self._file_map = {}
         self._folder = self._beaver_config.get('path')
         self._logger = logger
@@ -124,7 +123,7 @@ class Worker(object):
         # In case of files created afterwards we don't do this.
         for fid, data in self._file_map.iteritems():
             self._logger.debug("[{0}] - getting start position {1}".format(fid, data['file'].name))
-            start_position = self._file_config.get('start_position', data['file'].name)
+            start_position = self._beaver_config.get_field('start_position', data['file'].name)
 
             if self._sincedb_path:
                 sincedb_start_position = self._sincedb_start_position(data['file'], fid=fid)
@@ -176,7 +175,7 @@ class Worker(object):
             self._logger.debug("[{0}] - line count {1} for {2}".format(fid, line_count, data['file'].name))
             self._sincedb_update_position(data['file'], fid=fid, lines=line_count, force_update=True)
 
-            tail_lines = self._file_config.get('tail_lines', data['file'].name)
+            tail_lines = self._beaver_config.get_field('tail_lines', data['file'].name)
             tail_lines = int(tail_lines)
             if tail_lines:
                 encoding = data['encoding']
@@ -187,14 +186,14 @@ class Worker(object):
 
     def _callback_wrapper(self, filename, lines):
         self._callback(('callback', {
-            'fields': self._file_config.get('fields', filename),
+            'fields': self._beaver_config.get_field('fields', filename),
             'filename': filename,
-            'format': self._file_config.get('format', filename),
-            'ignore_empty': self._file_config.get('ignore_empty', filename),
+            'format': self._beaver_config.get_field('format', filename),
+            'ignore_empty': self._beaver_config.get_field('ignore_empty', filename),
             'lines': lines,
             'timestamp': datetime.datetime.utcnow().isoformat() + "Z",
-            'tags': self._file_config.get('tags', filename),
-            'type': self._file_config.get('type', filename),
+            'tags': self._beaver_config.get_field('tags', filename),
+            'type': self._beaver_config.get_field('type', filename),
         }))
 
     def _sincedb_init(self):
@@ -227,7 +226,7 @@ class Worker(object):
         current_time = int(time.time())
         update_time = self._file_map[fid]['update_time']
         if not force_update:
-            sincedb_write_interval = self._file_config.get('sincedb_write_interval', file.name)
+            sincedb_write_interval = self._beaver_config.get_field('sincedb_write_interval', file.name)
             if update_time and current_time - update_time <= sincedb_write_interval:
                 return False
 
@@ -299,7 +298,7 @@ class Worker(object):
             for name, exclude in self._beaver_config.get('globs').items():
                 globbed = [os.path.realpath(filename) for filename in eglob(name, exclude)]
                 files.extend(globbed)
-                self._file_config.addglob(name, globbed)
+                self._beaver_config.addglob(name, globbed)
                 self._callback(("addglob", (name, globbed)))
         else:
             for name in self.listdir():
@@ -332,7 +331,7 @@ class Worker(object):
                     self.unwatch(data['file'], fid)
                     self.watch(data['file'].name)
                 elif data['file'].tell() > st.st_size:
-                    if st.st_size == 0 and self._file_config.get('ignore_truncate', data['file'].name):
+                    if st.st_size == 0 and self._beaver_config.get_field('ignore_truncate', data['file'].name):
                         self._logger.info("[{0}] - file size is 0 {1}. ".format(fid, data['file'].name) +
                                           "If you use another tool (i.e. logrotate) to truncate " +
                                           "the file, your application may continue to write to " +
@@ -372,7 +371,7 @@ class Worker(object):
     def watch(self, fname):
         """Opens a file for log tailing"""
         try:
-            file = self.open(fname, encoding=self._file_config.get('encoding', fname))
+            file = self.open(fname, encoding=self._beaver_config.get_field('encoding', fname))
             fid = self.get_file_id(os.stat(fname))
         except EnvironmentError, err:
             if err.errno != errno.ENOENT:
@@ -380,7 +379,7 @@ class Worker(object):
         else:
             self._logger.info("[{0}] - watching logfile {1}".format(fid, fname))
             self._file_map[fid] = {
-                'encoding': self._file_config.get('encoding', fname),
+                'encoding': self._beaver_config.get_field('encoding', fname),
                 'file': file,
                 'line': 0,
                 'update_time': None,

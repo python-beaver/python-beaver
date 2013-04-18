@@ -6,8 +6,8 @@ from beaver.transports.base_transport import BaseTransport
 
 class ZmqTransport(BaseTransport):
 
-    def __init__(self, beaver_config, file_config, logger=None):
-        super(ZmqTransport, self).__init__(beaver_config, file_config, logger=logger)
+    def __init__(self, beaver_config, logger=None):
+        super(ZmqTransport, self).__init__(beaver_config, logger=logger)
 
         zeromq_address = beaver_config.get('zeromq_address')
 

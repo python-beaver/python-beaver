@@ -4,7 +4,7 @@ import Queue
 import signal
 import sys
 
-from beaver.config import FileConfig, BeaverConfig
+from beaver.config import BeaverConfig
 from beaver.queue import run_queue
 from beaver.ssh_tunnel import create_ssh_tunnel
 from beaver.utils import REOPEN_FILES, setup_custom_logger
@@ -14,8 +14,7 @@ from beaver.worker.tail_manager import TailManager
 def run(args=None):
     logger = setup_custom_logger('beaver', args)
 
-    file_config = FileConfig(args, logger=logger)
-    beaver_config = BeaverConfig(args, file_config=file_config, logger=logger)
+    beaver_config = BeaverConfig(args, logger=logger)
     queue = multiprocessing.JoinableQueue(beaver_config.get('max_queue_size'))
 
     manager = None
@@ -53,7 +52,7 @@ def run(args=None):
     signal.signal(signal.SIGQUIT, cleanup)
 
     def create_queue_consumer():
-        process_args = (queue, beaver_config, file_config, logger)
+        process_args = (queue, beaver_config, logger)
         proc = multiprocessing.Process(target=run_queue, args=process_args)
 
         logger.info("Starting queue consumer")
@@ -68,7 +67,6 @@ def run(args=None):
         paths=["/var/log/system.log"],
         beaver_config=beaver_config,
         queue_consumer_function=create_queue_consumer,
-        file_config=file_config,
         callback=queue_put,
         logger=logger
     )

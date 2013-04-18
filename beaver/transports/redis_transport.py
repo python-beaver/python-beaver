@@ -9,8 +9,8 @@ from beaver.transports.exception import TransportException
 
 class RedisTransport(BaseTransport):
 
-    def __init__(self, beaver_config, file_config, logger=None):
-        super(RedisTransport, self).__init__(beaver_config, file_config, logger=logger)
+    def __init__(self, beaver_config, logger=None):
+        super(RedisTransport, self).__init__(beaver_config, logger=logger)
 
         redis_url = beaver_config.get('redis_url')
         redis_password = beaver_config.get('redis_password')

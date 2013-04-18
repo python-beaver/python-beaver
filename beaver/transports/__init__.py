@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-def create_transport(beaver_config, file_config, logger):
+def create_transport(beaver_config, logger):
     """Creates and returns a transport object"""
     transport_str = beaver_config.get('transport')
     if '.' not in transport_str:
@@ -17,6 +17,6 @@ def create_transport(beaver_config, file_config, logger):
 
     _module = __import__(module_path, globals(), locals(), class_name, -1)
     transport_class = getattr(_module, class_name)
-    transport = transport_class(beaver_config, file_config, logger)
+    transport = transport_class(beaver_config=beaver_config, logger=logger)
 
     return transport

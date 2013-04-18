@@ -11,11 +11,10 @@ from beaver.worker.tail import Tail
 
 class TailManager(BaseLog):
 
-    def __init__(self, paths, beaver_config, file_config, queue_consumer_function, callback, logger=None):
+    def __init__(self, paths, beaver_config, queue_consumer_function, callback, logger=None):
         super(TailManager, self).__init__(logger=logger)
         self._active = False
         self._beaver_config = beaver_config
-        self._file_config = file_config
         self._folder = self._beaver_config.get('path')
         self._callback = callback
         self._create_queue_consumer = queue_consumer_function
@@ -29,7 +28,7 @@ class TailManager(BaseLog):
         self.watch(paths)
 
     def listdir(self):
-        """HACK around not having a file_config stanza
+        """HACK around not having a beaver_config stanza
         TODO: Convert this to a glob"""
         ls = os.listdir(self._folder)
         return [x for x in ls if os.path.splitext(x)[1][1:] == "log"]
@@ -42,7 +41,6 @@ class TailManager(BaseLog):
             tail = Tail(
                 filename=path,
                 beaver_config=self._beaver_config,
-                file_config=self._file_config,
                 callback=self._callback,
                 logger=self._logger
             )
@@ -85,8 +83,8 @@ class TailManager(BaseLog):
             extend_files = files.extend
             for name, exclude in self._beaver_config.get('globs').items():
                 globbed = [os.path.realpath(filename) for filename in eglob(name, exclude)]
-                self._file_config.addglob(name, globbed)
                 extend_files(globbed)
+                self._beaver_config.addglob(name, globbed)
                 self._callback(("addglob", (name, globbed)))
         else:
             append_files = files.append

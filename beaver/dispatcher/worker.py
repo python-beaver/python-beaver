@@ -4,7 +4,7 @@ import Queue
 import signal
 import sys
 
-from beaver.config import FileConfig, BeaverConfig
+from beaver.config import BeaverConfig
 from beaver.queue import run_queue
 from beaver.ssh_tunnel import create_ssh_tunnel
 from beaver.utils import setup_custom_logger, REOPEN_FILES
@@ -14,8 +14,7 @@ from beaver.worker.worker import Worker
 def run(args):
     logger = setup_custom_logger('beaver', args)
 
-    file_config = FileConfig(args, logger=logger)
-    beaver_config = BeaverConfig(args, file_config=file_config, logger=logger)
+    beaver_config = BeaverConfig(args, logger=logger)
     queue = multiprocessing.Queue(beaver_config.get('max_queue_size'))
 
     worker = None
@@ -48,7 +47,7 @@ def run(args):
     signal.signal(signal.SIGQUIT, cleanup)
 
     def create_queue_consumer():
-        process_args = (queue, beaver_config, file_config, logger)
+        process_args = (queue, beaver_config, logger)
         proc = multiprocessing.Process(target=run_queue, args=process_args)
 
         logger.info('Starting queue consumer')
@@ -61,7 +60,7 @@ def run(args):
                 logger.debug('Detected non-linux platform. Files will be reopened for tailing')
 
             logger.info('Starting worker...')
-            worker = Worker(beaver_config, file_config, queue_consumer_function=create_queue_consumer, callback=queue.put, logger=logger)
+            worker = Worker(beaver_config, queue_consumer_function=create_queue_consumer, callback=queue.put, logger=logger)
 
             logger.info('Working...')
             worker.loop()

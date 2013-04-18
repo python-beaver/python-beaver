@@ -32,6 +32,7 @@ def parse_args():
     """
     parser = argparse.ArgumentParser(description='Beaver logfile shipper', epilog=epilog_example, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('-c', '--configfile', help='ini config file path', dest='config', default='/dev/null')
+    parser.add_argument('-C', '--confd-path', help='path to conf.d directory', dest='confd_path', default='/etc/beaver/conf.d')
     parser.add_argument('-d', '--debug', help='enable debug mode', dest='debug', default=False, action='store_true')
     parser.add_argument('-D', '--daemonize', help='daemonize in the background', dest='daemonize', default=False, action='store_true')
     parser.add_argument('-f', '--files', help='space-separated filelist to watch, can include globs (*.log). Overrides --path argument', dest='files', default=None, nargs='+')

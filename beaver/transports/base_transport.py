@@ -19,16 +19,16 @@ except ImportError:
 
 class BaseTransport(object):
 
-    def __init__(self, beaver_config, file_config, logger=None):
+    def __init__(self, beaver_config, logger=None):
         """Generic transport configuration
         Will attach the file_config object, setup the
         current hostname, and ensure we have a proper
         formatter for the current transport
         """
+        self._beaver_config = beaver_config
         self._current_host = beaver_config.get('hostname')
         self._default_formatter = beaver_config.get('format', 'null')
         self._formatters = {}
-        self._file_config = file_config
         self._is_valid = True
         self._logger = logger
 
@@ -87,7 +87,7 @@ class BaseTransport(object):
 
     def format(self, filename, line, timestamp, **kwargs):
         """Returns a formatted log line"""
-        formatter = self._file_config.get('format', filename)
+        formatter = self._beaver_config.get_field('format', filename)
         if formatter not in self._formatters:
             formatter = self._default_formatter
 
@@ -103,7 +103,7 @@ class BaseTransport(object):
         })
 
     def addglob(self, globname, globbed):
-        self._file_config.addglob(globname, globbed)
+        self._beaver_config.addglob(globname, globbed)
 
     def valid(self):
         return self._is_valid

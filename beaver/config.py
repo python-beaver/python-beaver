@@ -1,20 +1,45 @@
 # -*- coding: utf-8 -*-
-import ConfigParser
 import logging
 import os
 import socket
 import warnings
 
+from conf_d import Configuration
 from beaver.utils import eglob
 
 
 class BeaverConfig():
 
-    def __init__(self, args, file_config=None, logger=None):
+    def __init__(self, args, logger=None):
         self._logger = logger or logging.getLogger(__name__)
         self._logger.debug('Processing beaver portion of config file %s' % args.config)
 
-        self._beaver_defaults = {
+        self._section_defaults = {
+            'add_field': '',
+            'debug': '0',
+            'discover_interval': '15',
+            'encoding': 'utf_8',
+
+            # should be a python regex of files to remove
+            'exclude': '',
+            'format': '',
+
+            # throw out empty lines instead of shipping them
+            'ignore_empty': '0',
+
+            # allow ignoring copytruncate results
+            'ignore_truncate': '0',
+
+            'message_format': '',
+            'sincedb_write_interval': '15',
+            'stat_interval': '1',
+            'start_position': 'end',
+            'tags': '',
+            'tail_lines': '0',
+            'type': '',
+        }
+
+        self._main_defaults = {
             'mqtt_clientid': 'mosquitto',
             'mqtt_host': 'localhost',
             'mqtt_port': '1883',
@@ -81,6 +106,9 @@ class BeaverConfig():
             'path': os.environ.get('BEAVER_PATH', '/var/log'),
             'transport': os.environ.get('BEAVER_TRANSPORT', 'stdout'),  # this needs to be passed to the import class somehow
 
+            # Path to individual file configs. These override any sections in the main beaver.ini file
+            'confd_path': '/etc/beaver/conf.d',
+
             # the following are parsed before the config file is parsed
             # but may be useful at runtime
             'config': '/dev/null',
@@ -90,13 +118,12 @@ class BeaverConfig():
         }
 
         self._configfile = args.config
-        self._beaver_config = self._parse(args)
+        self._globbed = []
+        self._parse(args)
         for key in self._beaver_config:
             self._logger.debug('[CONFIG] "{0}" => "{1}"'.format(key, self._beaver_config.get(key)))
 
-        if file_config is not None:
-            self._update_files(file_config)
-
+        self._update_files()
         self._check_for_deprecated_usage()
 
     def beaver_config(self):
@@ -107,6 +134,31 @@ class BeaverConfig():
 
     def set(self, key, value):
         self._beaver_config[key] = value
+
+    def get_field(self, field, filename):
+        return self._files.get(os.path.realpath(filename), self._section_defaults)[field]
+
+    def addglob(self, globname, globbed):
+        if globname not in self._globbed:
+            self._logger.debug('Adding glob {0}'.format(globname))
+            config = self._file_config[globname]
+            self._file_config[globname] = config
+            for key in config:
+                self._logger.debug('Config: "{0}" => "{1}"'.format(key, config[key]))
+        else:
+            config = self._file_config.get(globname)
+
+        for filename in globbed:
+            self._files[filename] = config
+        self._globbed.append(globname)
+
+    def getfilepaths(self):
+        return self._files.keys()
+
+    def getglobs(self):
+        globs = []
+        [globs.extend([name, self._file_config[name].get('exclude')]) for name in self._file_config]
+        return dict(zip(globs[0::2], globs[1::2]))
 
     def use_ssh_tunnel(self):
         required = [
@@ -165,92 +217,168 @@ class BeaverConfig():
             warnings.warn('"update_file_mapping_time" has been supersceded by "discover_interval". Stop using: "update_file_mapping_time', DeprecationWarning)
 
     def _parse(self, args):
-        """Parses the configuration file for beaver configuration info
+        def _main_parser(config):
+            transpose = ['config', 'debug', 'daemonize', 'files', 'format', 'fqdn', 'hostname', 'path', 'pid', 'transport']
+            namspace_dict = vars(args)
+            for key in transpose:
+                if key not in namspace_dict or namspace_dict[key] is None or namspace_dict[key] == '':
+                    continue
 
-        Configuration priority:
-            argparse > configfile > env var
-        """
-        _beaver_config = ConfigParser.ConfigParser(self._beaver_defaults)
-        if self._configfile and len(_beaver_config.read(self._configfile)) != 1:
-            raise Exception('Could not parse config file "%s"' % self._configfile)
+                config[key] = namspace_dict[key]
 
-        if not _beaver_config.has_section('beaver'):
-            self._logger.debug('[CONFIG] Using beaver defaults')
-            config = self._beaver_defaults
-        else:
-            self._logger.debug('[CONFIG] Reading beaver config from file')
-            config = dict((x[0], x[1]) for x in _beaver_config.items('beaver'))
+            if args.mode:
+                config['zeromq_bind'] = args.mode
 
-        transpose = ['config', 'debug', 'daemonize', 'files', 'format', 'fqdn', 'hostname', 'path', 'pid', 'transport']
-        namspace_dict = vars(args)
-        for key in transpose:
-            if key not in namspace_dict:
+            # HACK: Python 2.6 ConfigParser does not properly
+            #       handle non-string values
+            for key in config:
+                if config[key] == '':
+                    config[key] = None
+
+            require_bool = ['debug', 'daemonize', 'fqdn', 'rabbitmq_exchange_durable']
+
+            for key in require_bool:
+                config[key] = bool(int(config[key]))
+
+            require_int = [
+                'max_failure',
+                'max_queue_size',
+                'queue_timeout',
+                'rabbitmq_port',
+                'respawn_delay',
+                'subprocess_poll_sleep',
+                'udp_port',
+                'wait_timeout',
+                'zeromq_hwm',
+            ]
+            for key in require_int:
+                if config[key] is not None:
+                    config[key] = int(config[key])
+
+            require_float = [
+                'update_file_mapping_time',
+                'discover_interval',
+            ]
+
+            for key in require_float:
+                if config[key] is not None:
+                    config[key] = float(config[key])
+
+            if config['files'] is not None and type(config['files']) == str:
+                config['files'] = config['files'].split(',')
+
+            config['path'] = os.path.realpath(config['path'])
+            if not os.path.isdir(config['path']):
+                raise LookupError('{0} does not exist'.format(config['path']))
+
+            if config.get('hostname') is None:
+                if config.get('fqdn') is True:
+                    config['hostname'] = socket.getfqdn()
+                else:
+                    config['hostname'] = socket.gethostname()
+
+            if config.get('sincedb_path'):
+                config['sincedb_path'] = os.path.realpath(config.get('sincedb_path'))
+
+            config['globs'] = {}
+
+            return config
+
+        def _section_parser(config, raise_exceptions=True):
+            '''Parse a given INI-style config file using ConfigParser module.
+            Stanza's names match file names, and properties are defaulted as in
+            http://logstash.net/docs/1.1.1/inputs/file
+
+            Config file example:
+
+            [/var/log/syslog]
+            type: syslog
+            tags: sys,main
+
+            [/var/log/auth]
+            type: syslog
+            ;tags: auth,main
+            '''
+
+            fields = config.get('add_field', '')
+            if type(fields) != dict:
+                try:
+                    if type(fields) == str:
+                        fields = filter(None, fields.split(','))
+                    if len(fields) == 0:
+                        config['fields'] = {}
+                    elif (len(fields) % 2) == 1:
+                        if raise_exceptions:
+                            raise Exception('Wrong number of values for add_field')
+                    else:
+                        fieldkeys = fields[0::2]
+                        fieldvalues = [[x] for x in fields[1::2]]
+                        config['fields'] = dict(zip(fieldkeys, fieldvalues))
+                except TypeError:
+                    config['fields'] = {}
+
+            if 'add_field' in config:
+                del config['add_field']
+
+            try:
+                tags = config.get('tags', '')
+                if type(tags) == str:
+                    tags = filter(None, tags.split(','))
+                if len(tags) == 0:
+                    tags = []
+                config['tags'] = tags
+            except TypeError:
+                config['tags'] = []
+
+            try:
+                file_type = config.get('type', 'file')
+                if not file_type:
+                    file_type = 'file'
+                config['type'] = file_type
+            except:
+                config['type'] = 'file'
+
+            if config['type']:
+                if raise_exceptions:
+                    raise Exception('Missing mandatory config "type"')
+
+            require_bool = ['debug', 'ignore_empty', 'ignore_truncate']
+            for k in require_bool:
+                config[k] = bool(int(config[k]))
+
+            require_int = ['sincedb_write_interval', 'stat_interval', 'tail_lines']
+            for k in require_int:
+                config[k] = int(config[k])
+
+            return config
+
+        conf = Configuration(
+            name='beaver',
+            path=self._configfile,
+            main_defaults=self._main_defaults,
+            section_defaults=self._section_defaults,
+            main_parser=_main_parser,
+            section_parser=_section_parser,
+        )
+
+        config = conf.raw()
+        self._beaver_config = config['beaver']
+        self._file_config = config['sections']
+
+        self._main_parser = _main_parser(self._main_defaults)
+        self._section_defaults = _section_parser(self._section_defaults, raise_exceptions=False)
+
+        self._files = {}
+        for section in config['sections']:
+            globs = eglob(section, config['sections'][section].get('exclude', ''))
+            if not globs:
+                self._logger.debug('Skipping glob due to no files found: %s' % section)
                 continue
-            if namspace_dict[key] is None:
-                continue
-            if namspace_dict[key] == '':
-                continue
-            config[key] = namspace_dict[key]
 
-        if args.mode:
-            config['zeromq_bind'] = args.mode
+            for globbed_file in globs:
+                self._files[os.path.realpath(globbed_file)] = config['sections'][section]
 
-        # HACK: Python 2.6 ConfigParser does not properly
-        #       handle non-string values
-        for key in config:
-            if config[key] == '':
-                config[key] = None
-
-        require_bool = ['debug', 'daemonize', 'fqdn', 'rabbitmq_exchange_durable']
-
-        for key in require_bool:
-            config[key] = bool(int(config[key]))
-
-        require_int = [
-            'max_failure',
-            'max_queue_size',
-            'queue_timeout',
-            'rabbitmq_port',
-            'respawn_delay',
-            'subprocess_poll_sleep',
-            'udp_port',
-            'wait_timeout',
-            'zeromq_hwm',
-        ]
-        for key in require_int:
-            if config[key] is not None:
-                config[key] = int(config[key])
-
-        require_float = [
-            'update_file_mapping_time',
-            'discover_interval',
-        ]
-
-        for key in require_float:
-            if config[key] is not None:
-                config[key] = float(config[key])
-
-        if config['files'] is not None and type(config['files']) == str:
-            config['files'] = config['files'].split(',')
-
-        config['path'] = os.path.realpath(config['path'])
-        if not os.path.isdir(config['path']):
-            raise LookupError('{0} does not exist'.format(config['path']))
-
-        if config.get('hostname') is None:
-            if config.get('fqdn') is True:
-                config['hostname'] = socket.getfqdn()
-            else:
-                config['hostname'] = socket.gethostname()
-
-        if config.get('sincedb_path'):
-            config['sincedb_path'] = os.path.realpath(config.get('sincedb_path'))
-
-        config['globs'] = {}
-
-        return config
-
-    def _update_files(self, config):
+    def _update_files(self):
         globs = self.get('files', default=[])
         files = self.get('files', default=[])
 
@@ -260,170 +388,15 @@ class BeaverConfig():
             globs = {}
 
         try:
-            files.extend(config.getfilepaths())
-            globs.update(config.getglobs())
+            files.extend(self.getfilepaths())
+            globs.update(self.getglobs())
         except AttributeError:
-            files = config.getfilepaths()
-            globs = config.getglobs()
+            files = self.getfilepaths()
+            globs = self.getglobs()
 
         self.set('globs', globs)
         self.set('files', files)
 
-
-class FileConfig():
-    '''
-    Parse a given INI-style config file using ConfigParser module.
-    Stanza's names match file names, and properties are defaulted as in
-    http://logstash.net/docs/1.1.1/inputs/file
-
-    Config file example:
-
-    [/var/log/syslog]
-    type: syslog
-    tags: sys,main
-
-    [/var/log/auth]
-    type: syslog
-    ;tags: auth,main
-
-    [...]
-    '''
-
-    def __init__(self, args, logger=None):
-        self._logger = logger
-        self._logger.debug('Processing file portion of config file %s' % args.config)
-
-        self._defaults = {
-            'add_field': '',
-            'debug': '0',
-            'discover_interval': '15',
-            'encoding': 'utf_8',
-
-            # should be a python regex of files to remove
-            'exclude': '',
-            'format': '',
-
-            # throw out empty lines instead of shipping them
-            'ignore_empty': '0',
-
-            # allow ignoring copytruncate results
-            'ignore_truncate': '0',
-
-            'message_format': '',
-            'sincedb_write_interval': '15',
-            'stat_interval': '1',
-            'start_position': 'end',
-            'tags': '',
-            'tail_lines': '0',
-            'type': '',
-        }
-
-        self._configfile = args.config
-        self._config = ConfigParser.ConfigParser(self._defaults)
-        self._sanitize()
-        self._files, self._globs = self._parse()
-        self._default_config = self._gen_config(self._defaults)
-        self._globbed = []
-
-    def get(self, field, filename):
-        return self._files.get(os.path.realpath(filename), self._default_config)[field]
-
-    def addglob(self, globname, globbed):
-        if globname not in self._globbed:
-            self._logger.debug('Adding glob {0}'.format(globname))
-            config = self._globs.get(globname, self._defaults)
-            config = self._gen_config(config)
-            self._globs[globname] = config
-            for key in config:
-                self._logger.debug('Config: "{0}" => "{1}"'.format(key, config[key]))
-        else:
-            config = self._globs.get(globname)
-
-        for filename in globbed:
-            self._files[filename] = config
-        self._globbed.append(globname)
-
-    def getfilepaths(self):
-        return self._files.keys()
-
-    def getglobs(self):
-        globs = []
-        [globs.extend([name, self._globs[name].get('exclude')]) for name in self._globs]
-        return dict(zip(globs[0::2], globs[1::2]))
-
-    def _gen_config(self, config):
-        fields = config.get('add_field', '')
-        if type(fields) != dict:
-            try:
-                if type(fields) == str:
-                    fields = filter(None, fields.split(','))
-                if len(fields) == 0:
-                    config['fields'] = {}
-                elif (len(fields) % 2) == 1:
-                    raise Exception('Wrong number of values for add_field')
-                else:
-                    fieldkeys = fields[0::2]
-                    fieldvalues = [[x] for x in fields[1::2]]
-                    config['fields'] = dict(zip(fieldkeys, fieldvalues))
-            except TypeError:
-                config['fields'] = {}
-
-        if 'add_field' in config:
-            del config['add_field']
-
-        try:
-            tags = config.get('tags', '')
-            if type(tags) == str:
-                tags = filter(None, tags.split(','))
-            if len(tags) == 0:
-                tags = []
-            config['tags'] = tags
-        except TypeError:
-            config['tags'] = []
-
-        try:
-            file_type = config.get('type', 'file')
-            if not file_type:
-                file_type = 'file'
-            config['type'] = file_type
-        except:
-            config['type'] = 'file'
-
-        config['debug'] = bool(int(config['debug']))
-        config['ignore_empty'] = bool(int(config['ignore_empty']))
-        config['ignore_truncate'] = bool(int(config['ignore_truncate']))
-
-        config['sincedb_write_interval'] = int(config['sincedb_write_interval'])
-        config['stat_interval'] = int(config['stat_interval'])
-        config['tail_lines'] = int(config['tail_lines'])
-
-        return config
-
-    def _parse(self):
-        glob_paths = {}
-        files = {}
-        for filename in self._config.sections():
-            if not self._config.get(filename, 'type'):
-                raise Exception('%s: missing mandatory config "type"' % filename)
-
-            config = dict((x[0], x[1]) for x in self._config.items(filename))
-            glob_paths[filename] = config
-
-            globs = eglob(filename, config.get('exclude', ''))
-            if not globs:
-                self._logger.debug('Skipping glob due to no files found: %s' % filename)
-                continue
-
-            config = self._gen_config(config)
-
-            for globbed_file in globs:
-                files[os.path.realpath(globbed_file)] = config
-
-        return files, glob_paths
-
-    def _sanitize(self):
-        if len(self._config.read(self._configfile)) != 1:
-            raise Exception('Could not parse config file "%s"' % self._configfile)
-
-        if self._config.has_section('beaver'):
-            self._config.remove_section('beaver')
+        for f in files:
+            if f not in self._file_config:
+                self._file_config[f] = self._section_defaults

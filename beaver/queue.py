@@ -9,7 +9,7 @@ from beaver.transports.exception import TransportException
 from unicode_dammit import unicode_dammit
 
 
-def run_queue(queue, beaver_config, file_config, logger=None):
+def run_queue(queue, beaver_config, logger=None):
     signal.signal(signal.SIGTERM, signal.SIG_DFL)
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     signal.signal(signal.SIGQUIT, signal.SIG_DFL)
@@ -21,7 +21,7 @@ def run_queue(queue, beaver_config, file_config, logger=None):
     transport = None
     try:
         logger.debug('Logging using the {0} transport'.format(beaver_config.get('transport')))
-        transport = create_transport(beaver_config, file_config, logger=logger)
+        transport = create_transport(beaver_config, logger=logger)
 
         failure_count = 0
         while True:
@@ -76,7 +76,7 @@ def run_queue(queue, beaver_config, file_config, logger=None):
 
                         sys.exit(0)
             elif command == 'addglob':
-                file_config.addglob(*data)
+                beaver_config.addglob(*data)
                 transport.addglob(*data)
             elif command == 'exit':
                 break
