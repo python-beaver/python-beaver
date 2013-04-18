@@ -32,8 +32,6 @@ class BaseTransport(object):
         self._is_valid = True
         self._logger = logger
 
-        msgpack_formatter = msgpack.Packer()
-
         def null_formatter(data):
             return data['@message']
 
@@ -48,7 +46,7 @@ class BaseTransport(object):
             return '[{0}] [{1}] {2}'.format(data['@source_host'], data['@timestamp'], data['@message'])
 
         self._formatters['json'] = json.dumps
-        self._formatters['msgpack'] = msgpack_formatter.pack
+        self._formatters['msgpack'] = msgpack.packb
         self._formatters['null'] = null_formatter
         self._formatters['rawjson'] = rawjson_formatter
         self._formatters['string'] = string_formatter
