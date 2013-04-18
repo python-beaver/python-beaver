@@ -37,10 +37,16 @@ class BaseTransport(object):
 
         def rawjson_formatter(data):
             json_data = json.loads(data['@message'])
-            for field in ['@source', '@type', '@tags', '@source_host', '@source_path']:
-                if field in data:
-                    json_data[field] = data[field]
-            return json.dumps(json_data)
+            del data['@message']
+
+            for field in json_data:
+                data[field] = json_data[field]
+
+            for field in ['@message', '@source', '@source_host', '@source_path', '@tags', '@timestamp', '@type']:
+                if field not in data:
+                    data[field] = ''
+
+            return json.dumps(data)
 
         def string_formatter(data):
             return '[{0}] [{1}] {2}'.format(data['@source_host'], data['@timestamp'], data['@message'])
