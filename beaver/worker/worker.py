@@ -48,6 +48,7 @@ class Worker(object):
         self._create_queue_consumer = queue_consumer_function
         self._file_map = {}
         self._folder = self._beaver_config.get('path')
+        self._last_file_mapping_update = {}
         self._logger = logger
         self._proc = None
         self._sincedb_path = self._beaver_config.get('sincedb_path')
@@ -88,6 +89,8 @@ class Worker(object):
 
             if int(time.time()) - self._update_time > self._beaver_config.get('discover_interval'):
                 self.update_files()
+
+            self._ensure_files_are_good(current_time=t)
 
             for fid, data in self._file_map.iteritems():
                 try:
@@ -316,8 +319,23 @@ class Worker(object):
                 fid = self.get_file_id(st)
                 ls.append((fid, absname))
 
+        # add new ones
+        for fid, fname in ls:
+            if fid not in self._file_map:
+                self.watch(fname)
+
+    def _ensure_files_are_good(self, current_time):
+        """Every N seconds, ensures that the file we are tailing is the file we expect to be tailing"""
+
         # check existent files
         for fid, data in self._file_map.iteritems():
+            filename = data['file'].name
+            stat_interval = self._beaver_config.get_field('stat_interval', filename)
+            if filename in self._last_file_mapping_update and current_time - self._last_file_mapping_update[filename] <= stat_interval:
+                continue
+
+            self._last_file_mapping_update[filename] = time.time()
+
             try:
                 st = os.stat(data['file'].name)
             except EnvironmentError, err:
@@ -350,10 +368,6 @@ class Worker(object):
                     file.seek(position)
                     self._file_map[fid]['file'] = file
 
-        # add new ones
-        for fid, fname in ls:
-            if fid not in self._file_map:
-                self.watch(fname)
 
     def unwatch(self, file, fid):
         """file no longer exists; if it has been renamed
