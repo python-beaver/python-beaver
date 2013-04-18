@@ -119,7 +119,7 @@ class Tail(BaseLog):
             self._log_info('file truncated')
             self._update_file(seek_to_end=False)
         elif REOPEN_FILES:
-            self._log_warning('file reloaded (non-linux)')
+            self._log_debug('file reloaded (non-linux)')
             position = self._file.tell()
             self._update_file(seek_to_end=False)
             self._file.seek(position, os.SEEK_SET)
