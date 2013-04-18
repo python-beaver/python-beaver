@@ -325,8 +325,14 @@ class Tail(BaseLog):
                     self._log_info('file removed')
                     self.close()
 
-            self._fid = self.get_file_id(st)
-            if seek_to_end:
+            fid = self.get_file_id(st)
+            if not self._fid:
+                self._fid = fid
+
+            if fid != self._fid:
+                self._log_info('file rotated')
+                self.close()
+            elif seek_to_end:
                 self._seek_to_end()
 
     def tail(self, fname, encoding, window, position=None):
