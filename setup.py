@@ -10,6 +10,15 @@ try:
 except ImportError:
     from distutils.core import setup
 
+# Hack to prevent stupid TypeError: 'NoneType' object is not callable error on
+# exit of python setup.py test # in multiprocessing/util.py _exit_function when
+# running python setup.py test (see
+# http://www.eby-sarna.com/pipermail/peak/2010-May/003357.html)
+try:
+    import multiprocessing
+    multiprocessing
+except ImportError:
+    pass
 
 requirements = open('requirements/base.txt').readlines()
 if sys.version_info[:2] <= (2, 6):
