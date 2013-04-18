@@ -49,7 +49,7 @@ class TailManager(BaseLog):
 
             self._tails[tail.fid()] = tail
 
-    def run(self):
+    def run(self, interval=0.1,):
         while self._active:
             for fid in self._tails.keys():
                 if not (self._proc and self._proc.is_alive()):
@@ -63,8 +63,10 @@ class TailManager(BaseLog):
 
                 self._tails[fid].run(once=True)
 
-                if not self._tails[fid].active():
+                if not self._tails[fid].active:
                     del self._tails[fid]
+
+            time.sleep(interval)
 
     def update_files(self):
         """Ensures all files are properly loaded.
@@ -80,14 +82,16 @@ class TailManager(BaseLog):
         possible_files = []
         files = []
         if len(self._beaver_config.get('globs')) > 0:
+            extend_files = files.extend
             for name, exclude in self._beaver_config.get('globs').items():
                 globbed = [os.path.realpath(filename) for filename in eglob(name, exclude)]
-                files.extend(globbed)
                 self._file_config.addglob(name, globbed)
+                extend_files(globbed)
                 self._callback(("addglob", (name, globbed)))
         else:
+            append_files = files.append
             for name in self.listdir():
-                files.append(os.path.realpath(os.path.join(self._folder, name)))
+                append_files(os.path.realpath(os.path.join(self._folder, name)))
 
         for absname in files:
             try:
@@ -98,8 +102,9 @@ class TailManager(BaseLog):
             else:
                 if not stat.S_ISREG(st.st_mode):
                     continue
+                append_possible_files = possible_files.append
                 fid = self.get_file_id(st)
-                possible_files.append((fid, absname))
+                append_possible_files((fid, absname))
 
         # add new ones
         new_files = [fname for fid, fname in possible_files if fid not in self._tails]

@@ -20,7 +20,7 @@ class Tail(BaseLog):
     def __init__(self, filename, callback, position="end", logger=None, beaver_config=None, file_config=None):
         super(Tail, self).__init__(logger=logger)
 
-        self._active = False
+        self.active = False
         self._callback = callback
         self._fid = None
         self._file = None
@@ -69,22 +69,18 @@ class Tail(BaseLog):
 
     def close(self):
         """Closes all currently open file pointers"""
-        self._active = False
+        self.active = False
         if self._file:
             self._file.close()
 
-    def active(self):
-        return self._active
-
     def run(self, once=False):
-        while self._active:
-            current_time = int(time.time())
-            self._run_pass(current_time=current_time)
-            self._log_debug('Iteration took {0:.6f}'.format(time.time() - current_time))
-            time.sleep(0.1)
+        while self.active:
+            current_time = time.time()
+            self._run_pass()
 
             self._ensure_file_is_good(current_time=current_time)
 
+            self._log_debug('Iteration took {0:.6f}'.format(time.time() - current_time))
             if once:
                 break
 
@@ -99,7 +95,7 @@ class Tail(BaseLog):
         if self._last_file_mapping_update and current_time - self._last_file_mapping_update <= self._stat_interval:
             return
 
-        self._last_file_mapping_update = int(time.time())
+        self._last_file_mapping_update = time.time()
 
         try:
             st = os.stat(self._filename)
@@ -128,7 +124,7 @@ class Tail(BaseLog):
             self._update_file(seek_to_end=False)
             self._file.seek(position, os.SEEK_SET)
 
-    def _run_pass(self, current_time):
+    def _run_pass(self):
         """Read lines from a file and performs a callback against them"""
         line_count = 0
         while True:
@@ -136,7 +132,7 @@ class Tail(BaseLog):
                 lines = self._file.readlines(4096)
             except IOError, e:
                 if e.errno == errno.ESTALE:
-                    self._active = False
+                    self.active = False
                     return False
 
             if not lines:
@@ -321,7 +317,7 @@ class Tail(BaseLog):
         except IOError:
             pass
         else:
-            self._active = True
+            self.active = True
             try:
                 st = os.stat(self._filename)
             except EnvironmentError, err:
