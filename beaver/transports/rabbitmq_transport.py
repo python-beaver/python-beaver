@@ -28,7 +28,11 @@ class RabbitmqTransport(BaseTransport):
         self._channel = self._connection.channel()
 
         # Declare RabbitMQ queue and bindings
-        self._channel.queue_declare(queue=beaver_config.get('rabbitmq_queue'))
+        self._channel.queue_declare(
+            queue=beaver_config.get('rabbitmq_queue'),
+            durable=beaver_config.get('rabbitmq_queue_durable'),
+            arguments={'x-ha-policy': 'all'} if beaver_config.get('rabbitmq_ha_queue') else {}
+        )
         self._channel.exchange_declare(
             exchange=self._rabbitmq_exchange,
             exchange_type=beaver_config.get('rabbitmq_exchange_type'),
