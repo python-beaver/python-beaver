@@ -53,6 +53,8 @@ class BeaverConfig():
             'rabbitmq_queue': os.environ.get('RABBITMQ_QUEUE', 'logstash-queue'),
             'rabbitmq_exchange_type': os.environ.get('RABBITMQ_EXCHANGE_TYPE', 'direct'),
             'rabbitmq_exchange_durable': os.environ.get('RABBITMQ_EXCHANGE_DURABLE', '0'),
+            'rabbitmq_queue_durable': os.environ.get('RABBITMQ_QUEUE_DURABLE', '0'),
+            'rabbitmq_ha_queue': os.environ.get('RABBITMQ_HA_QUEUE', '0'),
             'rabbitmq_key': os.environ.get('RABBITMQ_KEY', 'logstash-key'),
             'rabbitmq_exchange': os.environ.get('RABBITMQ_EXCHANGE', 'logstash-exchange'),
             'redis_url': os.environ.get('REDIS_URL', 'redis://localhost:6379/0'),
@@ -235,7 +237,7 @@ class BeaverConfig():
                 if config[key] == '':
                     config[key] = None
 
-            require_bool = ['debug', 'daemonize', 'fqdn', 'rabbitmq_exchange_durable']
+            require_bool = ['debug', 'daemonize', 'fqdn', 'rabbitmq_exchange_durable', 'rabbitmq_queue_durable', 'rabbitmq_ha_queue']
 
             for key in require_bool:
                 config[key] = bool(int(config[key]))
