@@ -42,39 +42,44 @@ def run_queue(queue, beaver_config, logger=None):
                 continue
 
             if command == 'callback':
-                try:
-                    if data.get('ignore_empty', False):
-                        logger.debug('removing empty lines')
-                        lines = data['lines']
-                        new_lines = []
-                        for line in lines:
-                            message = unicode_dammit(line)
-                            if len(message) == 0:
-                                continue
-                            new_lines.append(message)
-                        data['lines'] = new_lines
+                if data.get('ignore_empty', False):
+                    logger.debug('removing empty lines')
+                    lines = data['lines']
+                    new_lines = []
+                    for line in lines:
+                        message = unicode_dammit(line)
+                        if len(message) == 0:
+                            continue
+                        new_lines.append(message)
+                    data['lines'] = new_lines
 
-                    if len(data['lines']) == 0:
-                        logger.debug('0 active lines sent from worker')
-                        continue
+                if len(data['lines']) == 0:
+                    logger.debug('0 active lines sent from worker')
+                    continue
 
-                    transport.callback(**data)
-                except TransportException:
-                    failure_count = failure_count + 1
-                    if failure_count > beaver_config.get('max_failure'):
-                        failure_count = beaver_config.get('max_failure')
-
-                    sleep_time = int(beaver_config.get('respawn_delay')) ** failure_count
-                    logger.info('Caught transport exception, respawning in %d seconds' % sleep_time)
-
+                while True:
                     try:
-                        time.sleep(sleep_time)
-                        transport.reconnect()
-                    except KeyboardInterrupt:
-                        logger.info('User cancelled respawn.')
-                        transport.interrupt()
+                        transport.callback(**data)
+                        break
+                    except TransportException:
+                        failure_count = failure_count + 1
+                        if failure_count > beaver_config.get('max_failure'):
+                            failure_count = beaver_config.get('max_failure')
 
-                        sys.exit(0)
+                        sleep_time = beaver_config.get('respawn_delay') ** failure_count
+                        logger.info('Caught transport exception, reconnecting in %d seconds' % sleep_time)
+
+                        try:
+                            transport.invalidate()
+                            time.sleep(sleep_time)
+                            transport.reconnect()
+                            if transport.valid():
+                                failure_count = 0
+                                logger.info('Reconnected successfully')
+                        except KeyboardInterrupt:
+                            logger.info('User cancelled respawn.')
+                            transport.interrupt()
+                            sys.exit(0)
             elif command == 'addglob':
                 beaver_config.addglob(*data)
                 transport.addglob(*data)

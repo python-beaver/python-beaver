@@ -57,33 +57,13 @@ class BaseTransport(object):
         self._formatters['rawjson'] = rawjson_formatter
         self._formatters['string'] = string_formatter
 
+    def addglob(self, globname, globbed):
+        """Adds a set of globbed files to the attached beaver_config"""
+        self._beaver_config.addglob(globname, globbed)
+
     def callback(self, filename, lines):
         """Processes a set of lines for a filename"""
         return True
-
-    def reconnect(self):
-        """Allows reconnection from when a handled
-        TransportException is thrown"""
-        return True
-
-    def interrupt(self):
-        """Allows keyboard interrupts to be
-        handled properly by the transport
-        """
-        return True
-
-    def unhandled(self):
-        """Allows unhandled exceptions to be
-        handled properly by the transport
-        """
-        return True
-
-    def get_timestamp(self, **kwargs):
-        timestamp = kwargs.get('timestamp')
-        if not timestamp:
-            timestamp = datetime.datetime.utcnow().isoformat() + 'Z'
-
-        return timestamp
 
     def format(self, filename, line, timestamp, **kwargs):
         """Returns a formatted log line"""
@@ -102,8 +82,35 @@ class BaseTransport(object):
             '@message': line,
         })
 
-    def addglob(self, globname, globbed):
-        self._beaver_config.addglob(globname, globbed)
+    def get_timestamp(self, **kwargs):
+        """Retrieves the timestamp for a given set of data"""
+        timestamp = kwargs.get('timestamp')
+        if not timestamp:
+            timestamp = datetime.datetime.utcnow().isoformat() + 'Z'
+
+        return timestamp
+
+    def interrupt(self):
+        """Allows keyboard interrupts to be
+        handled properly by the transport
+        """
+        return True
+
+    def invalidate(self):
+        """Invalidates the current transport"""
+        self._is_valid = False
+
+    def reconnect(self):
+        """Allows reconnection from when a handled
+        TransportException is thrown"""
+        return True
+
+    def unhandled(self):
+        """Allows unhandled exceptions to be
+        handled properly by the transport
+        """
+        return True
 
     def valid(self):
+        """Returns whether or not the transport can send data"""
         return self._is_valid

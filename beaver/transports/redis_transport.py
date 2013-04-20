@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import redis
+import traceback
 import time
 import urlparse
 
@@ -16,31 +17,41 @@ class RedisTransport(BaseTransport):
         redis_password = beaver_config.get('redis_password')
         _url = urlparse.urlparse(redis_url, scheme='redis')
         _, _, _db = _url.path.rpartition('/')
-
         self._redis = redis.StrictRedis(host=_url.hostname, port=_url.port, password=redis_password, db=int(_db), socket_timeout=10)
         self._redis_namespace = beaver_config.get('redis_namespace')
+        self._is_valid = False
 
-        wait = 0
-        while 1:
-            if wait == 20:
-                break
+        self._connect()
 
-            time.sleep(1)
+    def _connect(self):
+        wait = -1
+        while True:
             wait += 1
+            time.sleep(wait)
+            if wait == 20:
+                return False
+
+            if wait > 0:
+                self._logger.info("Retrying connection, attempt {0}".format(wait + 1))
+
             try:
                 self._redis.ping()
                 break
             except UserWarning:
-                self._is_valid = False
-                raise TransportException('Connection appears to have been lost')
-            except Exception, e:
-                self._is_valid = False
-                try:
-                    raise TransportException(e.strerror)
-                except AttributeError:
-                    raise TransportException('Unspecified exception encountered')
+                traceback.print_exc()
+            except Exception:
+                traceback.print_exc()
 
+        self._is_valid = True
         self._pipeline = self._redis.pipeline(transaction=False)
+
+    def reconnect(self):
+        self._connect()
+
+    def invalidate(self):
+        """Invalidates the current transport"""
+        self._redis.connection_pool.disconnect()
+        return False
 
     def callback(self, filename, lines, **kwargs):
         timestamp = self.get_timestamp(**kwargs)
@@ -53,4 +64,8 @@ class RedisTransport(BaseTransport):
                 self.format(filename, line, timestamp, **kwargs)
             )
 
-        self._pipeline.execute()
+        try:
+            self._pipeline.execute()
+        except redis.exceptions.ConnectionError, e:
+            traceback.print_exc()
+            raise TransportException(str(e))

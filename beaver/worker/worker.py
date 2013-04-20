@@ -368,7 +368,6 @@ class Worker(object):
                     file.seek(position)
                     self._file_map[fid]['file'] = file
 
-
     def unwatch(self, file, fid):
         """file no longer exists; if it has been renamed
         try to read it for the last time in case the
