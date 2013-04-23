@@ -50,6 +50,7 @@ class RedisTransport(BaseTransport):
 
     def invalidate(self):
         """Invalidates the current transport"""
+        super(RedisTransport, self).invalidate()
         self._redis.connection_pool.disconnect()
         return False
 
