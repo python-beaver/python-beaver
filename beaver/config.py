@@ -332,17 +332,9 @@ class BeaverConfig():
             except TypeError:
                 config['tags'] = []
 
-            try:
-                file_type = config.get('type', 'file')
-                if not file_type:
-                    file_type = 'file'
-                config['type'] = file_type
-            except:
+            file_type = config.get('type', None)
+            if not file_type:
                 config['type'] = 'file'
-
-            if config['type']:
-                if raise_exceptions:
-                    raise Exception('Missing mandatory config "type"')
 
             require_bool = ['debug', 'ignore_empty', 'ignore_truncate']
             for k in require_bool:
