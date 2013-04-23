@@ -13,7 +13,7 @@ class PidFile(object):
 
     def __init__(self, path):
         """Initializes path for pidfile"""
-        self.path = path
+        self.path = os.path.realpath(path)
         self.pidfile = None
 
     def __enter__(self):
