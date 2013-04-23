@@ -266,6 +266,9 @@ class BeaverConfig():
                 if config[key] is not None:
                     config[key] = float(config[key])
 
+            if config.get('format') == 'null':
+                config['format'] = 'raw'
+
             if config['files'] is not None and type(config['files']) == str:
                 config['files'] = config['files'].split(',')
 
@@ -331,6 +334,9 @@ class BeaverConfig():
                 config['tags'] = tags
             except TypeError:
                 config['tags'] = []
+
+            if config.get('format') == 'null':
+                config['format'] = 'raw'
 
             file_type = config.get('type', None)
             if not file_type:

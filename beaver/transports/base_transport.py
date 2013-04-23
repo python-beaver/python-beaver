@@ -32,7 +32,7 @@ class BaseTransport(object):
         self._is_valid = True
         self._logger = logger
 
-        def null_formatter(data):
+        def raw_formatter(data):
             return data['@message']
 
         def rawjson_formatter(data):
@@ -53,7 +53,7 @@ class BaseTransport(object):
 
         self._formatters['json'] = json.dumps
         self._formatters['msgpack'] = msgpack.packb
-        self._formatters['null'] = null_formatter
+        self._formatters['raw'] = raw_formatter
         self._formatters['rawjson'] = rawjson_formatter
         self._formatters['string'] = string_formatter
 
