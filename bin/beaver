@@ -12,7 +12,13 @@ version(args)
 
 if args.daemonize:
     assert args.pid, "A pid path must be specified in the beaver config or via the -P flag"
-    with daemon.DaemonContext(pidfile=PidFile(args.pid),):
+
+    if args.output:
+        context = daemon.DaemonContext(pidfile=PidFile(args.pid), stdout=open(args.output, "wb"), stderr=open(args.output, "wb"))
+    else:
+        context = daemon.DaemonContext(pidfile=PidFile(args.pid))
+
+    with context:
         if args.experimental:
             tail_run(args)
         else:
