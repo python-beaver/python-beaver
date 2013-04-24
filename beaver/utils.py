@@ -66,7 +66,7 @@ def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None
             formatter = logging.Formatter('[%(asctime)s] %(levelname)-7s %(message)s')
 
         handler = logging.StreamHandler()
-        if output is None and has_args and args.daemonize:
+        if output is None and has_args:
             output = args.output
 
         if output:
