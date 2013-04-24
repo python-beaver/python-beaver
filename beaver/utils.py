@@ -69,7 +69,10 @@ def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None
             output = args.output
 
         if output is not None:
-            handler = logging.FileHandler(output)
+            file_handler = logging.FileHandler(output)
+            if formatter is not False:
+                file_handler.setFormatter(formatter)
+            logger.addHandler(file_handler)
 
         if formatter is not False:
             handler.setFormatter(formatter)
