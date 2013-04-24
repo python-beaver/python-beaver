@@ -127,6 +127,7 @@ class Worker(object):
         for fid, data in self._file_map.iteritems():
             self._logger.debug("[{0}] - getting start position {1}".format(fid, data['file'].name))
             start_position = self._beaver_config.get_field('start_position', data['file'].name)
+            is_active = data['active']
 
             if self._sincedb_path:
                 sincedb_start_position = self._sincedb_start_position(data['file'], fid=fid)
@@ -151,12 +152,20 @@ class Worker(object):
                     except UnicodeDecodeError:
                         self._logger.debug("[{0}] - UnicodeDecodeError raised for {1} with encoding {2}".format(fid, data['file'].name, data['encoding']))
                         data['file'] = self.open(data['file'].name, encoding=encoding)
+                        if not data['file']:
+                            self.unwatch(data['file'], fid)
+                            is_active = False
+                            break
+
                         data['encoding'] = encoding
 
                     if line_count != start_position:
                         self._logger.debug("[{0}] - file at different position than {1}, assuming manual truncate for {2}".format(fid, start_position, data['file'].name))
                         data['file'].seek(0, os.SEEK_SET)
                         start_position == "beginning"
+
+            if not is_active:
+                continue
 
             if start_position == "beginning":
                 continue
@@ -172,7 +181,15 @@ class Worker(object):
                     except UnicodeDecodeError:
                         self._logger.debug("[{0}] - UnicodeDecodeError raised for {1} with encoding {2}".format(fid, data['file'].name, data['encoding']))
                         data['file'] = self.open(data['file'].name, encoding=encoding)
+                        if not data['file']:
+                            self.unwatch(data['file'], fid)
+                            is_active = False
+                            break
+
                         data['encoding'] = encoding
+
+            if not is_active:
+                continue
 
             current_position = data['file'].tell()
             self._logger.debug("[{0}] - line count {1} for {2}".format(fid, line_count, data['file'].name))
@@ -365,8 +382,9 @@ class Worker(object):
                     fname = data['file'].name
                     data['file'].close()
                     file = self.open(fname, encoding=data['encoding'])
-                    file.seek(position)
-                    self._file_map[fid]['file'] = file
+                    if file:
+                        file.seek(position)
+                        self._file_map[fid]['file'] = file
 
     def unwatch(self, file, fid):
         """file no longer exists; if it has been renamed
@@ -374,49 +392,59 @@ class Worker(object):
         log rotator has written something in it.
         """
         try:
-            self.readfile(fid, file)
+            if file:
+                self.readfile(fid, file)
         except IOError:
             # Silently ignore any IOErrors -- file is gone
             pass
-        self._logger.info("[{0}] - un-watching logfile {1}".format(fid, file.name))
+
+        if file:
+            self._logger.info("[{0}] - un-watching logfile {1}".format(fid, file.name))
+        else:
+            self._logger.info("[{0}] - un-watching logfile".format(fid))
+
         del self._file_map[fid]
 
     def watch(self, fname):
         """Opens a file for log tailing"""
         try:
             file = self.open(fname, encoding=self._beaver_config.get_field('encoding', fname))
-            fid = self.get_file_id(os.stat(fname))
+            if file:
+                fid = self.get_file_id(os.stat(fname))
         except EnvironmentError, err:
             if err.errno != errno.ENOENT:
                 raise
         else:
-            self._logger.info("[{0}] - watching logfile {1}".format(fid, fname))
-            self._file_map[fid] = {
-                'encoding': self._beaver_config.get_field('encoding', fname),
-                'file': file,
-                'line': 0,
-                'update_time': None,
-            }
+            if file:
+                self._logger.info("[{0}] - watching logfile {1}".format(fid, fname))
+                self._file_map[fid] = {
+                    'encoding': self._beaver_config.get_field('encoding', fname),
+                    'file': file,
+                    'line': 0,
+                    'update_time': None,
+                    'active': True,
+                }
 
-    @classmethod
-    def open(cls, fname, encoding=None):
+    def open(self, filename, encoding=None):
         """Opens a file with the appropriate call"""
-        if IS_GZIPPED_FILE.search(fname):
-            file = gzip.open(fname, "rb")
-        else:
-            if encoding:
-                file = io.open(fname, "r", encoding=encoding)
+        try:
+            if IS_GZIPPED_FILE.search(filename):
+                _file = gzip.open(filename, "rb")
             else:
-                file = io.open(fname, "r")
+                file_encoding = self._beaver_config.get_field('encoding', filename)
+                if encoding:
+                    _file = io.open(filename, "r", encoding=encoding)
+                elif file_encoding:
+                    _file = io.open(filename, "r", encoding=file_encoding)
+                else:
+                    _file = io.open(filename, "r")
+        except IOError, e:
+            self._logger.warning(str(e))
+            _file = None
 
-        return file
+        return _file
 
-    @staticmethod
-    def get_file_id(st):
-        return "%xg%x" % (st.st_dev, st.st_ino)
-
-    @classmethod
-    def tail(cls, fname, encoding, window, position=None):
+    def tail(self, fname, encoding, window, position=None):
         """Read last N lines from file fname."""
         if window <= 0:
             raise ValueError('invalid window %r' % window)
@@ -427,14 +455,20 @@ class Worker(object):
 
         for enc in encodings:
             try:
-                f = cls.open(fname, encoding=enc)
-                return cls.tail_read(f, window, position=position)
+                f = self.open(fname, encoding=enc)
+                if not f:
+                    return []
+                return self.tail_read(f, window, position=position)
             except IOError, err:
                 if err.errno == errno.ENOENT:
                     return []
                 raise
             except UnicodeDecodeError:
                 pass
+
+    @staticmethod
+    def get_file_id(st):
+        return "%xg%x" % (st.st_dev, st.st_ino)
 
     @classmethod
     def tail_read(cls, f, window, position=None):

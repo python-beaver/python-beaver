@@ -45,7 +45,8 @@ class TailManager(BaseLog):
                 logger=self._logger
             )
 
-            self._tails[tail.fid()] = tail
+            if tail.active:
+                self._tails[tail.fid()] = tail
 
     def run(self, interval=0.1,):
         while self._active:

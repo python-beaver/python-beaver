@@ -47,7 +47,8 @@ class Tail(BaseLog):
         self._type = beaver_config.get_field('type', filename)
 
         self._update_file()
-        self._log_info("watching logfile")
+        if self.active:
+            self._log_info("watching logfile")
 
     def __del__(self):
         """Closes all files"""
@@ -55,15 +56,20 @@ class Tail(BaseLog):
 
     def open(self, encoding=None):
         """Opens the file with the appropriate call"""
-        if IS_GZIPPED_FILE.search(self._filename):
-            _file = gzip.open(self._filename, 'rb')
-        else:
-            if encoding:
-                _file = io.open(self._filename, 'r', encoding=encoding)
-            elif self._encoding:
-                _file = io.open(self._filename, 'r', encoding=self._encoding)
+        try:
+            if IS_GZIPPED_FILE.search(self._filename):
+                _file = gzip.open(self._filename, 'rb')
             else:
-                _file = io.open(self._filename, 'r')
+                if encoding:
+                    _file = io.open(self._filename, 'r', encoding=encoding)
+                elif self._encoding:
+                    _file = io.open(self._filename, 'r', encoding=self._encoding)
+                else:
+                    _file = io.open(self._filename, 'r')
+        except IOError, e:
+            self._log_warning(str(e))
+            _file = None
+            self.close()
 
         return _file
 
@@ -122,7 +128,8 @@ class Tail(BaseLog):
             self._log_debug('file reloaded (non-linux)')
             position = self._file.tell()
             self._update_file(seek_to_end=False)
-            self._file.seek(position, os.SEEK_SET)
+            if self.active:
+                self._file.seek(position, os.SEEK_SET)
 
     def _run_pass(self):
         """Read lines from a file and performs a callback against them"""
@@ -179,6 +186,9 @@ class Tail(BaseLog):
             self._start_position = int(self._start_position)
             for encoding in ENCODINGS:
                 line_count, encoded = self._seek_to_position(encoding=encoding, position=True)
+                if line_count is None and encoded is None:
+                    return
+
                 if encoded:
                     break
 
@@ -190,6 +200,9 @@ class Tail(BaseLog):
             self._log_debug('getting end position')
             for encoding in ENCODINGS:
                 line_count, encoded = self._seek_to_position(encoding=encoding)
+                if line_count is None and encoded is None:
+                    return
+
                 if encoded:
                     break
 
@@ -203,6 +216,8 @@ class Tail(BaseLog):
             lines = self.tail(self._filename, encoding=self._encoding, window=self._tail_lines, position=current_position)
             if lines:
                 self._callback_wrapper(lines)
+
+        return
 
     def _seek_to_position(self, encoding=None, position=None):
         line_count = 0
@@ -220,6 +235,9 @@ class Tail(BaseLog):
             self._log_debug('UnicodeDecodeError raised with encoding {0}'.format(self._encoding))
             self._file = self.open(encoding=encoding)
             self._encoding = encoding
+
+        if not self._file:
+            return None, None
 
         if position and line_count != self._start_position:
             self._log_debug('file at different position than {0}, assuming manual truncate'.format(self._start_position))
@@ -317,6 +335,9 @@ class Tail(BaseLog):
         except IOError:
             pass
         else:
+            if not self._file:
+                return
+
             self.active = True
             try:
                 st = os.stat(self._filename)
@@ -347,7 +368,10 @@ class Tail(BaseLog):
         for enc in encodings:
             try:
                 f = self.open(encoding=enc)
-                return self.tail_read(f, window, position=position)
+                if f:
+                    return self.tail_read(f, window, position=position)
+
+                return False
             except IOError, err:
                 if err.errno == errno.ENOENT:
                     return []
