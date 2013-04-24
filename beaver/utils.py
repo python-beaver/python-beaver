@@ -5,6 +5,7 @@ import itertools
 import logging
 import platform
 import re
+import os
 import sys
 
 import beaver
@@ -67,6 +68,9 @@ def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None
         handler = logging.StreamHandler()
         if output is None and has_args and args.daemonize:
             output = args.output
+
+        if output:
+            output = os.path.realpath(output)
 
         if output is not None:
             file_handler = logging.FileHandler(output)
