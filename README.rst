@@ -292,7 +292,7 @@ Example 11: SQS Transport::
 
     # logstash indexer config:
     input {
-      sqs_fillz {
+      sqs {
         queue => "logstash-input"
         type => "shipper-input"
         format => "json_event"
