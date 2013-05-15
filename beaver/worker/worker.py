@@ -92,12 +92,17 @@ class Worker(object):
 
             self._ensure_files_are_good(current_time=t)
 
+            unwatch_list = []
+
             for fid, data in self._file_map.iteritems():
                 try:
                     self.readfile(fid, data['file'])
                 except IOError, e:
                     if e.errno == errno.ESTALE:
-                        self.unwatch(data['file'], fid)
+                        unwatch_list.append(fid)
+
+            self.unwatch_list(unwatch_list)
+
             if async:
                 return
 
@@ -122,6 +127,8 @@ class Worker(object):
             self._sincedb_update_position(file, fid=fid, lines=line_count, force_update=True)
 
     def seek_to_end(self):
+        unwatch_list = []
+
         # The first time we run the script we move all file markers at EOF.
         # In case of files created afterwards we don't do this.
         for fid, data in self._file_map.iteritems():
@@ -153,7 +160,7 @@ class Worker(object):
                         self._logger.debug("[{0}] - UnicodeDecodeError raised for {1} with encoding {2}".format(fid, data['file'].name, data['encoding']))
                         data['file'] = self.open(data['file'].name, encoding=encoding)
                         if not data['file']:
-                            self.unwatch(data['file'], fid)
+                            unwatch_list.append(fid)
                             is_active = False
                             break
 
@@ -182,7 +189,7 @@ class Worker(object):
                         self._logger.debug("[{0}] - UnicodeDecodeError raised for {1} with encoding {2}".format(fid, data['file'].name, data['encoding']))
                         data['file'] = self.open(data['file'].name, encoding=encoding)
                         if not data['file']:
-                            self.unwatch(data['file'], fid)
+                            unwatch_list.append(fid)
                             is_active = False
                             break
 
@@ -203,6 +210,8 @@ class Worker(object):
                 lines = self.tail(data['file'].name, encoding=encoding, window=tail_lines, position=current_position)
                 if lines:
                     self._callback_wrapper(filename=data['file'].name, lines=lines)
+
+        self.unwatch_list(unwatch_list)
 
     def _callback_wrapper(self, filename, lines):
         self._callback(('callback', {
@@ -344,6 +353,10 @@ class Worker(object):
     def _ensure_files_are_good(self, current_time):
         """Every N seconds, ensures that the file we are tailing is the file we expect to be tailing"""
 
+        # We cannot watch/unwatch in a single iteration
+        rewatch_list = []
+        unwatch_list = []
+
         # check existent files
         for fid, data in self._file_map.iteritems():
             filename = data['file'].name
@@ -357,14 +370,13 @@ class Worker(object):
                 st = os.stat(data['file'].name)
             except EnvironmentError, err:
                 if err.errno == errno.ENOENT:
-                    self.unwatch(data['file'], fid)
+                    unwatch_list.append(fid)
                 else:
                     raise
             else:
                 if fid != self.get_file_id(st):
                     self._logger.info("[{0}] - file rotated {1}".format(fid, data['file'].name))
-                    self.unwatch(data['file'], fid)
-                    self.watch(data['file'].name)
+                    rewatch_list.append(fid)
                 elif data['file'].tell() > st.st_size:
                     if st.st_size == 0 and self._beaver_config.get_field('ignore_truncate', data['file'].name):
                         self._logger.info("[{0}] - file size is 0 {1}. ".format(fid, data['file'].name) +
@@ -374,8 +386,7 @@ class Worker(object):
                                           "better do nothing here")
                         continue
                     self._logger.info("[{0}] - file truncated {1}".format(fid, data['file'].name))
-                    self.unwatch(data['file'], fid)
-                    self.watch(data['file'].name)
+                    rewatch_list.append(fid)
                 elif REOPEN_FILES:
                     self._logger.debug("[{0}] - file reloaded (non-linux) {1}".format(fid, data['file'].name))
                     position = data['file'].tell()
@@ -385,6 +396,27 @@ class Worker(object):
                     if file:
                         file.seek(position)
                         self._file_map[fid]['file'] = file
+
+        self.unwatch_list(unwatch_list)
+        self.rewatch_list(rewatch_list)
+
+    def rewatch_list(self, rewatch_list):
+        for fid in rewatch_list:
+            if fid not in self._file_map:
+                continue
+
+            f = self._file_map[fid]['file']
+            filename = f.name
+            self.unwatch(f, fid)
+            self.watch(filename)
+
+    def unwatch_list(self, unwatch_list):
+        for fid in unwatch_list:
+            if fid not in self._file_map:
+                continue
+
+            f = self._file_map[fid]['file']
+            self.unwatch(f, fid)
 
     def unwatch(self, file, fid):
         """file no longer exists; if it has been renamed

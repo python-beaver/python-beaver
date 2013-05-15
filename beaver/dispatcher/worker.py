@@ -33,7 +33,10 @@ def run(args):
 
         if worker is not None:
             logger.info('Closing worker...')
-            worker.close()
+            try:
+                worker.close()
+            except RuntimeError:
+                pass
 
         if ssh_tunnel is not None:
             logger.info('Closing ssh tunnel...')
