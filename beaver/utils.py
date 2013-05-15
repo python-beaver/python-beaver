@@ -15,6 +15,7 @@ logging.basicConfig()
 MAGIC_BRACKETS = re.compile('({([^}]+)})')
 IS_GZIPPED_FILE = re.compile('.gz$')
 REOPEN_FILES = 'linux' not in platform.platform().lower()
+CAN_DAEMONIZE = sys.platform != 'win32'
 
 cached_regices = {}
 
