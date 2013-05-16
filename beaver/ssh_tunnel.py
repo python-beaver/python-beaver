@@ -4,6 +4,8 @@ import signal
 import subprocess
 import time
 
+from beaver.base_log import BaseLog
+
 
 def create_ssh_tunnel(beaver_config, logger=None):
     """Returns a BeaverSshTunnel object if the current config requires us to"""
@@ -11,13 +13,13 @@ def create_ssh_tunnel(beaver_config, logger=None):
         return None
 
     logger.info("Proxying transport using through local ssh tunnel")
-    return BeaverSshTunnel(beaver_config)
+    return BeaverSshTunnel(beaver_config, logger=logger)
 
 
-class BeaverSubprocess(object):
+class BeaverSubprocess(BaseLog):
     """General purpose subprocess wrapper"""
 
-    def __init__(self, beaver_config):
+    def __init__(self, beaver_config, logger=None):
         """Child classes should build a subprocess via the following method:
 
            self._subprocess = subprocess.Popen(cmd, stdout=subprocess.PIPE, preexec_fn=os.setsid)
@@ -25,8 +27,12 @@ class BeaverSubprocess(object):
         This will allow us to attach a session id to the spawned child, allowing
         us to send a SIGTERM to the process on close
         """
+        super(BeaverSubprocess, self).__init__(logger=logger)
+        self._log_template = '[BeaverSubprocess] - {0}'
+
         self._beaver_config = beaver_config
         self._subprocess = None
+        self._logger = logger
 
     def poll(self):
         """Poll attached subprocess until it is available"""
@@ -45,8 +51,9 @@ class BeaverSubprocess(object):
 class BeaverSshTunnel(BeaverSubprocess):
     """SSH Tunnel Subprocess Wrapper"""
 
-    def __init__(self, beaver_config):
-        super(BeaverSshTunnel, self).__init__(beaver_config)
+    def __init__(self, beaver_config, logger=None):
+        super(BeaverSshTunnel, self).__init__(beaver_config, logger=logger)
+        self._log_template = '[BeaverSshTunnel] - {0}'
 
         key_file = beaver_config.get('ssh_key_file')
         tunnel = beaver_config.get('ssh_tunnel')
