@@ -5,7 +5,7 @@ import stat
 import time
 
 from beaver.utils import eglob
-from beaver.worker.base_log import BaseLog
+from beaver.base_log import BaseLog
 from beaver.worker.tail import Tail
 
 

@@ -10,7 +10,7 @@ import time
 
 from beaver.utils import IS_GZIPPED_FILE, REOPEN_FILES
 from beaver.unicode_dammit import ENCODINGS
-from beaver.worker.base_log import BaseLog
+from beaver.base_log import BaseLog
 
 
 class Tail(BaseLog):
