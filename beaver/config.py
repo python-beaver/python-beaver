@@ -30,6 +30,10 @@ class BeaverConfig():
             # allow ignoring copytruncate results
             'ignore_truncate': '0',
 
+            # buffered tokenization
+            'delimiter': "\n",
+            'size_limit': '',
+
             'message_format': '',
             'sincedb_write_interval': '15',
             'stat_interval': '1',

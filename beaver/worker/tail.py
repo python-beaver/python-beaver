@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# file tailer
+import collections
 import datetime
 import errno
 import gzip
@@ -45,6 +45,21 @@ class Tail(BaseLog):
         self._tail_lines = beaver_config.get_field('tail_lines', filename)
         self._tags = beaver_config.get_field('tags', filename)
         self._type = beaver_config.get_field('type', filename)
+
+        # The following is for the buffered tokenization
+        # Store the specified delimiter
+        self._delimiter = beaver_config.get_field("delimiter", filename)
+        # Store the specified size limitation
+        self._size_limit = beaver_config.get_field("size_limit", filename)
+        # The input buffer is stored as an array.  This is by far the most efficient
+        # approach given language constraints (in C a linked list would be a more
+        # appropriate data structure).  Segments of input data are stored in a list
+        # which is only joined when a token is reached, substantially reducing the
+        # number of objects required for the operation.
+        self._input = collections.deque([])
+
+        # Size of the input buffer
+        self._input_size = 0
 
         self._update_file()
         if self.active:
@@ -96,6 +111,71 @@ class Tail(BaseLog):
     def fid(self):
         return self._fid
 
+    def _buffer_extract(self, data):
+        """
+        Extract takes an arbitrary string of input data and returns an array of
+        tokenized entities, provided there were any available to extract.  This
+        makes for easy processing of datagrams using a pattern like:
+
+          tokenizer.extract(data).map { |entity| Decode(entity) }.each do ..."""
+        # Extract token-delimited entities from the input string with the split command.
+        # There's a bit of craftiness here with the -1 parameter.  Normally split would
+        # behave no differently regardless of if the token lies at the very end of the
+        # input buffer or not (i.e. a literal edge case)  Specifying -1 forces split to
+        # return "" in this case, meaning that the last entry in the list represents a
+        # new segment of data where the token has not been encountered
+        entities = collections.deque(data.split(self._delimiter, -1))
+
+        # Check to see if the buffer has exceeded capacity, if we're imposing a limit
+        if self._size_limit:
+            if self.input_size + len(entities[0]) > self._size_limit:
+                raise Exception('input buffer full')
+            self._input_size += len(entities[0])
+
+        # Move the first entry in the resulting array into the input buffer.  It represents
+        # the last segment of a token-delimited entity unless it's the only entry in the list.
+        self._input.append(entities.popleft())
+
+        # If the resulting array from the split is empty, the token was not encountered
+        # (not even at the end of the buffer).  Since we've encountered no token-delimited
+        # entities this go-around, return an empty array.
+        if len(entities) == 0:
+            return []
+
+        # At this point, we've hit a token, or potentially multiple tokens.  Now we can bring
+        # together all the data we've buffered from earlier calls without hitting a token,
+        # and add it to our list of discovered entities.
+        entities.appendleft(''.join(self._input))
+
+        # Now that we've hit a token, joined the input buffer and added it to the entities
+        # list, we can go ahead and clear the input buffer.  All of the segments that were
+        # stored before the join can now be garbage collected.
+        self._input.clear()
+
+        # The last entity in the list is not token delimited, however, thanks to the -1
+        # passed to split.  It represents the beginning of a new list of as-yet-untokenized
+        # data, so we add it to the start of the list.
+        self._input.append(entities.pop())
+
+        # Set the new input buffer size, provided we're keeping track
+        if self._size_limit:
+            self._input_size = len(self._input[0])
+
+        # Now we're left with the list of extracted token-delimited entities we wanted
+        # in the first place.  Hooray!
+        return entities
+
+    # Flush the contents of the input buffer, i.e. return the input buffer even though
+    # a token has not yet been encountered
+    def _buffer_flush(self):
+        buf = ''.join(self._input)
+        self._input.clear
+        return buf
+
+    # Is the buffer empty?
+    def _buffer_empty(self):
+        return len(self._input) > 0
+
     def _ensure_file_is_good(self, current_time):
         """Every N seconds, ensures that the file we are tailing is the file we expect to be tailing"""
         if self._last_file_mapping_update and current_time - self._last_file_mapping_update <= self._stat_interval:
@@ -136,11 +216,13 @@ class Tail(BaseLog):
         line_count = 0
         while True:
             try:
-                lines = self._file.readlines(4096)
+                data = self._file.read(4096)
             except IOError, e:
                 if e.errno == errno.ESTALE:
                     self.active = False
                     return False
+
+            lines = self._buffer_extract(data)
 
             if not lines:
                 break
