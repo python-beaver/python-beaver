@@ -26,17 +26,17 @@ def run(args):
         logger.info('{0} detected'.format(sig_name))
         logger.info('Shutting down. Please wait...')
 
-        try:
-            queue.put_nowait(('exit', ()))
-        except Queue.Full:
-            pass
-
         if worker is not None:
             logger.info('Closing worker...')
             try:
                 worker.close()
             except RuntimeError:
                 pass
+
+        try:
+            queue.put_nowait(('exit', ()))
+        except Queue.Full:
+            pass
 
         if ssh_tunnel is not None:
             logger.info('Closing ssh tunnel...')
