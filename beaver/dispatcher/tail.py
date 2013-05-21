@@ -33,7 +33,10 @@ def run(args=None):
 
         if manager is not None:
             logger.info("Closing worker...")
-            manager.close()
+            try:
+                manager.close()
+            except RuntimeError:
+                pass
 
         try:
             queue_put_nowait(("exit", ()))
