@@ -31,8 +31,14 @@ class BeaverSubprocess(BaseLog):
         self._log_template = '[BeaverSubprocess] - {0}'
 
         self._beaver_config = beaver_config
+        self._command = 'sleep 1'
         self._subprocess = None
         self._logger = logger
+
+    def run(self):
+        self._log_debug('Running command: {0}'.format(self._command))
+        self._subprocess = subprocess.Popen(['/bin/sh', '-c', self._command], preexec_fn=os.setsid)
+        self.poll()
 
     def poll(self):
         """Poll attached subprocess until it is available"""
@@ -71,11 +77,9 @@ class BeaverSshTunnel(BeaverSubprocess):
         ssh_opts.append('-o BatchMode=yes')
 
         command = 'while true; do ssh {0} -i "{4}" "{5}" -L "{1}:{2}:{3}"; sleep 10; done'
-        command = command.format(' '.join(ssh_opts), tunnel_port, remote_host, remote_port, key_file, tunnel)
-        self._log_debug('Running ssh command: {0}'.format(command))
-        self._subprocess = subprocess.Popen(['/bin/sh', '-c', command], preexec_fn=os.setsid)
+        self._command = command.format(' '.join(ssh_opts), tunnel_port, remote_host, remote_port, key_file, tunnel)
 
-        self.poll()
+        self.run()
 
     def get_host(self, tunnel=None):
         port = self.get_port(tunnel)
