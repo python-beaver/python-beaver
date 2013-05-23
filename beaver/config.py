@@ -224,7 +224,7 @@ class BeaverConfig():
 
     def _parse(self, args):
         def _main_parser(config):
-            transpose = ['config', 'debug', 'daemonize', 'files', 'format', 'fqdn', 'hostname', 'path', 'pid', 'transport']
+            transpose = ['config', 'confd_path', 'debug', 'daemonize', 'files', 'format', 'fqdn', 'hostname', 'path', 'pid', 'transport']
             namspace_dict = vars(args)
             for key in transpose:
                 if key not in namspace_dict or namspace_dict[key] is None or namspace_dict[key] == '':
@@ -363,6 +363,7 @@ class BeaverConfig():
             section_defaults=self._section_defaults,
             main_parser=_main_parser,
             section_parser=_section_parser,
+            path_from_main='confd_path'
         )
 
         config = conf.raw()

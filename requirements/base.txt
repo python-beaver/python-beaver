@@ -1,5 +1,5 @@
 boto==2.8.0
-conf_d>=0.0.2
+conf_d>=0.0.3
 glob2==0.3
 mosquitto>=1.1
 msgpack-pure>=0.1.3
