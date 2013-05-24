@@ -5,14 +5,14 @@ from beaver.transports.base_transport import BaseTransport
 from beaver.transports.exception import TransportException
 
 
-class MosquittoTransport(BaseTransport):
+class MqttTransport(BaseTransport):
 
     def __init__(self, beaver_config, logger=None):
         """
         Mosquitto client initilization. Once this this transport is initialized
         it has invoked a connection to the server
         """
-        super(MosquittoTransport, self).__init__(beaver_config, logger=logger)
+        super(MqttTransport, self).__init__(beaver_config, logger=logger)
 
         self._client = Mosquitto(beaver_config.get('mqtt_clientid'), clean_session=True)
         self._topic = beaver_config.get('mqtt_topic')
