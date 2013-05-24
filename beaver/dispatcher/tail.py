@@ -67,7 +67,6 @@ def run(args=None):
 
     logger.info("Starting worker...")
     manager = TailManager(
-        paths=["/var/log/system.log"],
         beaver_config=beaver_config,
         queue_consumer_function=create_queue_consumer,
         callback=queue_put,
