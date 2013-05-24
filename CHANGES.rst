@@ -1,6 +1,330 @@
 Changelog
 =========
 
+29 (2013-05-24)
+---------------
+
+- Do not harcode path in TailManager. Closes #143. [Jose Diaz-Gonzalez]
+
+- Use /etc/beaver/conf for path and provide conf.d example. Closes #149.
+  [Jose Diaz-Gonzalez]
+
+- Added mqtt as option in argparse configuration for the transport flag.
+  [Jose Diaz-Gonzalez]
+
+- Fixed broken MqttTransport naming. [Jose Diaz-Gonzalez]
+
+- Refactored BeaverSubprocess to maintain the running command as an
+  attribute. [Jose Diaz-Gonzalez]
+
+- Properly parse the beaver conf.d path for new sections. Closes #144.
+  Closes #145. Refs #107. [Jose Diaz-Gonzalez]
+
+- Use a Buffered Tokenizer to read large/fast incoming log input. Refs
+  #135. Refs #105. [Jose Diaz-Gonzalez]
+
+- Close queue after worker has been stopped. Refs #135. [Jose Diaz-
+  Gonzalez]
+
+- Wrap manager.close() call in try/except to mimic the worker
+  dispatcher. [Jose Diaz-Gonzalez]
+
+- Properly parse out the port from the `ssh_tunnel` option. Closes #142.
+  [Jose Diaz-Gonzalez]
+
+- Subclass the BaseLog class in BeaverSubprocess. Refs #142. [Jose Diaz-
+  Gonzalez]
+
+- Move base_log module higher up in hierarchy. Refs #142. [Jose Diaz-
+  Gonzalez]
+
+- Disable daemonization on the windows platform. Closes #141. [Jose
+  Diaz-Gonzalez]
+
+- Move file unwatching in old-style worker out of for-loop. Refs #139.
+  [Jose Diaz-Gonzalez]
+
+  Each worker has a `self._file_map` attribute which is a mapping of
+  file ids to file data. When retrieving lines or checking on the status
+  of the file, we use `iteritems()` which gives us a generator as
+  opposed to a copy such as with `items()`. This generator allows us to
+  iterate over the files without having issues where the file handle may
+  open several times or other random Python issues.
+  
+  Using a generator also means that the set that we are iterating over
+  should not change mid
+  iteration, which it does if a file is unwatched. To circumvent this,
+  we should use a separate list to keep track of files we need to
+  unwatch or rewatch, and do it out of band.
+  
+  We should also take care to catch `RuntimeError` which may arise when
+  closing the Worker out of band
+  such as in the `cleanup` step of the worker dispatcher
+  but nowhere else.
+  
+  This should fix issues where logrotate suddenly causes files to
+  disappear for a time and beaver tries to tail the file at the exact
+  time it is being recreated.
+
+- Typo in SQS docs. [Jonathan Quail]
+
+- Remove ujson requirement. [Jose Diaz-Gonzalez]
+
+  This allows users that do not have a compiler in their deployment area
+  to install beaver.
+  
+  Closes #137
+
+- Turn on logfile output when running in non-daemon contexts. Closes
+  #131. [Jose Diaz-Gonzalez]
+
+- Expand logging output path. Closes #133. [Jose Diaz-Gonzalez]
+
+- Ensure logging to a file does not destroy regular logging. Closes
+  #132. [Jose Diaz-Gonzalez]
+
+- Properly handle unreadable files by logging a warning instead of
+  crashing. Closes #130. [Jose Diaz-Gonzalez]
+
+- Rename null_formatter to raw_formatter in BaseTransport class. [Jose
+  Diaz-Gonzalez]
+
+- Ensure that the RedisTransport calls the super invalidate method. Refs
+  #93. [Jose Diaz-Gonzalez]
+
+- Fix issue where input type was not being detected properly. [Jose
+  Diaz-Gonzalez]
+
+- Use logfile flag for sending all output to a file in daemon contexts.
+  [Jose Diaz-Gonzalez]
+
+- Expand path for pidfile creation. [Jose Diaz-Gonzalez]
+
+- Properly handle redis reconnects when the datastore becomes
+  unreacheable. Refs #93. [Jose Diaz-Gonzalez]
+
+- 'type' instead of 'exchange_type' in recent pika vers. [Pravir
+  Chandra]
+
+- Adding options to make queues durable and HA. [Pravir Chandra]
+
+- Respect stat_interval file configuration in stable worker. [Jose Diaz-
+  Gonzalez]
+
+- Unified configuration file using conf_d module. [Jose Diaz-Gonzalez]
+
+  This change adds support for a conf.d directory
+  configured only via the `
+  
+  confd
+  path` flag
+  which allows beaver to read configuration from multiple files.
+  
+  Please note that the primary `beaver` stanza MUST be located in the
+  file specified by the `
+  
+  configfile` argument. Any other such `beaver` stanzas will be ignored.
+  
+  This change also unifies the `BeaverConfig` and `FileConfig` classes,
+  and simplifies the api for retrieving global vs file
+  specific data.
+  
+  Please note that this commit BREAKS custom transport classes, as the
+  interface for creating a transport class has changed. If you are
+  referencing a `file_config.get(field, filename)` anywhere, please omit
+  this and refer to `beaver_config.get_field(field, filename)`.
+  
+  Closes #107
+
+- Hack to prevent stupid TypeError: 'NoneType' when running tests via
+  setup.py. [Jose Diaz-Gonzalez]
+
+- Properly handle rotated files on Darwin architectures. [Jose Diaz-
+  Gonzalez]
+
+- Log to debug instead of warning for file reloading on Darwin
+  architectures. [Jose Diaz-Gonzalez]
+
+- Speed up experimental worker. [Jose Diaz-Gonzalez]
+
+  Removed inline sleep call, which slowed down passes n*0.1 seconds,
+  where n is the number of files being tailed
+  
+  Inline methods that update data structures which should speed up
+  larger installations
+  
+  Make self.active() an attribute lookup instead of a method call
+
+- Use latest version of message pack interface (0.3.0). Closes #128.
+  [Jose Diaz-Gonzalez]
+
+- Alternative for reading python requirements. [Justin Lambert]
+
+- Fix options sent from original worker to queue. Refs #119. [Jose Diaz-
+  Gonzalez]
+
+- Allow users to ignore the results of a copytruncate from logrotate.
+  Refs #105. [Jose Diaz-Gonzalez]
+
+- Fix rpm package building. Closes #123. [Jose Diaz-Gonzalez]
+
+- Added experimental tail-version of beaver. [Jose Diaz-Gonzalez]
+
+- Beginning work to move from an omniscient worker to individual tail
+  objects. [Jose Diaz-Gonzalez]
+
+- Fix kwargs call. [Jose Diaz-Gonzalez]
+
+- Add formatting to mqtt transport. Closes #115. [Jose Diaz-Gonzalez]
+
+- Retrieve more data from callback to minimize dictionary lookups. [Jose
+  Diaz-Gonzalez]
+
+- Prefer single quotes to double quotes where possible. [Jose Diaz-
+  Gonzalez]
+
+- Ensure stat_interval and tail_lines are both integer values. [Jose
+  Diaz-Gonzalez]
+
+- Alphabetize config variables for file_config. [Jose Diaz-Gonzalez]
+
+- Ensure that debug flag is a boolean. [Jose Diaz-Gonzalez]
+
+- Follow logstash covention for 'format' instead of 'message_format'
+  [Jose Diaz-Gonzalez]
+
+- Use passed in 'ignore_empty' field instead of a file_config lookup in
+  queue module. [Jose Diaz-Gonzalez]
+
+- Prefer discover_interval over update_file_mapping_time. [Jose Diaz-
+  Gonzalez]
+
+- Fix TransportException import. Closes #122. [Jose Diaz-Gonzalez]
+
+- Use an alternative method of reading in requirements. Refs #120. [Jose
+  Diaz-Gonzalez]
+
+- Auto-reconnect mechanism for the SSH tunnel. [Michael Franz Aigner]
+
+- Fix import of REOPEN_FILES constant in dispatcher.py. [Jose Diaz-
+  Gonzalez]
+
+- Fix a PEP8 violation. [Jose Diaz-Gonzalez]
+
+- Ensure all files are utf-8 encoded. [Jose Diaz-Gonzalez]
+
+- Namespace transport classes in the transport module. [Jose Diaz-
+  Gonzalez]
+
+- Allow specifying debug mode via argument. [Jose Diaz-Gonzalez]
+
+- Added thread-safety to datetime calls. [Jose Diaz-Gonzalez]
+
+- Added support for message_format. Closes #91. [Jose Diaz-Gonzalez]
+
+- Add msgpack_pure as fallback for C-Based msgpack package. [Jose Diaz-
+  Gonzalez]
+
+- Fix issues in sincedb implementation. Refs #116. [Jose Diaz-Gonzalez]
+
+- Fix casting issue when checking start_position. [Jose Diaz-Gonzalez]
+
+- Properly handle Queue.Full exceptions. [Jose Diaz-Gonzalez]
+
+- More logging. [Jose Diaz-Gonzalez]
+
+- Expand the sincedb path on configuration parse. [Jose Diaz-Gonzalez]
+
+- Ignore since.db files. [Jose Diaz-Gonzalez]
+
+- Simplified sincedb support to handle an edge case. Refs #116. [Jose
+  Diaz-Gonzalez]
+
+- Remove errant print. [Jose Diaz-Gonzalez]
+
+- Added support for file exclusion in config stanzas. Closes #106. [Jose
+  Diaz-Gonzalez]
+
+- Added python regex exclusion support to eglob. Refs #106. [Jose Diaz-
+  Gonzalez]
+
+- PEP8. [Jose Diaz-Gonzalez]
+
+- Added a tests directory with some sample tests from users. [Jose Diaz-
+  Gonzalez]
+
+- Convert the 'sincedb_write_interval' option to an integer. Refs #116.
+  [Jose Diaz-Gonzalez]
+
+- Moved logger call to a more intelligent spot. [Jose Diaz-Gonzalez]
+
+- Ensure that we use the proper encoding when opening a file. Closes
+  #104. [Jose Diaz-Gonzalez]
+
+- Centralize file-reading using classmethod open() [Jose Diaz-Gonzalez]
+
+- Fixed issue where tailed lines were not being properly sent to the
+  callback. [Jose Diaz-Gonzalez]
+
+- Remove unnecessary argument from Worke.__init__() [Jose Diaz-Gonzalez]
+
+- Force-parse non-unicode files using unicode_dammit. [Jose Diaz-
+  Gonzalez]
+
+- Set utf-8 as default encoding on all python files. [Jose Diaz-
+  Gonzalez]
+
+- Fixed pyflakes issues. [rtoma]
+
+- Syntax fix of list. [rtoma]
+
+- Raise an AssertionError when run in daemon without a pid path
+  specified. Closes #112. [Jose Diaz-Gonzalez]
+
+- Add support for ignoring empty lines. [Jose Diaz-Gonzalez]
+
+- Properly cast boolean values from strings. [Jose Diaz-Gonzalez]
+
+- Ensure all sections have the proper values on start. [Jose Diaz-
+  Gonzalez]
+
+- Ensure internal file_config state is updated. [Jose Diaz-Gonzalez]
+
+- Pass in timestamp from worker class for more accurate timestamps at
+  the cost of speed of sending. [Jose Diaz-Gonzalez]
+
+- Centralize timestamp retrieval to base transport class. [Jose Diaz-
+  Gonzalez]
+
+- Added support for gzipped files. refs #39. [Jose Diaz-Gonzalez]
+
+- Added support for sqlite3-based sincedb. Refs #6 and #39. [Jose Diaz-
+  Gonzalez]
+
+- Refactored worker so as to allow further data to be added to the
+  file_map. [Jose Diaz-Gonzalez]
+
+- Refactor seek_to_end to properly support file tailing. [Jose Diaz-
+  Gonzalez]
+
+- Added support for pubsub zmq. [Jose Diaz-Gonzalez]
+
+- Added support for mosquitto transport. [Jose Diaz-Gonzalez]
+
+- Added support for specifying file encoding, using io.open vs os.open.
+  [Jose Diaz-Gonzalez]
+
+- Fix issue where a field may not exist in the data. [Jose Diaz-
+  Gonzalez]
+
+- Added support for rawjson format. [Jose Diaz-Gonzalez]
+
+- Fixed zeromq tests. [Jose Diaz-Gonzalez]
+
+- Added SQS transport. [Jonathan Quail]
+
+- Fixing outdated transport docs. [Morgan Delagrange]
+
 28 (2013-03-05)
 ---------------
 
