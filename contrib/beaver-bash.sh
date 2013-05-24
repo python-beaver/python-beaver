@@ -33,7 +33,7 @@ while true
 do
 	/usr/local/bin/beaver
 	## If you would prefer to use a config file, use this line instead
-	#exec /usr/local/bin/beaver -c /etc/beaver.conf
+	#exec /usr/local/bin/beaver -c /etc/beaver/conf
 
 	echo "$0: Waiting for $AFTER_CRASH_WAIT seconds before retrying."
 	sleep $AFTER_CRASH_WAIT
