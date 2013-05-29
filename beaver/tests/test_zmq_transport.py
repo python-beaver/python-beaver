@@ -10,6 +10,8 @@ try:
 except ImportError, e:
     if e.message == 'No module named zmq':
         skip = True
+    else:
+        raise
 
 
 @unittest.skipIf(skip, 'zmq not installed')
