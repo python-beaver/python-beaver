@@ -28,7 +28,7 @@ Usage
 
 usage::
 
-    beaver [-h] [-c CONFIG] [-d] [-D] [-f FILES [FILES ...]]
+    beaver [-h] [-c CONFIG] [-C CONFIG_DIR] [-d] [-D] [-f FILES [FILES ...]]
            [-F {json,msgpack,raw,rawjson,string}] [-H HOSTNAME] [-m {bind,connect}]
            [-l OUTPUT] [-p PATH] [-P PID]
            [-t {mqtt,rabbitmq,redis,sqs,stdout,udp,zmq}] [-v] [--fqdn]
@@ -37,7 +37,8 @@ optional arguments::
 
     -h, --help            show this help message and exit
     -c CONFIG, --configfile CONFIG
-                          ini config file path
+                          main beaver ini config file path
+    -C CONFIG_DIR         ini config directory path
     -d, --debug           enable debug mode
     -D, --daemonize       daemonize in the background
     -f FILES [FILES ...], --files FILES [FILES ...]
@@ -367,7 +368,7 @@ Example 15: Loading stanzas from /etc/beaver/conf.d/* support::
     tags: nginx,server
 
     # From the commandline
-    beaver -c /etc/beaver/conf
+    beaver -c /etc/beaver/conf -C /etc/beaver/conf.d
 
 
 As you can see, ``beaver`` is pretty flexible as to how you can use/abuse it in production.
