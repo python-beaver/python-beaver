@@ -28,7 +28,7 @@ Usage
 
 usage::
 
-    beaver [-h] [-c CONFIG] [-C CONFIG_DIR] [-d] [-D] [-f FILES [FILES ...]]
+    beaver [-h] [-c CONFIG] [-C CONFD_PATH] [-d] [-D] [-f FILES [FILES ...]]
            [-F {json,msgpack,raw,rawjson,string}] [-H HOSTNAME] [-m {bind,connect}]
            [-l OUTPUT] [-p PATH] [-P PID]
            [-t {mqtt,rabbitmq,redis,sqs,stdout,udp,zmq}] [-v] [--fqdn]
@@ -38,7 +38,7 @@ optional arguments::
     -h, --help            show this help message and exit
     -c CONFIG, --configfile CONFIG
                           main beaver ini config file path
-    -C CONFIG_DIR         ini config directory path
+    -C CONFD_PATH         ini config directory path
     -d, --debug           enable debug mode
     -D, --daemonize       daemonize in the background
     -f FILES [FILES ...], --files FILES [FILES ...]
