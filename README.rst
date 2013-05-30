@@ -1,3 +1,4 @@
+.. image:: https://secure.travis-ci.org/josegonzalez/beaver.png
 ======
 Beaver
 ======
