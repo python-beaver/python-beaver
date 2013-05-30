@@ -1,0 +1,8 @@
+language: python
+python:
+  - "2.7"
+before_install:
+ - sudo apt-get remove -qq libzmq3 || true
+ - sudo apt-get install -qq build-essential libzmq-dev
+install: "pip install -r requirements/zeromq.txt -r requirements/tests.txt --use-mirrors"
+script: nosetests
