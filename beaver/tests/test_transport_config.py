@@ -2,6 +2,7 @@
 import fakeredis
 import logging
 import mock
+import tempfile
 import unittest
 
 import beaver
@@ -21,7 +22,8 @@ with mock.patch('pika.adapters.BlockingConnection', autospec=True) as mock_pika:
             self.logger = logging.getLogger(__name__)
 
         def _get_config(self, **kwargs):
-            return BeaverConfig(mock.Mock(config=None, **kwargs))
+            empty_conf = tempfile.NamedTemporaryFile(delete=True)
+            return BeaverConfig(mock.Mock(config=empty_conf.name, **kwargs))
 
         @mock.patch('pika.adapters.BlockingConnection', mock_pika)
         def test_builtin_rabbitmq(self):

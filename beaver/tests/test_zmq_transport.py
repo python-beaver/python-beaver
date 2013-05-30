@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 import mock
 import unittest
+import tempfile
 
 from beaver.config import BeaverConfig
 
 try:
-    from beaver.transport.zmq_transport import ZmqTransport
+    from beaver.transports.zmq_transport import ZmqTransport
     skip = False
 except ImportError, e:
     if e.message == 'No module named zmq':
@@ -18,7 +19,8 @@ except ImportError, e:
 class ZmqTests(unittest.TestCase):
 
     def setUp(self):
-        self.beaver_config = BeaverConfig(mock.Mock(config=None))
+        empty_conf = tempfile.NamedTemporaryFile(delete=True)
+        self.beaver_config = BeaverConfig(mock.Mock(config=empty_conf.name))
 
     def test_pub(self):
         self.beaver_config.set('zeromq_address', 'tcp://localhost:2120')
