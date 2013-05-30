@@ -1,0 +1,3 @@
+fakeredis
+mock
+nose
