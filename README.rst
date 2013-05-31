@@ -414,6 +414,13 @@ When using ``copytruncate`` style log rotation, two race conditions can occur:
    watch which may be truncated are generally going to be large enough
    and slow-filling enough that this won't crop up in the wild.
 
+When you get an error similar to ``ImportError: No module named
+_sqlite3`` your python seems to miss the sqlite3-module. This can be the
+case on FreeBSD and probably other systems. If so, use the local package
+manager or port system to build that module. On FreeBSD::
+
+    cd /usr/ports/databases/py-sqlite3
+    sudo make install clean
 
 Credits
 =======
