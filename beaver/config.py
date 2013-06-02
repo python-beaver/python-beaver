@@ -110,6 +110,7 @@ class BeaverConfig():
             'ssh_tunnel_port': '',
             'ssh_remote_host': '',
             'ssh_remote_port': '',
+            'ssh_options': '',
             'subprocess_poll_sleep': '1',
 
             # the following can be passed via argparse
@@ -304,6 +305,15 @@ class BeaverConfig():
 
             if config['zeromq_address'] and type(config['zeromq_address']) == str:
                 config['zeromq_address'] = [x.strip() for x in config.get('zeromq_address').split(',')]
+
+            if config.get('ssh_options') is not None:
+                csv = config.get('ssh_options')
+                config['ssh_options'] = []
+                if csv == str:
+                    for opt in csv.split(','):
+                        config['ssh_options'].append('-o %s' % opt.strip())
+            else:
+                config['ssh_options'] = []
 
             config['globs'] = {}
 

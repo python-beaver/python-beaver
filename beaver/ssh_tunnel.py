@@ -75,6 +75,7 @@ class BeaverSshTunnel(BeaverSubprocess):
         ssh_opts.append('-n')
         ssh_opts.append('-N')
         ssh_opts.append('-o BatchMode=yes')
+        ssh_opts = ssh_opts + beaver_config.get('ssh_options')
 
         command = 'while true; do ssh {0} -i "{4}" "{5}" -L "{1}:{2}:{3}"; sleep 10; done'
         self._command = command.format(' '.join(ssh_opts), tunnel_port, remote_host, remote_port, key_file, tunnel)

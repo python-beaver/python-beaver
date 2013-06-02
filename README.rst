@@ -119,6 +119,7 @@ The following configuration keys are for building an SSH Tunnel that can be used
 * ssh_tunnel_port: Default ``None``. Local port for SSH Tunnel
 * ssh_remote_host: Default ``None``. Remote host to connect to within SSH Tunnel
 * ssh_remote_port: Default ``None``. Remote port to connect to within SSH Tunnel
+* ssh_options: Default ``None``. Comma separated list of SSH options to Pass through to the SSH Tunnel. See ``ssh_config(5)`` for more options
 
 The following configuration keys are for multi-line events support and are per file.
 
@@ -423,6 +424,19 @@ Example 18: Multi-line event for Python traceback::
         0 / 0
     ZeroDivisionError: integer division or modulo by zero
 
+Example 16: Use SSH options for redis transport through SSH Tunnel::
+
+    # /etc/beaver/conf
+    [beaver]
+    transport: redis
+    redis_url: redis://localhost:6379/0
+    redis_namespace: logstash:beaver
+    ssh_options: StrictHostKeyChecking=no, Compression=yes, CompressionLevel=9
+    ssh_key_file: /etc/beaver/remote_key
+    ssh_tunnel: remote-logger@logs.example.net
+    ssh_tunnel_port: 6379
+    ssh_remote_host: 127.0.0.1
+    ssh_remote_port: 6379
 
 As you can see, ``beaver`` is pretty flexible as to how you can use/abuse it in production.
 
