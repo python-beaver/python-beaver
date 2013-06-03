@@ -250,11 +250,12 @@ Example 9: Read config from config.ini and put to stdout::
     tags: tag1,tag2
     add_field: fieldname1,fieldvalue1[,fieldname2,fieldvalue2, ...]
 
-    ; follow all logs in /var/log except those with `messages` or `secure` in the name
+    ; follow all logs in /var/log except those with `messages` or `secure` in the name.
+    ; The exclude tag must be a valid python regular expression.
     [/var/log/*log]
     type: syslog
     tags: sys
-    exclude: (messages,secure)
+    exclude: (messages|secure)
 
     ; follow /var/log/messages.log and /var/log/secure.log using file globbing
     [/var/log/{messages,secure}.log]
