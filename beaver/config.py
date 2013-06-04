@@ -299,6 +299,9 @@ class BeaverConfig():
             else:
                 config['ssh_options'] = []
 
+            if config['zeromq_address'] and type(config['zeromq_address']) == str:
+                config['zeromq_address'] = [x.strip() for x in config.get('zeromq_address').split(',')]
+
             config['globs'] = {}
 
             return config

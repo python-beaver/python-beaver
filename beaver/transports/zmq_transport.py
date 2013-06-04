@@ -9,7 +9,7 @@ class ZmqTransport(BaseTransport):
     def __init__(self, beaver_config, logger=None):
         super(ZmqTransport, self).__init__(beaver_config, logger=logger)
 
-        zeromq_addresses = [x.strip() for x in beaver_config.get('zeromq_address').split(',')]
+        zeromq_addresses = beaver_config.get('zeromq_address')
 
         self._ctx = zmq.Context()
         if beaver_config.get('zeromq_pattern') == 'pub':
