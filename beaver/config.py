@@ -289,6 +289,9 @@ class BeaverConfig():
             if config.get('sincedb_path'):
                 config['sincedb_path'] = os.path.realpath(config.get('sincedb_path'))
 
+            if config['zeromq_address'] and type(config['zeromq_address']) == str:
+                config['zeromq_address'] = [x.strip() for x in config.get('zeromq_address').split(',')]
+
             config['globs'] = {}
 
             return config
