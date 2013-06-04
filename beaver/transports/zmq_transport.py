@@ -9,7 +9,7 @@ class ZmqTransport(BaseTransport):
     def __init__(self, beaver_config, logger=None):
         super(ZmqTransport, self).__init__(beaver_config, logger=logger)
 
-        zeromq_address = beaver_config.get('zeromq_address')
+        zeromq_addresses = [x.strip() for x in beaver_config.get('zeromq_address').split(',')]
 
         self._ctx = zmq.Context()
         if beaver_config.get('zeromq_pattern') == 'pub':
@@ -22,9 +22,11 @@ class ZmqTransport(BaseTransport):
             self._pub.hwm = zeromq_hwm
 
         if beaver_config.get('mode') == 'bind':
-            self._pub.bind(zeromq_address)
+            for addr in zeromq_addresses:
+                self._pub.bind(addr)
         else:
-            self._pub.connect(zeromq_address)
+            for addr in zeromq_addresses:
+                self._pub.connect(addr)
 
     def callback(self, filename, lines, **kwargs):
         timestamp = self.get_timestamp(**kwargs)
