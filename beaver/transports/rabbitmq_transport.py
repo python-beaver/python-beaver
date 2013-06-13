@@ -10,38 +10,50 @@ class RabbitmqTransport(BaseTransport):
     def __init__(self, beaver_config, logger=None):
         super(RabbitmqTransport, self).__init__(beaver_config, logger=logger)
 
-        self._rabbitmq_key = beaver_config.get('rabbitmq_key')
-        self._rabbitmq_exchange = beaver_config.get('rabbitmq_exchange')
+        self._rabbitmq_config = {}
+        config_to_store = [
+            'key', 'exchange', 'username', 'password', 'host', 'port', 'vhost', 
+            'queue', 'queue_durable', 'ha_queue', 'exchange_type', 'exchange_durable'
+        ]
+
+        for key in config_to_store:
+            self._rabbitmq_config[key] = beaver_config.get('rabbitmq_' + key)
+
+        self._connection = None
+        self._channel = None
+        self._connect()
+
+    def _connect(self):
 
         # Setup RabbitMQ connection
         credentials = pika.PlainCredentials(
-            beaver_config.get('rabbitmq_username'),
-            beaver_config.get('rabbitmq_password')
+            self._rabbitmq_config['username'],
+            self._rabbitmq_config['password']
         )
         parameters = pika.connection.ConnectionParameters(
             credentials=credentials,
-            host=beaver_config.get('rabbitmq_host'),
-            port=beaver_config.get('rabbitmq_port'),
-            virtual_host=beaver_config.get('rabbitmq_vhost')
+            host=self._rabbitmq_config['host'],
+            port=self._rabbitmq_config['port'],
+            virtual_host=self._rabbitmq_config['vhost']
         )
         self._connection = pika.adapters.BlockingConnection(parameters)
         self._channel = self._connection.channel()
 
         # Declare RabbitMQ queue and bindings
         self._channel.queue_declare(
-            queue=beaver_config.get('rabbitmq_queue'),
-            durable=beaver_config.get('rabbitmq_queue_durable'),
-            arguments={'x-ha-policy': 'all'} if beaver_config.get('rabbitmq_ha_queue') else {}
+            queue=self._rabbitmq_config['queue'],
+            durable=self._rabbitmq_config['queue_durable'],
+            arguments={'x-ha-policy': 'all'} if self._rabbitmq_config['ha_queue'] else {}
         )
         self._channel.exchange_declare(
-            exchange=self._rabbitmq_exchange,
-            type=beaver_config.get('rabbitmq_exchange_type'),
-            durable=beaver_config.get('rabbitmq_exchange_durable')
+            exchange=self._rabbitmq_config['exchange'],
+            exchange_type=self._rabbitmq_config['exchange_type'],
+            durable=self._rabbitmq_config['exchange_durable']
         )
         self._channel.queue_bind(
-            exchange=self._rabbitmq_exchange,
-            queue=beaver_config.get('rabbitmq_queue'),
-            routing_key=self._rabbitmq_key
+            exchange=self._rabbitmq_config['exchange'],
+            queue=self._rabbitmq_config['queue'],
+            routing_key=self._rabbitmq_config['key']
         )
 
     def callback(self, filename, lines, **kwargs):
@@ -55,8 +67,8 @@ class RabbitmqTransport(BaseTransport):
                 with warnings.catch_warnings():
                     warnings.simplefilter('error')
                     self._channel.basic_publish(
-                        exchange=self._rabbitmq_exchange,
-                        routing_key=self._rabbitmq_key,
+                        exchange=self._rabbitmq_config['exchange'],
+                        routing_key=self._rabbitmq_config['key'],
                         body=self.format(filename, line, timestamp, **kwargs),
                         properties=pika.BasicProperties(
                             content_type='text/json',
@@ -76,6 +88,9 @@ class RabbitmqTransport(BaseTransport):
     def interrupt(self):
         if self._connection:
             self._connection.close()
+
+    def reconnect(self):
+        self._connect()
 
     def unhandled(self):
         return True
