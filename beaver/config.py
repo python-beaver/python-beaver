@@ -31,7 +31,8 @@ class BeaverConfig():
             'ignore_truncate': '0',
 
             # buffered tokenization
-            'delimiter': "\n",
+            # we string-escape the delimiter later so that we can put escaped characters in our config file
+            'delimiter': '\n',
             'size_limit': '',
 
             'message_format': '',
@@ -362,6 +363,8 @@ class BeaverConfig():
             require_bool = ['debug', 'ignore_empty', 'ignore_truncate']
             for k in require_bool:
                 config[k] = bool(int(config[k]))
+
+            config['delimiter'] = config['delimiter'].decode('string-escape')
 
             require_int = ['sincedb_write_interval', 'stat_interval', 'tail_lines']
             for k in require_int:
