@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 import socket
+import errno
 import time
 
 from beaver.transports.base_transport import BaseTransport
+from beaver.transports.exception import TransportException
 
 
 class TcpTransport(BaseTransport):
@@ -51,5 +53,18 @@ class TcpTransport(BaseTransport):
         if kwargs.get('timestamp', False):
             del kwargs['timestamp']
 
-        for line in lines:
-            self._sock.send(self.format(filename, line, timestamp, **kwargs) + "\n")
+        try:
+            for line in lines:
+                self._sock.send(self.format(filename, line, timestamp, **kwargs) + "\n")
+        except socket.error, e:
+            self.invalidate()
+
+            if isinstance(e.args, tuple):
+                if e[0] == errno.EPIPE:
+                    raise TransportException('Connection appears to have been lost')
+            
+            raise TransportException('Socket Error: %s', e.args)
+        except Exception:
+            self.invalidate()
+
+            raise TransportException('Unspecified exception encountered')  # TRAP ALL THE THINGS!
