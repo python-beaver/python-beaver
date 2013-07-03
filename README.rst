@@ -314,7 +314,7 @@ Example 12: SQS Transport::
     sqs_aws_region: us-east-1
     sqs_aws_queue: logstash-input
     sqs_aws_access_key: <access_key>
-    sqs_aws_secret_access_key: <secret_key>
+    sqs_aws_secret_key: <secret_key>
 
     # logstash indexer config:
     input {
