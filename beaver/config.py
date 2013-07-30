@@ -279,9 +279,10 @@ class BeaverConfig():
             if config['files'] is not None and type(config['files']) == str:
                 config['files'] = config['files'].split(',')
 
-            config['path'] = os.path.realpath(config['path'])
-            if not os.path.isdir(config['path']):
-                raise LookupError('{0} does not exist'.format(config['path']))
+            if config['path'] is not None:
+                config['path'] = os.path.realpath(config['path'])
+                if not os.path.isdir(config['path']):
+                    raise LookupError('{0} does not exist'.format(config['path']))
 
             if config.get('hostname') is None:
                 if config.get('fqdn') is True:
