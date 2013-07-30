@@ -76,8 +76,11 @@ class Worker(object):
         You may want to override this to add extra logic or
         globbling support.
         """
-        ls = os.listdir(self._folder)
-        return [x for x in ls if os.path.splitext(x)[1][1:] == "log"]
+        if self._folder is not None:
+            ls = os.listdir(self._folder)
+            return [x for x in ls if os.path.splitext(x)[1][1:] == "log"]
+        else:
+            return []
 
     def loop(self, interval=0.1, async=False):
         """Start the loop.
