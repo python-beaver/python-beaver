@@ -2,7 +2,7 @@
 import multiprocessing
 import Queue
 import signal
-import sys
+import os
 
 from beaver.config import BeaverConfig
 from beaver.queue import run_queue
@@ -48,7 +48,7 @@ def run(args=None):
             ssh_tunnel.close()
 
         logger.info("Shutdown complete.")
-        return sys.exit(signalnum)
+        return os._exit(signalnum)
 
     signal.signal(signal.SIGTERM, cleanup)
     signal.signal(signal.SIGINT, cleanup)
