@@ -1,6 +1,90 @@
 Changelog
 =========
 
+30 (2013-08-22)
+---------------
+
+- Use os._exit over sys.exit in signal handlers to quit cleanly.
+  [Kristian Glass]
+
+  As per
+  http://thushw.blogspot.co.uk/2010/12/python
+  dont
+  use
+  sysexit
+  inside
+  signal.html
+  the use of `sys.exit` inside the signal handlers means that a
+  `SystemExit` exception is raised
+  (http://docs.python.org/2/library/sys.html#sys.exit) which can be
+  caught
+  by try/except blocks that might have been executing at time of signal
+  handling, resulting in beaver failing to quit
+
+- Allow path to be None. [Lars Hansson]
+
+  Allow path to be set empty (None) in the configuration filer. This way
+  all files and globs can be configured in files in confd_path.
+
+- Fixed example in Readme.rst for sqs_aws_secret_key. [Jonathan Quail]
+
+- Redis 2.4.11 is no longer available on Pypi. [Andrew Gross]
+
+  Fixes issue #167
+
+- Add a TCP transport. [Kiall Mac Innes]
+
+- Allow string escapes in delimiter. [Michael Mittelstadt]
+
+  As far as I can tell, there is no way for me to represent a newline as
+  a delimiter in a configuration file with ConfigParser. I want to do
+  this:
+  
+  [/ephemeral_storage/logs/kind_of_special.log]
+  tags: special
+  type: special
+  delimiter: \n\n
+  
+  As the log has a blank line between its multiline entries.
+  
+  My change allows that, by making delimiter not string
+  escaped until
+  after the config file is parsed. I'm naive about python, so there is a
+  strong possibility I've gone about it horribly wrong. This would also
+  easily allow splitting on nulls, tabs, unicode characters and other
+  things that ConfigParser may not find kosher.
+  
+  By doing this sort of multiline parsing with beaver, it allows one to
+  run logstash without the multiline filter, which due to its lack of
+  thread
+  safety, forces you to run logstash with only one worker thread.
+
+- Isolate connection logic. Provide proper reconnect support. [Chris
+  Roberts]
+
+- Fix zmq transport tests. [Scott Smith]
+
+- Move zmq address config parsing into _main_parser. [Scott Smith]
+
+- Allow specifying multiple zmq addresses to bind/connect. [Scott Smith]
+
+- Corrected documentation for exclude tag. Closes #157. [Jose Diaz-
+  Gonzalez]
+
+- Add missing sqlite3 module to documentation. [Andreas Lappe]
+
+- Tests status. [Denis Orlikhin]
+
+- Travis integration. [Denis Orlikhin]
+
+- Tests fix (conf_d does work without existing file) [Denis Orlikhin]
+
+- CONFIG_DIR to CONFD_PATH. [iyingchi]
+
+- Added doc for -C option for config directory. [iyingchi]
+
+- Implicit broken zmq error handling. [Denis Orlikhin]
+
 29 (2013-05-24)
 ---------------
 
