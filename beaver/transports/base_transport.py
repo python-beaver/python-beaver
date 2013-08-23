@@ -72,7 +72,7 @@ class BaseTransport(object):
             formatter = self._default_formatter
 
         return self._formatters[formatter]({
-            '@source': 'file://{0}{1}'.format(self._current_host, filename),
+            '@source': 'file://{0}'.format(filename),
             '@type': kwargs.get('type'),
             '@tags': kwargs.get('tags'),
             '@fields': kwargs.get('fields'),
