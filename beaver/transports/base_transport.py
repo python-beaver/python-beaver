@@ -36,7 +36,12 @@ class BaseTransport(object):
             return data['@message']
 
         def rawjson_formatter(data):
-            json_data = json.loads(data['@message'])
+            try:
+                json_data = json.loads(data['@message'])
+            except ValueError:
+                self._logger.warning("cannot parse as rawjson: {0}".format(data['@message']))
+                json_data = json.loads("{}")
+
             del data['@message']
 
             for field in json_data:
