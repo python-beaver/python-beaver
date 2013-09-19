@@ -272,11 +272,11 @@ Example 10: TCP transport::
     [beaver]
     tcp_host: 127.0.0.1
     tcp_port: 9999
+    format: raw
 
     # logstash indexer config:
     input {
       tcp {
-        type => 'shipper-input'
         host => '127.0.0.1'
         port => '9999'
       }
