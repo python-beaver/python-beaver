@@ -33,28 +33,28 @@ class BaseTransport(object):
         self._logger = logger
 
         def raw_formatter(data):
-            return data['@message']
+            return data['message']
 
         def rawjson_formatter(data):
             try:
-                json_data = json.loads(data['@message'])
+                json_data = json.loads(data['message'])
             except ValueError:
-                self._logger.warning("cannot parse as rawjson: {0}".format(data['@message']))
+                self._logger.warning("cannot parse as rawjson: {0}".format(data['message']))
                 json_data = json.loads("{}")
 
-            del data['@message']
+            del data['message']
 
             for field in json_data:
                 data[field] = json_data[field]
 
-            for field in ['@message', '@source', '@source_host', '@source_path', '@tags', '@timestamp', '@type']:
+            for field in ['message', 'host', 'file', 'tags', '@timestamp', 'type']:
                 if field not in data:
                     data[field] = ''
 
             return json.dumps(data)
 
         def string_formatter(data):
-            return '[{0}] [{1}] {2}'.format(data['@source_host'], data['@timestamp'], data['@message'])
+            return '[{0}] [{1}] {2}'.format(data['host'], data['@timestamp'], data['message'])
 
         self._formatters['json'] = json.dumps
         self._formatters['msgpack'] = msgpack.packb
@@ -77,14 +77,12 @@ class BaseTransport(object):
             formatter = self._default_formatter
 
         return self._formatters[formatter]({
-            '@source': 'file://{0}'.format(filename),
-            '@type': kwargs.get('type'),
-            '@tags': kwargs.get('tags'),
-            '@fields': kwargs.get('fields'),
+            'type': kwargs.get('type'),
+            'tags': kwargs.get('tags'),
             '@timestamp': timestamp,
-            '@source_host': self._current_host,
-            '@source_path': filename,
-            '@message': line,
+            'host': self._current_host,
+            'file': filename,
+            'message': line
         })
 
     def get_timestamp(self, **kwargs):
