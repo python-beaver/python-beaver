@@ -127,9 +127,23 @@ class Worker(object):
             lines = self._buffer_extract(data=data, fid=fid)
 
             if not lines:
+                # Before returning, check if an event (maybe partial) is waiting for too long.
+                if self._file_map[fid]['current_event'] and time.time() - self._file_map[fid]['last_activity'] > 1:
+                    event = '\n'.join(self._file_map[fid]['current_event'])
+                    self._file_map[fid]['current_event'].clear()
+                    self._callback_wrapper(filename=file.name, lines=[event])
                 break
 
-            self._callback_wrapper(filename=file.name, lines=lines)
+            self._file_map[fid]['last_activity'] = time.time()
+
+            if self._file_map[fid]['multiline_regex_after'] or self._file_map[fid]['multiline_regex_before']:
+                # Multiline is enabled for this file.
+                events = self._multiline_merge(lines=lines, fid=fid)
+            else:
+                events = lines
+
+            if events:
+                self._callback_wrapper(filename=file.name, lines=events)
 
             if self._sincedb_path:
                 current_line_count = len(lines)
@@ -203,6 +217,37 @@ class Worker(object):
     # Is the buffer empty?
     def _buffer_empty(self, fid):
         return len(self._file_map[fid]['input']) > 0
+
+    def _multiline_merge(self, lines, fid):
+        """ Merge multi-line events based.
+
+            Some event (like Python trackback or Java stracktrace) spawn
+            on multiple line. This method will merge them using two
+            regular expression: multiline_regex_after and
+            multiline_regex_before.
+
+            If a line match multiline_regex_after, it will be merged
+            with next line from the same file.
+
+            If a line match multiline_regex_before, it will be merged
+            with previous line from the same file.
+        """
+        events = []
+        re_before = self._file_map[fid]['multiline_regex_before']
+        re_after = self._file_map[fid]['multiline_regex_after']
+        current_event = self._file_map[fid]['current_event']
+        for line in lines:
+            if re_before and re_before.match(line):
+                current_event.append(line)
+            elif re_after and current_event and re_after.match(current_event[-1]):
+                current_event.append(line)
+            else:
+                if current_event:
+                    events.append('\n'.join(current_event))
+                current_event.clear()
+                current_event.append(line)
+
+        return events
 
     def _seek_to_end(self):
         unwatch_list = []
@@ -504,6 +549,10 @@ class Worker(object):
         try:
             if file:
                 self._run_pass(fid, file)
+                if self._file_map[fid]['current_event']:
+                    event = '\n'.join(self._file_map[fid]['current_event'])
+                    self._file_map[fid]['current_event'].clear()
+                    self._callback_wrapper(filename=file.name, lines=[event])
         except IOError:
             # Silently ignore any IOErrors -- file is gone
             pass
@@ -528,12 +577,16 @@ class Worker(object):
             if file:
                 self._logger.info("[{0}] - watching logfile {1}".format(fid, fname))
                 self._file_map[fid] = {
+                    'current_event': collections.deque([]),
                     'delimiter': self._beaver_config.get_field('delimiter', fname),
                     'encoding': self._beaver_config.get_field('encoding', fname),
                     'file': file,
                     'input': collections.deque([]),
                     'input_size': 0,
+                    'last_activity': 0,
                     'line': 0,
+                    'multiline_regex_after': self._beaver_config.get_field('multiline_regex_after', fname),
+                    'multiline_regex_before': self._beaver_config.get_field('multiline_regex_before', fname),
                     'size_limit': self._beaver_config.get_field('size_limit', fname),
                     'update_time': None,
                     'active': True,
