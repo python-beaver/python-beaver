@@ -61,6 +61,12 @@ class Tail(BaseLog):
         # Size of the input buffer
         self._input_size = 0
 
+        # Attribute for multi-line events
+        self._current_event = collections.deque([])
+        self._last_activity = 0
+        self._multiline_regex_after = beaver_config.get_field('multiline_regex_after', filename)
+        self._multiline_regex_before = beaver_config.get_field('multiline_regex_before', filename)
+
         self._update_file()
         if self.active:
             self._log_info("watching logfile")
@@ -93,6 +99,11 @@ class Tail(BaseLog):
         self.active = False
         if self._file:
             self._file.close()
+
+        if self._current_event:
+            event = '\n'.join(self._current_event)
+            self._current_event.clear()
+            self._callback_wrapper([event])
 
     def run(self, once=False):
         while self.active:
@@ -176,6 +187,37 @@ class Tail(BaseLog):
     def _buffer_empty(self):
         return len(self._input) > 0
 
+    def _multiline_merge(self, lines):
+        """ Merge multi-line events based.
+
+            Some event (like Python trackback or Java stracktrace) spawn
+            on multiple line. This method will merge them using two
+            regular expression: multiline_regex_after and
+            multiline_regex_before.
+
+            If a line match multiline_regex_after, it will be merged
+            with next line from the same file.
+
+            If a line match multiline_regex_before, it will be merged
+            with previous line from the same file.
+        """
+        events = []
+        re_before = self._multiline_regex_before
+        re_after = self._multiline_regex_after
+        current_event = self._current_event
+        for line in lines:
+            if re_before and re_before.match(line):
+                current_event.append(line)
+            elif re_after and current_event and re_after.match(current_event[-1]):
+                current_event.append(line)
+            else:
+                if current_event:
+                    events.append('\n'.join(current_event))
+                current_event.clear()
+                current_event.append(line)
+
+        return events
+
     def _ensure_file_is_good(self, current_time):
         """Every N seconds, ensures that the file we are tailing is the file we expect to be tailing"""
         if self._last_file_mapping_update and current_time - self._last_file_mapping_update <= self._stat_interval:
@@ -225,9 +267,23 @@ class Tail(BaseLog):
             lines = self._buffer_extract(data)
 
             if not lines:
+                # Before returning, check if an event (maybe partial) is waiting for too long.
+                if self._current_event and time.time() - self._last_activity > 1:
+                    event = '\n'.join(self._current_event)
+                    self._current_event.clear()
+                    self._callback_wrapper([event])
                 break
 
-            self._callback_wrapper(lines)
+            self._last_activity = time.time()
+
+            if self._multiline_regex_after or self._multiline_regex_before:
+                # Multiline is enabled for this file.
+                events = self._multiline_merge(lines)
+            else:
+                events = lines
+
+            if events:
+                self._callback_wrapper(events)
 
             if self._sincedb_path:
                 current_line_count = len(lines)
