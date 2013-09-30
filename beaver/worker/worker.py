@@ -332,7 +332,14 @@ class Worker(object):
 
                 lines = self.tail(data['file'].name, encoding=encoding, window=tail_lines, position=current_position)
                 if lines:
-                    self._callback_wrapper(filename=data['file'].name, lines=lines)
+                    self._file_map[fid]['last_activity'] = time.time()
+
+                    if self._file_map[fid]['multiline_regex_after'] or self._file_map[fid]['multiline_regex_before']:
+                        # Multiline is enabled for this file.
+                        events = self._multiline_merge(lines=lines, fid=fid)
+                    else:
+                        events = lines
+                    self._callback_wrapper(filename=data['file'].name, lines=events)
 
         self.unwatch_list(unwatch_list)
 

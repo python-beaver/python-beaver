@@ -353,7 +353,13 @@ class Tail(BaseLog):
             self._log_debug('tailing {0} lines'.format(self._tail_lines))
             lines = self.tail(self._filename, encoding=self._encoding, window=self._tail_lines, position=current_position)
             if lines:
-                self._callback_wrapper(lines)
+                self._last_activity = time.time()
+                if self._multiline_regex_after or self._multiline_regex_before:
+                    # Multiline is enabled for this file.
+                    events = self._multiline_merge(lines)
+                else:
+                    events = lines
+                self._callback_wrapper(events)
 
         return
 
