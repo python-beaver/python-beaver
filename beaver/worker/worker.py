@@ -9,7 +9,7 @@ import sqlite3
 import stat
 import time
 
-from beaver.utils import IS_GZIPPED_FILE, REOPEN_FILES, eglob
+from beaver.utils import IS_GZIPPED_FILE, REOPEN_FILES, eglob, multiline_merge
 from beaver.unicode_dammit import ENCODINGS
 
 
@@ -138,7 +138,11 @@ class Worker(object):
 
             if self._file_map[fid]['multiline_regex_after'] or self._file_map[fid]['multiline_regex_before']:
                 # Multiline is enabled for this file.
-                events = self._multiline_merge(lines=lines, fid=fid)
+                events = multiline_merge(
+                        lines,
+                        self._file_map[fid]['current_event'],
+                        self._file_map[fid]['multiline_regex_after'],
+                        self._file_map[fid]['multiline_regex_before'])
             else:
                 events = lines
 
@@ -217,37 +221,6 @@ class Worker(object):
     # Is the buffer empty?
     def _buffer_empty(self, fid):
         return len(self._file_map[fid]['input']) > 0
-
-    def _multiline_merge(self, lines, fid):
-        """ Merge multi-line events based.
-
-            Some event (like Python trackback or Java stracktrace) spawn
-            on multiple line. This method will merge them using two
-            regular expression: multiline_regex_after and
-            multiline_regex_before.
-
-            If a line match multiline_regex_after, it will be merged
-            with next line from the same file.
-
-            If a line match multiline_regex_before, it will be merged
-            with previous line from the same file.
-        """
-        events = []
-        re_before = self._file_map[fid]['multiline_regex_before']
-        re_after = self._file_map[fid]['multiline_regex_after']
-        current_event = self._file_map[fid]['current_event']
-        for line in lines:
-            if re_before and re_before.match(line):
-                current_event.append(line)
-            elif re_after and current_event and re_after.match(current_event[-1]):
-                current_event.append(line)
-            else:
-                if current_event:
-                    events.append('\n'.join(current_event))
-                current_event.clear()
-                current_event.append(line)
-
-        return events
 
     def _seek_to_end(self):
         unwatch_list = []
@@ -332,11 +305,13 @@ class Worker(object):
 
                 lines = self.tail(data['file'].name, encoding=encoding, window=tail_lines, position=current_position)
                 if lines:
-                    self._file_map[fid]['last_activity'] = time.time()
-
                     if self._file_map[fid]['multiline_regex_after'] or self._file_map[fid]['multiline_regex_before']:
                         # Multiline is enabled for this file.
-                        events = self._multiline_merge(lines=lines, fid=fid)
+                        events = multiline_merge(
+                                lines,
+                                self._file_map[fid]['current_event'],
+                                self._file_map[fid]['multiline_regex_after'],
+                                self._file_map[fid]['multiline_regex_before'])
                     else:
                         events = lines
                     self._callback_wrapper(filename=data['file'].name, lines=events)
@@ -590,7 +565,7 @@ class Worker(object):
                     'file': file,
                     'input': collections.deque([]),
                     'input_size': 0,
-                    'last_activity': 0,
+                    'last_activity': time.time(),
                     'line': 0,
                     'multiline_regex_after': self._beaver_config.get_field('multiline_regex_after', fname),
                     'multiline_regex_before': self._beaver_config.get_field('multiline_regex_before', fname),
