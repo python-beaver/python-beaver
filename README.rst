@@ -120,6 +120,11 @@ The following configuration keys are for building an SSH Tunnel that can be used
 * ssh_remote_host: Default ``None``. Remote host to connect to within SSH Tunnel
 * ssh_remote_port: Default ``None``. Remote port to connect to within SSH Tunnel
 
+The following configuration keys are for multi-line events support and are per file.
+
+* multiline_regex_after: Default ``None``. If a line match this regular expression, it will be merged with next line(s).
+* multiline_regex_before: Default ``None``. If a line match this regular expression, it will be merged with previous line(s).
+
 The following can also be passed via argparse. Argparse will override all options in the configfile, when specified.
 
 * format: Default ``json``. Options ``[ json, msgpack, string ]``. Format to use when sending to transport
@@ -393,6 +398,30 @@ Example 16: Loading stanzas from /etc/beaver/conf.d/* support::
 
     # From the commandline
     beaver -c /etc/beaver/conf -C /etc/beaver/conf.d
+
+Example 17: Simple multi-line event: if line is indented it is the continuation of an event::
+
+    # /etc/beaver/conf
+    [/tmp/somefile]
+    multiline_regex_before = ^\s+
+
+
+Example 18: Multi-line event for Python traceback::
+
+    # /etc/beaver/conf
+    [/tmp/python.log]
+    multiline_regex_after = (^\s+File.*, line \d+, in)
+    multiline_regex_before = (^Traceback \(most recent call last\):)|(^\s+File.*, line \d+, in)|(^\w+Error: )
+
+    # /tmp/python.log
+    DEBUG:root:Calling faulty_function
+    WARNING:root:An error occured
+    Traceback (most recent call last):
+      File "doerr.py", line 12, in <module>
+        faulty_function()
+      File "doerr.py", line 7, in faulty_function
+        0 / 0
+    ZeroDivisionError: integer division or modulo by zero
 
 
 As you can see, ``beaver`` is pretty flexible as to how you can use/abuse it in production.
