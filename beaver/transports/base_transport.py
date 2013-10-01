@@ -51,8 +51,6 @@ class BaseTransport(object):
                 'host': 'host',
                 'raw_json_fields': ['message', 'host', 'file', 'tags', '@timestamp', 'type'],
             }
-        else:
-            raise LookupError("Invalid logstash_version")
 
         def raw_formatter(data):
             return data[self._fields.get('message')]
