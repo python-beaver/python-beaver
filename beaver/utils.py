@@ -150,3 +150,36 @@ def _replace_all(path, replacements):
     for j in replacements:
         path = path.replace(*j)
     return path
+
+
+def multiline_merge(lines, current_event, re_after, re_before):
+    """ Merge multi-line events based.
+
+        Some event (like Python trackback or Java stracktrace) spawn
+        on multiple line. This method will merge them using two
+        regular expression: regex_after and regex_before.
+
+        If a line match re_after, it will be merged with next line.
+
+        If a line match re_before, it will be merged with previous line.
+
+        This function return a list of complet event. Note that because
+        we don't know if an event is complet before another new event
+        start, the last event will not be returned but stored in
+        current_event. You should pass the same current_event to
+        successive call to multiline_merge. current_event is a list
+        of lines whose belong to the same event.
+    """
+    events = []
+    for line in lines:
+        if re_before and re_before.match(line):
+            current_event.append(line)
+        elif re_after and current_event and re_after.match(current_event[-1]):
+            current_event.append(line)
+        else:
+            if current_event:
+                events.append('\n'.join(current_event))
+            current_event.clear()
+            current_event.append(line)
+
+    return events
