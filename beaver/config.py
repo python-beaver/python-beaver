@@ -102,6 +102,8 @@ class BeaverConfig():
             # path to sincedb sqlite db
             'sincedb_path': '',
 
+            'logstash_version': '',
+
             # ssh tunnel support
             'ssh_key_file': '',
             'ssh_tunnel': '',
@@ -265,6 +267,7 @@ class BeaverConfig():
                 'udp_port',
                 'wait_timeout',
                 'zeromq_hwm',
+                'logstash_version',
             ]
             for key in require_int:
                 if config[key] is not None:
