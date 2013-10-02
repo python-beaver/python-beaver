@@ -11,10 +11,13 @@ from beaver.utils import setup_custom_logger, REOPEN_FILES
 from beaver.worker.worker import Worker
 
 
-def run(args):
+def run(args=None):
     logger = setup_custom_logger('beaver', args)
 
     beaver_config = BeaverConfig(args, logger=logger)
+    if beaver_config.get('logstash_version') not in [0, 1]:
+        raise LookupError("Invalid logstash_version")
+
     queue = multiprocessing.Queue(beaver_config.get('max_queue_size'))
 
     worker = None

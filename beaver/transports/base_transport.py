@@ -32,29 +32,49 @@ class BaseTransport(object):
         self._is_valid = True
         self._logger = logger
 
+        self._logstash_version = beaver_config.get('logstash_version')
+        if self._logstash_version == 0:
+            self._fields = {
+                'type': '@type',
+                'tags': '@tags',
+                'message': '@message',
+                'file': '@source_path',
+                'host': '@source_host',
+                'raw_json_fields': ['@message', '@source', '@source_host', '@source_path', '@tags', '@timestamp', '@type'],
+            }
+        elif self._logstash_version == 1:
+            self._fields = {
+                'type': 'type',
+                'tags': 'tags',
+                'message': 'message',
+                'file': 'file',
+                'host': 'host',
+                'raw_json_fields': ['message', 'host', 'file', 'tags', '@timestamp', 'type'],
+            }
+
         def raw_formatter(data):
-            return data['@message']
+            return data[self._fields.get('message')]
 
         def rawjson_formatter(data):
             try:
-                json_data = json.loads(data['@message'])
+                json_data = json.loads(data[self._fields.get('message')])
             except ValueError:
-                self._logger.warning("cannot parse as rawjson: {0}".format(data['@message']))
+                self._logger.warning("cannot parse as rawjson: {0}".format(self._fields.get('message')))
                 json_data = json.loads("{}")
 
-            del data['@message']
+            del data[self._fields.get('message')]
 
             for field in json_data:
                 data[field] = json_data[field]
 
-            for field in ['@message', '@source', '@source_host', '@source_path', '@tags', '@timestamp', '@type']:
+            for field in self._fields.get('raw_json_fields'):
                 if field not in data:
                     data[field] = ''
 
             return json.dumps(data)
 
         def string_formatter(data):
-            return '[{0}] [{1}] {2}'.format(data['@source_host'], data['@timestamp'], data['@message'])
+            return '[{0}] [{1}] {2}'.format(data[self._fields.get('host')], data['@timestamp'], data[self._fields.get('message')])
 
         self._formatters['json'] = json.dumps
         self._formatters['msgpack'] = msgpack.packb
@@ -76,16 +96,25 @@ class BaseTransport(object):
         if formatter not in self._formatters:
             formatter = self._default_formatter
 
-        return self._formatters[formatter]({
-            '@source': 'file://{0}'.format(filename),
-            '@type': kwargs.get('type'),
-            '@tags': kwargs.get('tags'),
-            '@fields': kwargs.get('fields'),
+        data = {
+            self._fields.get('type'): kwargs.get('type'),
+            self._fields.get('tags'): kwargs.get('tags'),
             '@timestamp': timestamp,
-            '@source_host': self._current_host,
-            '@source_path': filename,
-            '@message': line,
-        })
+            self._fields.get('host'): self._current_host,
+            self._fields.get('file'): filename,
+            self._fields.get('message'): line
+        }
+
+        if self._logstash_version == 0:
+            data['@source'] = 'file://{0}'.format(filename)
+            data['@fields'] = kwargs.get('fields')
+        else:
+            data['@version'] = self._logstash_version
+            fields = kwargs.get('fields')
+            for key in fields:
+                data[key] = fields.get(key)
+
+        return self._formatters[formatter](data)
 
     def get_timestamp(self, **kwargs):
         """Retrieves the timestamp for a given set of data"""
