@@ -5,6 +5,7 @@ import errno
 import gzip
 import io
 import os
+import signal
 import sqlite3
 import stat
 import time
@@ -55,22 +56,29 @@ class Worker(object):
         self._proc = None
         self._sincedb_path = self._beaver_config.get('sincedb_path')
         self._update_time = None
+        self._running = True
 
         if not callable(self._callback):
             raise RuntimeError("Callback for worker is not callable")
 
         self.update_files()
         self._seek_to_end()
+        signal.signal(signal.SIGTERM, self.close)
 
     def __del__(self):
         """Closes all files"""
         self.close()
 
-    def close(self):
+    def close(self, signalnum=None, frame=None):
+        self._running = False
         """Closes all currently open file pointers"""
         for id, data in self._file_map.iteritems():
             data['file'].close()
         self._file_map.clear()
+        if self._proc is not None and self._proc.is_alive():
+            self._proc.terminate()
+            self._proc.join()
+
 
     def listdir(self):
         """List directory and filter files by extension.
@@ -93,9 +101,11 @@ class Worker(object):
         """Start the loop.
         If async is True make one loop then return.
         """
+
         self.create_queue_consumer_if_required()
 
-        while True:
+        while self._running:
+
             t = time.time()
 
             if int(time.time()) - self._update_time > self._beaver_config.get('discover_interval'):

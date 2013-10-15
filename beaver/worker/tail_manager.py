@@ -3,6 +3,7 @@ import errno
 import os
 import stat
 import time
+import signal
 
 from beaver.utils import eglob
 from beaver.base_log import BaseLog
@@ -25,6 +26,8 @@ class TailManager(BaseLog):
         self._update_time = None
 
         self._active = True
+
+        signal.signal(signal.SIGTERM, self.close)
 
     def listdir(self):
         """HACK around not having a beaver_config stanza
@@ -116,12 +119,16 @@ class TailManager(BaseLog):
         new_files = [fname for fid, fname in possible_files if fid not in self._tails]
         self.watch(new_files)
 
-    def close(self):
+    def close(self, signalnum=None, frame=None):
+        self._running = False
         """Closes all currently open Tail objects"""
         self._log_debug("Closing all tail objects")
         self._active = False
         for fid in self._tails:
             self._tails[fid].close()
+        if self._proc is not None and self._proc.is_alive():
+            self._proc.terminate()
+            self._proc.join()
 
     @staticmethod
     def get_file_id(st):
