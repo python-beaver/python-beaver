@@ -582,11 +582,11 @@ class Worker(object):
             else:
                 file_encoding = self._beaver_config.get_field('encoding', filename)
                 if encoding:
-                    _file = io.open(filename, "r", encoding=encoding)
+                    _file = io.open(filename, "r", encoding=encoding, errors='replace')
                 elif file_encoding:
-                    _file = io.open(filename, "r", encoding=file_encoding)
+                    _file = io.open(filename, "r", encoding=file_encoding, errors='replace')
                 else:
-                    _file = io.open(filename, "r")
+                    _file = io.open(filename, "r", errors='replace')
         except IOError, e:
             self._logger.warning(str(e))
             _file = None
