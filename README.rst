@@ -454,17 +454,17 @@ Caveats
 
 When using ``copytruncate`` style log rotation, two race conditions can occur:
 
-1.  Any log data written prior to truncation which beaver has not yet
-    read and processed is lost. Nothing we can do about that.
+1. Any log data written prior to truncation which beaver has not yet
+   read and processed is lost. Nothing we can do about that.
 
-2.  Should the file be truncated, rewritten, and end up being larger than
-    the original file during the sleep interval, beaver won't detect
-    this. After some experimentation, this behavior also exists in GNU
-    tail, so I'm going to call this a "don't do that then" bug :)
+2. Should the file be truncated, rewritten, and end up being larger than
+   the original file during the sleep interval, beaver won't detect
+   this. After some experimentation, this behavior also exists in GNU
+   tail, so I'm going to call this a "don't do that then" bug :)
 
-    Additionally, the files beaver will most likely be called upon to
-    watch which may be truncated are generally going to be large enough
-    and slow-filling enough that this won't crop up in the wild.
+   Additionally, the files beaver will most likely be called upon to
+   watch which may be truncated are generally going to be large enough
+   and slow-filling enough that this won't crop up in the wild.
 
 ----
 
