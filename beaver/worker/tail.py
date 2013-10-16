@@ -82,11 +82,11 @@ class Tail(BaseLog):
                 _file = gzip.open(self._filename, 'rb')
             else:
                 if encoding:
-                    _file = io.open(self._filename, 'r', encoding=encoding)
+                    _file = io.open(self._filename, 'r', encoding=encoding, errors='replace')
                 elif self._encoding:
-                    _file = io.open(self._filename, 'r', encoding=self._encoding)
+                    _file = io.open(self._filename, 'r', encoding=self._encoding, errors='replace')
                 else:
-                    _file = io.open(self._filename, 'r')
+                    _file = io.open(self._filename, 'r', errors='replace')
         except IOError, e:
             self._log_warning(str(e))
             _file = None
