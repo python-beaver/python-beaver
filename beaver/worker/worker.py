@@ -8,6 +8,7 @@ import os
 import sqlite3
 import stat
 import time
+import threading
 
 from beaver.utils import IS_GZIPPED_FILE, REOPEN_FILES, eglob, multiline_merge
 from beaver.unicode_dammit import ENCODINGS
@@ -82,14 +83,20 @@ class Worker(object):
         else:
             return []
 
+    def create_queue_consumer_if_required(self, interval=5.0):
+        if not (self._proc and self._proc.is_alive()):
+            self._proc = self._create_queue_consumer()
+        timer = threading.Timer(interval, self.create_queue_consumer_if_required)
+        timer.start()
+
     def loop(self, interval=0.1, async=False):
         """Start the loop.
         If async is True make one loop then return.
         """
+        self.create_queue_consumer_if_required()
+
         while True:
             t = time.time()
-            if not (self._proc and self._proc.is_alive()):
-                self._proc = self._create_queue_consumer()
 
             if int(time.time()) - self._update_time > self._beaver_config.get('discover_interval'):
                 self.update_files()
