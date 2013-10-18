@@ -96,6 +96,9 @@ class BeaverConfig():
             # time in seconds from last command sent before a queue kills itself
             'queue_timeout': '60',
 
+            # kill and respawn worker process after given number of seconds
+            'refresh_worker_process': '',
+
             # time in seconds to wait on queue.get() block before raising Queue.Empty exception
             'wait_timeout': '5',
 
@@ -264,6 +267,7 @@ class BeaverConfig():
                 'rabbitmq_port',
                 'respawn_delay',
                 'subprocess_poll_sleep',
+                'refresh_worker_process',
                 'tcp_port',
                 'udp_port',
                 'wait_timeout',

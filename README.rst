@@ -135,6 +135,10 @@ The following can also be passed via argparse. Argparse will override all option
 * fqdn: Default ``False``. Whether to use the machine's FQDN in transport output
 * hostname: Default ``None``. Manually specified hostname
 
+The following configuration key allows cleaning up the worker and transport sub-processes on an interval respawning
+
+* refresh_worker_process: Default ``None``. Interval between sub-process cleanup
+
 Examples
 --------
 
