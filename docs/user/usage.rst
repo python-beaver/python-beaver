@@ -1,31 +1,9 @@
-.. image:: https://secure.travis-ci.org/josegonzalez/beaver.png
-======
-Beaver
-======
-
-python daemon that munches on logs and sends their contents to logstash
-
-Requirements
-============
-
-* Python 2.6+
-* Optional zeromq support: install libzmq (``brew install zmq`` or ``apt-get install libzmq-dev``) and pyzmq (``pip install pyzmq==2.1.11``)
-
-Installation
-============
-
-Using PIP:
-
-From Github::
-
-    pip install git+git://github.com/josegonzalez/beaver.git#egg=beaver
-
-From PyPI::
-
-    pip install beaver==30
+.. _usage:
 
 Usage
 =====
+
+The ``beaver`` binary contains a number of options:
 
 usage::
 
@@ -59,13 +37,6 @@ optional arguments::
                           log transport method
     -v, --version         output version and quit
     --fqdn                use the machine's FQDN for source_host
-
-Background
-==========
-
-Beaver provides an lightweight method for shipping local log files to Logstash. It does this using redis, zeromq, tcp, udp, rabbit or stdout as the transport. This means you'll need a redis, zeromq, tcp, udp, amqp or stdin input somewhere down the road to get the events.
-
-Events are sent in logstash's ``json_event`` format. Options can also be set as environment variables.
 
 Configuration File Options
 --------------------------
@@ -106,7 +77,7 @@ The following are used for instances when a TransportException is thrown - Trans
 * respawn_delay: Default ``3``. Initial respawn delay for exponential backoff
 * max_failure: Default ``7``. Max failures before exponential backoff terminates
 
-The following configuration keys are for SinceDB support. Specifying these will enable saving the current line number in an sqlite database. This is useful for cases where you may be restarting the beaver process, such as during a logrotate.
+The following configuration keys are for SinceDB support. Specifying these will enable saving the current line number in an sqlite database. This is useful for cases where you may be restarting the Beaver process, such as during a logrotate.
 
 * sincedb_path: Default ``None``. Full path to an ``sqlite3`` database. Will be created at this path if it does not exist. Beaver process must have read and write access
 
@@ -481,58 +452,3 @@ Use SSH options for redis transport through SSH Tunnel::
     ssh_tunnel_port: 6379
     ssh_remote_host: 127.0.0.1
     ssh_remote_port: 6379
-
-Caveats
-=======
-
-File tailing and shipping has a number of important issues that you should be aware of. These issues may affect just Beaver, or may affect other tools as well.
-
-Copytruncate
-------------
-
-When using ``copytruncate`` style log rotation, two race conditions can occur:
-
-1. Any log data written prior to truncation which Beaver has not yet
-   read and processed is lost. Nothing we can do about that.
-
-2. Should the file be truncated, rewritten, and end up being larger than
-   the original file during the sleep interval, Beaver won't detect
-   this. After some experimentation, this behavior also exists in GNU
-   tail, so I'm going to call this a "don't do that then" bug :)
-
-   Additionally, the files Beaver will most likely be called upon to
-   watch which may be truncated are generally going to be large enough
-   and slow-filling enough that this won't crop up in the wild.
-
-FreeBSD
--------
-
-When you get an error similar to ``ImportError: No module named
-_sqlite3`` your python seems to miss the sqlite3-module. This can be the
-case on FreeBSD and probably other systems. If so, use the local package
-manager or port system to build that module. On FreeBSD::
-
-    cd /usr/ports/databases/py-sqlite3
-    sudo make install clean
-
-Binary Log Data
----------------
-
-Binary data in your logs will be converted to escape sequences or ?'s depending on the encoding settings to prevent decoding exceptions from crashing Beaver.
-
-   | http://docs.python.org/2/library/codecs.html#codecs.replace_errors
-   | malformed data is replaced with a suitable replacement character such as '?' in bytestrings and '\ufffd' in Unicode  strings.
-
-Credits
-=======
-
-Based on work from Giampaolo and Lusis::
-
-    Real time log files watcher supporting log rotation.
-
-    Original Author: Giampaolo Rodola' <g.rodola [AT] gmail [DOT] com>
-    http://code.activestate.com/recipes/577968-log-watcher-tail-f-log/
-
-    License: MIT
-
-    Other hacks (ZMQ, JSON, optparse, ...): lusis
