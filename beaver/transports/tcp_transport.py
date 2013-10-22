@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import socket
 import errno
+import ssl
 import time
 
 from beaver.transports.base_transport import BaseTransport
@@ -15,15 +16,20 @@ class TcpTransport(BaseTransport):
         self._is_valid = False
         self._tcp_host = beaver_config.get('tcp_host')
         self._tcp_port = beaver_config.get('tcp_port')
+        self._tcp_ssl_enabled = beaver_config.get('tcp_ssl_enabled')
+        self._tcp_ssl_verify = beaver_config.get('tcp_ssl_verify')
+        self._tcp_ssl_cacert = beaver_config.get('tcp_ssl_cacert')
+        self._tcp_ssl_cert = beaver_config.get('tcp_ssl_cert')
 
         self._connect()
 
     def _connect(self):
         wait = -1
+        self._logger.debug("SSL enabled for TCP transport? %s" % self._tcp_ssl_enabled)
         while True:
             wait += 1
             time.sleep(wait)
-            
+
             if wait == 20:
                 return False
 
@@ -33,8 +39,15 @@ class TcpTransport(BaseTransport):
             try:
                 self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # TCP
                 self._sock.connect((self._tcp_host, int(self._tcp_port)))
-            except Exception:
-                pass
+                if self._tcp_ssl_enabled:
+                    self._logger.debug("SSL wrapping")
+                    self._sock = ssl.wrap_socket(self._sock,
+                                                 certfile=self._tcp_ssl_cert,
+                                                 ssl_version=ssl.PROTOCOL_TLSv1,
+                                                 ca_certs=self._tcp_ssl_cacert)
+
+            except Exception as e:
+                self._logger.error("Exception caught in socket connection: " + str(e))
             else:
                 self._logger.info("Connected")
                 self._is_valid = True
@@ -62,7 +75,7 @@ class TcpTransport(BaseTransport):
             if isinstance(e.args, tuple):
                 if e[0] == errno.EPIPE:
                     raise TransportException('Connection appears to have been lost')
-            
+
             raise TransportException('Socket Error: %s', e.args)
         except Exception:
             self.invalidate()
