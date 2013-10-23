@@ -4,6 +4,7 @@ import os
 import stat
 import time
 import signal
+import threading
 
 from beaver.utils import eglob
 from beaver.base_log import BaseLog
