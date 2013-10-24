@@ -5,11 +5,13 @@ import errno
 import gzip
 import io
 import os
+import signal
 import sqlite3
 import stat
 import time
+import threading
 
-from beaver.utils import IS_GZIPPED_FILE, REOPEN_FILES, eglob
+from beaver.utils import IS_GZIPPED_FILE, REOPEN_FILES, eglob, multiline_merge
 from beaver.unicode_dammit import ENCODINGS
 
 
@@ -54,39 +56,57 @@ class Worker(object):
         self._proc = None
         self._sincedb_path = self._beaver_config.get('sincedb_path')
         self._update_time = None
+        self._running = True
 
         if not callable(self._callback):
             raise RuntimeError("Callback for worker is not callable")
 
         self.update_files()
         self._seek_to_end()
+        signal.signal(signal.SIGTERM, self.close)
 
     def __del__(self):
         """Closes all files"""
         self.close()
 
-    def close(self):
+    def close(self, signalnum=None, frame=None):
+        self._running = False
         """Closes all currently open file pointers"""
         for id, data in self._file_map.iteritems():
             data['file'].close()
         self._file_map.clear()
+        if self._proc is not None and self._proc.is_alive():
+            self._proc.terminate()
+            self._proc.join()
+
 
     def listdir(self):
         """List directory and filter files by extension.
         You may want to override this to add extra logic or
         globbling support.
         """
-        ls = os.listdir(self._folder)
-        return [x for x in ls if os.path.splitext(x)[1][1:] == "log"]
+        if self._folder is not None:
+            ls = os.listdir(self._folder)
+            return [x for x in ls if os.path.splitext(x)[1][1:] == "log"]
+        else:
+            return []
+
+    def create_queue_consumer_if_required(self, interval=5.0):
+        if not (self._proc and self._proc.is_alive()):
+            self._proc = self._create_queue_consumer()
+        timer = threading.Timer(interval, self.create_queue_consumer_if_required)
+        timer.start()
 
     def loop(self, interval=0.1, async=False):
         """Start the loop.
         If async is True make one loop then return.
         """
-        while True:
+
+        self.create_queue_consumer_if_required()
+
+        while self._running:
+
             t = time.time()
-            if not (self._proc and self._proc.is_alive()):
-                self._proc = self._create_queue_consumer()
 
             if int(time.time()) - self._update_time > self._beaver_config.get('discover_interval'):
                 self.update_files()
@@ -124,9 +144,27 @@ class Worker(object):
             lines = self._buffer_extract(data=data, fid=fid)
 
             if not lines:
+                # Before returning, check if an event (maybe partial) is waiting for too long.
+                if self._file_map[fid]['current_event'] and time.time() - self._file_map[fid]['last_activity'] > 1:
+                    event = '\n'.join(self._file_map[fid]['current_event'])
+                    self._file_map[fid]['current_event'].clear()
+                    self._callback_wrapper(filename=file.name, lines=[event])
                 break
 
-            self._callback_wrapper(filename=file.name, lines=lines)
+            self._file_map[fid]['last_activity'] = time.time()
+
+            if self._file_map[fid]['multiline_regex_after'] or self._file_map[fid]['multiline_regex_before']:
+                # Multiline is enabled for this file.
+                events = multiline_merge(
+                        lines,
+                        self._file_map[fid]['current_event'],
+                        self._file_map[fid]['multiline_regex_after'],
+                        self._file_map[fid]['multiline_regex_before'])
+            else:
+                events = lines
+
+            if events:
+                self._callback_wrapper(filename=file.name, lines=events)
 
             if self._sincedb_path:
                 current_line_count = len(lines)
@@ -284,7 +322,16 @@ class Worker(object):
 
                 lines = self.tail(data['file'].name, encoding=encoding, window=tail_lines, position=current_position)
                 if lines:
-                    self._callback_wrapper(filename=data['file'].name, lines=lines)
+                    if self._file_map[fid]['multiline_regex_after'] or self._file_map[fid]['multiline_regex_before']:
+                        # Multiline is enabled for this file.
+                        events = multiline_merge(
+                                lines,
+                                self._file_map[fid]['current_event'],
+                                self._file_map[fid]['multiline_regex_after'],
+                                self._file_map[fid]['multiline_regex_before'])
+                    else:
+                        events = lines
+                    self._callback_wrapper(filename=data['file'].name, lines=events)
 
         self.unwatch_list(unwatch_list)
 
@@ -501,6 +548,10 @@ class Worker(object):
         try:
             if file:
                 self._run_pass(fid, file)
+                if self._file_map[fid]['current_event']:
+                    event = '\n'.join(self._file_map[fid]['current_event'])
+                    self._file_map[fid]['current_event'].clear()
+                    self._callback_wrapper(filename=file.name, lines=[event])
         except IOError:
             # Silently ignore any IOErrors -- file is gone
             pass
@@ -525,12 +576,16 @@ class Worker(object):
             if file:
                 self._logger.info("[{0}] - watching logfile {1}".format(fid, fname))
                 self._file_map[fid] = {
+                    'current_event': collections.deque([]),
                     'delimiter': self._beaver_config.get_field('delimiter', fname),
                     'encoding': self._beaver_config.get_field('encoding', fname),
                     'file': file,
                     'input': collections.deque([]),
                     'input_size': 0,
+                    'last_activity': time.time(),
                     'line': 0,
+                    'multiline_regex_after': self._beaver_config.get_field('multiline_regex_after', fname),
+                    'multiline_regex_before': self._beaver_config.get_field('multiline_regex_before', fname),
                     'size_limit': self._beaver_config.get_field('size_limit', fname),
                     'update_time': None,
                     'active': True,
@@ -544,11 +599,11 @@ class Worker(object):
             else:
                 file_encoding = self._beaver_config.get_field('encoding', filename)
                 if encoding:
-                    _file = io.open(filename, "r", encoding=encoding)
+                    _file = io.open(filename, "r", encoding=encoding, errors='replace')
                 elif file_encoding:
-                    _file = io.open(filename, "r", encoding=file_encoding)
+                    _file = io.open(filename, "r", encoding=file_encoding, errors='replace')
                 else:
-                    _file = io.open(filename, "r")
+                    _file = io.open(filename, "r", errors='replace')
         except IOError, e:
             self._logger.warning(str(e))
             _file = None

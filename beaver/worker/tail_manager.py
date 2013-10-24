@@ -3,6 +3,8 @@ import errno
 import os
 import stat
 import time
+import signal
+import threading
 
 from beaver.utils import eglob
 from beaver.base_log import BaseLog
@@ -26,6 +28,8 @@ class TailManager(BaseLog):
 
         self._active = True
 
+        signal.signal(signal.SIGTERM, self.close)
+
     def listdir(self):
         """HACK around not having a beaver_config stanza
         TODO: Convert this to a glob"""
@@ -47,11 +51,18 @@ class TailManager(BaseLog):
             if tail.active:
                 self._tails[tail.fid()] = tail
 
+    def create_queue_consumer_if_required(self, interval=5.0):
+        if not (self._proc and self._proc.is_alive()):
+            self._proc = self._create_queue_consumer()
+        timer = threading.Timer(interval, self.create_queue_consumer_if_required)
+        timer.start()
+
     def run(self, interval=0.1,):
+
+        self.create_queue_consumer_if_required()
+
         while self._active:
             for fid in self._tails.keys():
-                if not (self._proc and self._proc.is_alive()):
-                    self._proc = self._create_queue_consumer()
 
                 self.update_files()
 
@@ -109,12 +120,16 @@ class TailManager(BaseLog):
         new_files = [fname for fid, fname in possible_files if fid not in self._tails]
         self.watch(new_files)
 
-    def close(self):
+    def close(self, signalnum=None, frame=None):
+        self._running = False
         """Closes all currently open Tail objects"""
         self._log_debug("Closing all tail objects")
         self._active = False
         for fid in self._tails:
             self._tails[fid].close()
+        if self._proc is not None and self._proc.is_alive():
+            self._proc.terminate()
+            self._proc.join()
 
     @staticmethod
     def get_file_id(st):

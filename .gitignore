@@ -5,4 +5,5 @@
 *.db
 build
 dist
+docs/_build
 pkg

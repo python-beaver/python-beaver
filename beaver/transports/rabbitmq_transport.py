@@ -12,7 +12,7 @@ class RabbitmqTransport(BaseTransport):
 
         self._rabbitmq_config = {}
         config_to_store = [
-            'key', 'exchange', 'username', 'password', 'host', 'port', 'vhost', 
+            'key', 'exchange', 'username', 'password', 'host', 'port', 'vhost',
             'queue', 'queue_durable', 'ha_queue', 'exchange_type', 'exchange_durable'
         ]
 
@@ -55,6 +55,8 @@ class RabbitmqTransport(BaseTransport):
             queue=self._rabbitmq_config['queue'],
             routing_key=self._rabbitmq_config['key']
         )
+
+        self._is_valid = True;
 
     def callback(self, filename, lines, **kwargs):
         timestamp = self.get_timestamp(**kwargs)

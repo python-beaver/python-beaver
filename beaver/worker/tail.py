@@ -8,7 +8,7 @@ import os
 import sqlite3
 import time
 
-from beaver.utils import IS_GZIPPED_FILE, REOPEN_FILES
+from beaver.utils import IS_GZIPPED_FILE, REOPEN_FILES, multiline_merge
 from beaver.unicode_dammit import ENCODINGS
 from beaver.base_log import BaseLog
 
@@ -61,6 +61,12 @@ class Tail(BaseLog):
         # Size of the input buffer
         self._input_size = 0
 
+        # Attribute for multi-line events
+        self._current_event = collections.deque([])
+        self._last_activity = time.time()
+        self._multiline_regex_after = beaver_config.get_field('multiline_regex_after', filename)
+        self._multiline_regex_before = beaver_config.get_field('multiline_regex_before', filename)
+
         self._update_file()
         if self.active:
             self._log_info("watching logfile")
@@ -76,11 +82,11 @@ class Tail(BaseLog):
                 _file = gzip.open(self._filename, 'rb')
             else:
                 if encoding:
-                    _file = io.open(self._filename, 'r', encoding=encoding)
+                    _file = io.open(self._filename, 'r', encoding=encoding, errors='replace')
                 elif self._encoding:
-                    _file = io.open(self._filename, 'r', encoding=self._encoding)
+                    _file = io.open(self._filename, 'r', encoding=self._encoding, errors='replace')
                 else:
-                    _file = io.open(self._filename, 'r')
+                    _file = io.open(self._filename, 'r', errors='replace')
         except IOError, e:
             self._log_warning(str(e))
             _file = None
@@ -93,6 +99,11 @@ class Tail(BaseLog):
         self.active = False
         if self._file:
             self._file.close()
+
+        if self._current_event:
+            event = '\n'.join(self._current_event)
+            self._current_event.clear()
+            self._callback_wrapper([event])
 
     def run(self, once=False):
         while self.active:
@@ -225,9 +236,27 @@ class Tail(BaseLog):
             lines = self._buffer_extract(data)
 
             if not lines:
+                # Before returning, check if an event (maybe partial) is waiting for too long.
+                if self._current_event and time.time() - self._last_activity > 1:
+                    event = '\n'.join(self._current_event)
+                    self._current_event.clear()
+                    self._callback_wrapper([event])
                 break
 
-            self._callback_wrapper(lines)
+            self._last_activity = time.time()
+
+            if self._multiline_regex_after or self._multiline_regex_before:
+                # Multiline is enabled for this file.
+                events = multiline_merge(
+                        lines,
+                        self._current_event,
+                        self._multiline_regex_after,
+                        self._multiline_regex_before)
+            else:
+                events = lines
+
+            if events:
+                self._callback_wrapper(events)
 
             if self._sincedb_path:
                 current_line_count = len(lines)
@@ -297,7 +326,16 @@ class Tail(BaseLog):
             self._log_debug('tailing {0} lines'.format(self._tail_lines))
             lines = self.tail(self._filename, encoding=self._encoding, window=self._tail_lines, position=current_position)
             if lines:
-                self._callback_wrapper(lines)
+                if self._multiline_regex_after or self._multiline_regex_before:
+                    # Multiline is enabled for this file.
+                    events = multiline_merge(
+                            lines,
+                            self._current_event,
+                            self._multiline_regex_after,
+                            self._multiline_regex_before)
+                else:
+                    events = lines
+                self._callback_wrapper(events)
 
         return
 
