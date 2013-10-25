@@ -145,7 +145,9 @@ class Tail(BaseLog):
 
         # Move the first entry in the resulting array into the input buffer.  It represents
         # the last segment of a token-delimited entity unless it's the only entry in the list.
-        self._input.append(entities.popleft())
+        first_entry = entities.popleft()
+        if len(first_entry) > 0:
+            self._input.append(first_entry)
 
         # If the resulting array from the split is empty, the token was not encountered
         # (not even at the end of the buffer).  Since we've encountered no token-delimited
