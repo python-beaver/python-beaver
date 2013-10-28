@@ -76,10 +76,10 @@ class BeaverConfig():
             'sqs_aws_queue': '',
             'tcp_host': '127.0.0.1',
             'tcp_port': '9999',
-            'tcp_ssl_enable': False,
-            'tcp_ssl_verify': False,
-            'tcp_ssl_cacert': None,
-            'tcp_ssl_cert': None,
+            'tcp_ssl_enabled': '0',
+            'tcp_ssl_verify': '0',
+            'tcp_ssl_cacert': '',
+            'tcp_ssl_cert': '',
             'udp_host': os.environ.get('UDP_HOST', '127.0.0.1'),
             'udp_port': os.environ.get('UDP_PORT', '9999'),
             'zeromq_address': os.environ.get('ZEROMQ_ADDRESS', 'tcp://localhost:2120'),
@@ -259,7 +259,8 @@ class BeaverConfig():
                 if config[key] == '':
                     config[key] = None
 
-            require_bool = ['debug', 'daemonize', 'fqdn', 'rabbitmq_exchange_durable', 'rabbitmq_queue_durable', 'rabbitmq_ha_queue']
+            require_bool = ['debug', 'daemonize', 'fqdn', 'rabbitmq_exchange_durable', 'rabbitmq_queue_durable',
+                            'rabbitmq_ha_queue', 'tcp_ssl_enabled', 'tcp_ssl_verify']
 
             for key in require_bool:
                 config[key] = bool(int(config[key]))
