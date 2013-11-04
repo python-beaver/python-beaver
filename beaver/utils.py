@@ -70,17 +70,15 @@ def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None
     if logger.handlers:
         logger.handlers = []
 
+    handlers = []
     if not logger.handlers:
-        handler = logging.StreamHandler()
+        handlers.append(logging.StreamHandler())
         if output is not None:
-            file_handler = logging.FileHandler(output)
-            if formatter is not False:
-                file_handler.setFormatter(formatter)
-            logger.addHandler(file_handler)
+            handlers.append(logging.FileHandler(output))
 
+    for handler in handlers:
         if formatter is not False:
             handler.setFormatter(formatter)
-
         logger.addHandler(handler)
 
     if debug:
