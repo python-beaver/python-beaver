@@ -66,9 +66,7 @@ def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None
 
     logger = logging.getLogger(name)
     logger.propagate = False
-
-    if logger.handlers:
-        logger.handlers = []
+    logger.handlers = []
 
     handlers = []
     if not logger.handlers:
