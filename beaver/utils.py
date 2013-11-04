@@ -81,7 +81,7 @@ def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None
         logger.addHandler(handler)
 
     if hasattr(logging, 'captureWarnings'):
-        logging.captureWarnings(logging.getLevelName()=='DEBUG')
+        logging.captureWarnings(logging.getLevelName(logger.level)=='DEBUG')
 
     logger.debug('Logger level is {0}'.format(logging.getLevelName(logger.level)))
 
