@@ -86,12 +86,11 @@ def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None
 
     if debug:
         logger.setLevel(logging.DEBUG)
-        if hasattr(logging, 'captureWarnings'):
-            logging.captureWarnings(True)
     else:
         logger.setLevel(logging.INFO)
-        if hasattr(logging, 'captureWarnings'):
-            logging.captureWarnings(False)
+
+    if hasattr(logging, 'captureWarnings'):
+        logging.captureWarnings(debug==True)
 
     logger.debug('Logger level is {0}'.format(logging.getLevelName(logger.level)))
 
