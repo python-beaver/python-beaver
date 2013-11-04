@@ -35,7 +35,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Beaver logfile shipper', epilog=epilog_example, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('-c', '--configfile', help='ini config file path', dest='config', default='/dev/null')
     parser.add_argument('-C', '--confd-path', help='path to conf.d directory', dest='confd_path', default='/etc/beaver/conf.d')
-    parser.add_argument('-d', '--debug', help='enable debug mode', dest='debug', default=False, action='store_true')
+    parser.add_argument('-L', '--loglevel', help='set log level', dest='loglevel', default='info')
     parser.add_argument('-D', '--daemonize', help='daemonize in the background', dest='daemonize', default=False, action='store_true')
     parser.add_argument('-f', '--files', help='space-separated filelist to watch, can include globs (*.log). Overrides --path argument', dest='files', default=None, nargs='+')
     parser.add_argument('-F', '--format', help='format to use when sending to transport', default=None, dest='format', choices=['json', 'msgpack', 'raw', 'rawjson', 'string'])
@@ -53,11 +53,14 @@ def parse_args():
 
 
 def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None):
+    loglevel = logging.INFO
     if args is not None and type(args) == argparse.Namespace:
-        if debug is None:
-            debug = args.debug is True
+        loglevel = args.loglevel
         if output is None:
             output = args.output
+
+    if type(loglevel) == str:
+        loglevel = loglevel.upper()
 
     if formatter is None:
         formatter = logging.Formatter('[%(asctime)s] %(levelname)-7s %(message)s')
@@ -65,6 +68,7 @@ def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None
     logger = logging.getLogger(name)
     logger.propagate = False
     logger.handlers = []
+    logger.setLevel(loglevel)
 
     handlers = []
     handlers.append(logging.StreamHandler())
@@ -76,13 +80,8 @@ def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None
             handler.setFormatter(formatter)
         logger.addHandler(handler)
 
-    if debug:
-        logger.setLevel(logging.DEBUG)
-    else:
-        logger.setLevel(logging.INFO)
-
     if hasattr(logging, 'captureWarnings'):
-        logging.captureWarnings(debug==True)
+        logging.captureWarnings(logging.getLevelName()=='DEBUG')
 
     logger.debug('Logger level is {0}'.format(logging.getLevelName(logger.level)))
 
