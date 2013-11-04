@@ -59,20 +59,19 @@ def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None
         if output is None:
             output = args.output
 
+    if formatter is None:
+        formatter = logging.Formatter('[%(asctime)s] %(levelname)-7s %(message)s')
+    if output:
+        output = os.path.realpath(output)
+
     logger = logging.getLogger(name)
     logger.propagate = False
+
     if logger.handlers:
         logger.handlers = []
 
     if not logger.handlers:
-        if formatter is None:
-            formatter = logging.Formatter('[%(asctime)s] %(levelname)-7s %(message)s')
-
         handler = logging.StreamHandler()
-
-        if output:
-            output = os.path.realpath(output)
-
         if output is not None:
             file_handler = logging.FileHandler(output)
             if formatter is not False:
