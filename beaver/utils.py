@@ -53,22 +53,22 @@ def parse_args():
 
 
 def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None):
+    if args is not None and type(args) == argparse.Namespace:
+        if debug is None:
+            debug = args.debug is True
+        if output is None:
+            output = args.output
+
     logger = logging.getLogger(name)
     logger.propagate = False
     if logger.handlers:
         logger.handlers = []
-
-    has_args = args is not None and type(args) == argparse.Namespace
-    if debug is None:
-        debug = has_args and args.debug is True
 
     if not logger.handlers:
         if formatter is None:
             formatter = logging.Formatter('[%(asctime)s] %(levelname)-7s %(message)s')
 
         handler = logging.StreamHandler()
-        if output is None and has_args:
-            output = args.output
 
         if output:
             output = os.path.realpath(output)
