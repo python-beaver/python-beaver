@@ -1,6 +1,21 @@
 Changelog
 =========
 
+31 (2013-11-06)
+---------------
+
+- Add config value add_field_env to add fields to the event based
+  upon environment variables.
+
+  Usage: add_field_env: fieldName1,ENVVARIABLE1,fieldName2,ENVVARIABLE2
+
+  Also, strip whitespace from add_field and add_field_env strings to allow
+  you to put spaces after the commas to increase readability of the config file
+
+  Add add_field_env to usage docs.
+
+  Fixes issue #213
+
 30 (2013-08-22)
 ---------------
 

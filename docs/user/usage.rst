@@ -167,6 +167,7 @@ Read config from config.ini and put to stdout::
     type: mytype
     tags: tag1,tag2
     add_field: fieldname1,fieldvalue1[,fieldname2,fieldvalue2, ...]
+    add_field_env: fieldname1,ENVVARIABLE1[,fieldname2,ENVVARIABLE2, ...]
 
     ; follow all logs in /var/log except those with `messages` or `secure` in the name.
     ; The exclude tag must be a valid python regular expression.
