@@ -108,6 +108,10 @@ The following configuration key allows cleaning up the worker and transport sub-
 
 * refresh_worker_process: Default ``None``. Interval between sub-process cleanup
 
+The following configuration key allows the importing of OS environment data into the event.
+
+* add_field_env: Default ``None``. Format is fieldname1,ENVVARIABLE1[,fieldname2,ENVVARIABLE2, ...]
+
 Examples
 --------
 
@@ -167,6 +171,7 @@ Read config from config.ini and put to stdout::
     type: mytype
     tags: tag1,tag2
     add_field: fieldname1,fieldvalue1[,fieldname2,fieldvalue2, ...]
+    add_field_env: fieldname1,ENVVARIABLE1[,fieldname2,ENVVARIABLE2, ...]
 
     ; follow all logs in /var/log except those with `messages` or `secure` in the name.
     ; The exclude tag must be a valid python regular expression.
@@ -452,3 +457,18 @@ Use SSH options for redis transport through SSH Tunnel::
     ssh_tunnel_port: 6379
     ssh_remote_host: 127.0.0.1
     ssh_remote_port: 6379
+
+
+Environment Import Support
+**************************
+
+Using add_field_env allows you to add additional fields based upon OS environment data. For example if you
+want the instance ID from an AWS host (and you've imported that data into the environment before launch),
+you could add the following:
+
+add_field_env: instanceID,INSTANCE_ID
+
+If you're using Asgard to manage your auto scaling groups, you can extract the information that it sets as well.
+
+add_field_env: asgEnvironment,CLOUD_DEV_PHASE,launchConfig,CLOUD_LAUNCH_CONFIG,asgName,CLOUD_CLUSTER
+
