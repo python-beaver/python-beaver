@@ -380,7 +380,7 @@ class BeaverConfig():
                         envFieldkeys = envFields[0::2]
                         envFieldvalues = []
                         for x in envFields[1::2]:
-                            envFieldvalues.append([os.environ.get(x)])
+                            envFieldvalues.append(os.environ.get(x))
                         config['fields'].update(dict(zip(envFieldkeys, envFieldvalues)))
                 except TypeError:
                     config['envFields'] = {}

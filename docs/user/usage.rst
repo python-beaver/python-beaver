@@ -491,31 +491,23 @@ And the following beaver.conf file::
     tags: beaver-src
     add_field_env: launchConfig, CLOUD_LAUNCH_CONFIG, cloudCluster, CLOUD_CLUSTER, instanceID, INSTANCE_ID
 
-You would get the following event in your logstash input (using tcp for an input with a json codec)::
+You would get the following event in your logstash input (using tcp for an input with an oldlogstashjson codec)::
 
     {
-             "@source" => "file://ip-10-21-56-68/mnt/logs/jetty/access.log",
-        "@source_host" => "ip-10-21-56-68",
-            "@message" => "10.21.56.244 - - [07/11/2013:20:38:32 +0000] \"GET / HTTP/1.1\" 200 1297 \"-\" \"NING/1.0\"",
-               "@tags" => [
+             "message" => "10.21.56.244 - - [07/11/2013:22:44:15 +0000] \"GET / HTTP/1.1\" 200 14108 \"-\" \"NING/1.0\"",
+         "source_host" => "ip-10-21-56-68",
+         "source_path" => "/mnt/logs/jetty/access.log",
+              "source" => "file://ip-10-21-56-68/mnt/logs/jetty/access.log",
+                "tags" => [
             [0] "beaver-src"
         ],
-             "@fields" => {
-              "instanceID" => [
-                [0] "i-3cf70c0b"
-            ],
-            "cloudCluster" => [
-                [0] "always-cms-services-ext-d0prod"
-            ],
-            "launchConfig" => [
-                [0] "always-cms-services-ext-d0prod-20131030104814"
-            ]
-        },
-          "@timestamp" => "2013-11-07T20:38:32.096Z",
-        "@source_path" => "/mnt/logs/jetty/access.log",
-               "@type" => "cms-serv-ext",
+                "type" => "cms-serv-ext",
+          "@timestamp" => "2013-11-07T22:44:15.068Z",
+          "instanceID" => "i-3cf70c0b",
+        "cloudCluster" => "always-cms-services-ext-d0prod",
+        "launchConfig" => "always-cms-services-ext-d0prod-20131030104814",
             "@version" => "1",
-                "host" => "10.21.56.68:35245",
+                "host" => "10.21.56.68:36952"
     }
 
-This is very similiar to the logstash environment filter.
+This is functionally equivalent to the logstash environment filter.
