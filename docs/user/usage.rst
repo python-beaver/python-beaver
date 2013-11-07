@@ -171,7 +171,6 @@ Read config from config.ini and put to stdout::
     type: mytype
     tags: tag1,tag2
     add_field: fieldname1,fieldvalue1[,fieldname2,fieldvalue2, ...]
-    add_field_env: fieldname1,ENVVARIABLE1[,fieldname2,ENVVARIABLE2, ...]
 
     ; follow all logs in /var/log except those with `messages` or `secure` in the name.
     ; The exclude tag must be a valid python regular expression.
@@ -472,3 +471,51 @@ If you're using Asgard to manage your auto scaling groups, you can extract the i
 
 add_field_env: asgEnvironment,CLOUD_DEV_PHASE,launchConfig,CLOUD_LAUNCH_CONFIG,asgName,CLOUD_CLUSTER
 
+
+Assuming the following items in the environment::
+
+    # printenv | egrep '(CLOUD_LAUNCH_CONFIG|CLOUD_CLUSTER|INSTANCE_ID)'
+    CLOUD_CLUSTER=always-cms-services-ext-d0prod
+    CLOUD_LAUNCH_CONFIG=always-cms-services-ext-d0prod-20131030104814
+    INSTANCE_ID=i-3cf70c0b
+
+And the following beaver.conf file::
+
+    [beaver]
+    tcp_host: 10.21.52.249
+    tcp_port: 9999
+    format: json
+
+    [/mnt/logs/jetty/access.log]
+    type: cms-serv-ext
+    tags: beaver-src
+    add_field_env: launchConfig, CLOUD_LAUNCH_CONFIG, cloudCluster, CLOUD_CLUSTER, instanceID, INSTANCE_ID
+
+You would get the following event in your logstash input (using tcp for an input with a json codec)::
+
+    {
+             "@source" => "file://ip-10-21-56-68/mnt/logs/jetty/access.log",
+        "@source_host" => "ip-10-21-56-68",
+            "@message" => "10.21.56.244 - - [07/11/2013:20:38:32 +0000] \"GET / HTTP/1.1\" 200 1297 \"-\" \"NING/1.0\"",
+               "@tags" => [
+            [0] "beaver-src"
+        ],
+             "@fields" => {
+              "instanceID" => [
+                [0] "i-3cf70c0b"
+            ],
+            "cloudCluster" => [
+                [0] "always-cms-services-ext-d0prod"
+            ],
+            "launchConfig" => [
+                [0] "always-cms-services-ext-d0prod-20131030104814"
+            ]
+        },
+          "@timestamp" => "2013-11-07T20:38:32.096Z",
+        "@source_path" => "/mnt/logs/jetty/access.log",
+               "@type" => "cms-serv-ext",
+            "@version" => "1",
+                "host" => "10.21.56.68:35245",
+    }
+
+This is very similiar to the logstash environment filter.
