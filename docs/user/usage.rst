@@ -50,6 +50,10 @@ Beaver can optionally get data from a ``configfile`` using the ``-c`` flag. This
 * mqtt_topic: Default ``/logstash``. Topic to publish to
 * rabbitmq_host: Defaults ``localhost``. Host for RabbitMQ
 * rabbitmq_port: Defaults ``5672``. Port for RabbitMQ
+* rabbitmq_ssl: Defaults ``0``. Connect using SSL/TLS
+* rabbitmq_ssl_key: Optional. Defaults ``None``. Path to client private key for SSL/TLS
+* rabbitmq_ssl_cert: Optional. Defaults ``None``. Path to client certificate for SSL/TLS
+* rabbitmq_ssl_cacert: Optional. Defaults ``None``. Path to CA certificate for SSL/TLS
 * rabbitmq_vhost: Default ``/``
 * rabbitmq_username: Default ``guest``
 * rabbitmq_password: Default ``guest``

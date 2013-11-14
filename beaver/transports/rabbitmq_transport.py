@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import pika
+import ssl
 
 from beaver.transports.base_transport import BaseTransport
 from beaver.transports.exception import TransportException
@@ -13,7 +14,8 @@ class RabbitmqTransport(BaseTransport):
         self._rabbitmq_config = {}
         config_to_store = [
             'key', 'exchange', 'username', 'password', 'host', 'port', 'vhost',
-            'queue', 'queue_durable', 'ha_queue', 'exchange_type', 'exchange_durable'
+            'queue', 'queue_durable', 'ha_queue', 'exchange_type', 'exchange_durable',
+            'ssl', 'ssl_key', 'ssl_cert', 'ssl_cacert'
         ]
 
         for key in config_to_store:
@@ -30,10 +32,18 @@ class RabbitmqTransport(BaseTransport):
             self._rabbitmq_config['username'],
             self._rabbitmq_config['password']
         )
+        ssl_options = {
+            'keyfile': self._rabbitmq_config['ssl_key'],
+            'certfile': self._rabbitmq_config['ssl_cert'],
+            'ca_certs': self._rabbitmq_config['ssl_cacert'],
+            'ssl_version': ssl.PROTOCOL_TLSv1
+        }
         parameters = pika.connection.ConnectionParameters(
             credentials=credentials,
             host=self._rabbitmq_config['host'],
             port=self._rabbitmq_config['port'],
+            ssl=self._rabbitmq_config['ssl'],
+            ssl_options=ssl_options,
             virtual_host=self._rabbitmq_config['vhost']
         )
         self._connection = pika.adapters.BlockingConnection(parameters)
