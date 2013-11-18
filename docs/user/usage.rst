@@ -394,11 +394,18 @@ Mqtt transport using Mosquitto::
     beaver -c /etc/beaver/conf -f /var/log/unmappable.log -t mqtt
 
 HTTP transport::
+    The HTTP transport simply posts the payload data for a log event to the url specified here.
+    You can use this to post directly to elastic search, for example by creating an index and posting json to the index URL:
+    Assuming an elastic search instance running on your localhost: 
+    Create a 'logs' index:
+    curl -XPUT 'http://localhost:9200/logs/'
+
+    A beaver config to post directly to elastic search: 
     # /etc/beaver/conf
     [beaver]
     format: json
     logstash_version: 1
-    http_url: http://yourelasticsearchinstance:9200/logs/log
+    http_url: http://localhost:9200/logs/log
     
     #from the commandline
     beaver -c /etc/beaver/conf -F json -f /var/log/somefile -t http
