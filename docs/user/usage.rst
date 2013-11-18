@@ -71,6 +71,7 @@ Beaver can optionally get data from a ``configfile`` using the ``-c`` flag. This
 * zeromq_address: Default ``tcp://localhost:2120``. Zeromq URL
 * zeromq_hwm: Default None. Zeromq HighWaterMark socket option
 * zeromq_bind: Default ``bind``. Whether to bind to zeromq host or simply connect
+* http_url: Default ``None`` http://someserver.com/path
 
 The following are used for instances when a TransportException is thrown - Transport dependent
 
@@ -392,6 +393,16 @@ Mqtt transport using Mosquitto::
     # From the commandline
     beaver -c /etc/beaver/conf -f /var/log/unmappable.log -t mqtt
 
+HTTP transport::
+    # /etc/beaver/conf
+    [beaver]
+    format: json
+    logstash_version: 1
+    http_url: http://yourelasticsearchinstance:9200/logs/log
+    
+    #from the commandline
+    beaver -c /etc/beaver/conf -F json -f /var/log/somefile -t http
+    
 Sincedb support using Sqlite3
 *****************************
 
