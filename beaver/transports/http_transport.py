@@ -57,14 +57,11 @@ class HttpTransport(BaseTransport):
 
         try:
             for line in lines:
-                #escape the tab in the message field.
+                #escape any tab in the message field, assuming json payload
                 jsonline=self.format(filename,line,timestamp,**kwargs)
                 edata=jsonline.replace('\t','\\t')
-                #req=urllib2.Request(self._url,edata)
                 self._logger.debug("writing to : {0}".format(self._url))
                 self._logger.debug("writing data: {0}".format(edata))
-                #out = urllib2.urlopen(req)
-                #out.read()
                 r=requests.post(url=self._url,data=edata)
                 if r.status_code==200:
                     res=r.content
