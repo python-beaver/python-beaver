@@ -35,8 +35,9 @@ def run_queue(queue, beaver_config, logger=None):
 
             try:
                 command, data = queue.get(block=True, timeout=wait_timeout)
-                last_update_time = int(time.time())
-                logger.debug('Last update time now {0}'.format(last_update_time))
+                if command == "callback":
+                    last_update_time = int(time.time())
+                    logger.debug('Last update time now {0}'.format(last_update_time))
             except Queue.Empty:
                 logger.debug('No data')
                 continue

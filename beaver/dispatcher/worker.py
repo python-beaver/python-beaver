@@ -6,7 +6,7 @@ import os
 import time
 
 from beaver.config import BeaverConfig
-from beaver.queue import run_queue
+from beaver.run_queue import run_queue
 from beaver.ssh_tunnel import create_ssh_tunnel
 from beaver.utils import setup_custom_logger, REOPEN_FILES
 from beaver.worker.worker import Worker
