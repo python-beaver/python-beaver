@@ -78,7 +78,7 @@ def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None
         if output is not None:
             if output == 'syslog':
                 syslog = logging.handlers.SysLogHandler('/dev/log', facility=LOG_DAEMON)
-		syslog.setLevel(logging.INFO)
+                syslog.setLevel(logging.INFO)
                 syslog_formatter = logging.Formatter('%(name).24s[%(process)d]: %(message)s')
                 syslog.setFormatter(syslog_formatter)
                 logger.addHandler(syslog)
