@@ -7,6 +7,7 @@ import logging.handlers
 import platform
 import re
 import os
+import stat
 import sys
 from syslog import LOG_DAEMON
 
@@ -72,12 +73,13 @@ def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None
         if output is None and has_args:
             output = args.output
 
-        if output and output != 'syslog':
+        if output:
             output = os.path.realpath(output)
 
         if output is not None:
-            if output == 'syslog':
-                syslog = logging.handlers.SysLogHandler('/dev/log', facility=LOG_DAEMON)
+            isSock = os.path.exists(output) and stat.S_ISSOCK(os.stat(output).st_mode)
+            if isSock:
+                syslog = logging.handlers.SysLogHandler(output, facility=LOG_DAEMON)
                 syslog.setLevel(logging.INFO)
                 syslog_formatter = logging.Formatter('%(name).24s[%(process)d]: %(message)s')
                 syslog.setFormatter(syslog_formatter)
