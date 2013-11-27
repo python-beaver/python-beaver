@@ -3,10 +3,12 @@ import argparse
 import glob2
 import itertools
 import logging
+import logging.handlers
 import platform
 import re
 import os
 import sys
+from syslog import LOG_DAEMON
 
 import beaver
 
@@ -70,14 +72,21 @@ def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None
         if output is None and has_args:
             output = args.output
 
-        if output:
+        if output and output != 'syslog':
             output = os.path.realpath(output)
 
         if output is not None:
-            file_handler = logging.FileHandler(output)
-            if formatter is not False:
-                file_handler.setFormatter(formatter)
-            logger.addHandler(file_handler)
+            if output == 'syslog':
+                syslog = logging.handlers.SysLogHandler('/dev/log', facility=LOG_DAEMON)
+		syslog.setLevel(logging.INFO)
+                syslog_formatter = logging.Formatter('%(name).24s[%(process)d]: %(message)s')
+                syslog.setFormatter(syslog_formatter)
+                logger.addHandler(syslog)
+            else:
+                file_handler = logging.FileHandler(output)
+                if formatter is not False:
+                    file_handler.setFormatter(formatter)
+                logger.addHandler(file_handler)
 
         if formatter is not False:
             handler.setFormatter(formatter)
@@ -96,6 +105,7 @@ def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None
     logger.debug('Logger level is {0}'.format(logging.getLevelName(logger.level)))
 
     return logger
+
 
 
 def version(args):
