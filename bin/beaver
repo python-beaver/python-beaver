@@ -7,9 +7,9 @@ from beaver.pidfile import PidFile
 from beaver.utils import CAN_DAEMONIZE, parse_args, version
 
 args = parse_args()
+logging.config.fileConfig(args.logconf)
 version(args)
 
-logging.config.fileConfig(args.logconf)
 
 if args.daemonize:
     assert CAN_DAEMONIZE, "Daemonization is unimplemented on the Windows Platform"
