@@ -3,7 +3,6 @@ import argparse
 import glob2
 import itertools
 import logging
-import logging.handlers
 import platform
 import re
 import os
@@ -13,7 +12,6 @@ from syslog import LOG_DAEMON
 
 import beaver
 
-logging.basicConfig()
 
 MAGIC_BRACKETS = re.compile('({([^}]+)})')
 IS_GZIPPED_FILE = re.compile('.gz$')
