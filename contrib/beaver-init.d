@@ -12,9 +12,11 @@
 
 BEAVER_NAME='beaver'
 BEAVER_CMD='beaver -t stdout -c /etc/beaver/beaver.conf'
-BEAVER_PID='/var/run/logstash_beaver.pid'
+RUNDIR='/var/run/beaver'
+BEAVER_PID=${RUNDIR}/logstash_beaver.pid
 BEAVER_USER='beaver'
-BEAVER_LOG='/var/log/logstash_beaver.log'
+LOGDIR='/var/log/beaver'
+BEAVER_LOG=${LOGDIR}/logstash_beaver.log
 
 
 PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
@@ -35,6 +37,10 @@ do_start() {
         echo $'Log Sender server daemon already started.'
         return 0
     fi
+    mkdir -p $RUNDIR
+    chown $BEAVER_USER $RUNDIR
+    mkdir -p $LOGDIR
+    chown $BEAVER_USER $LOGDIR
     echo -n $"Log Sender server daemon: ${BEAVER_NAME}"
     su - "${BEAVER_USER}" -s '/bin/bash' -c "${BEAVER_CMD} >> ${BEAVER_LOG} 2>&1 & echo \$! > ${BEAVER_PID}"
     echo '.'
