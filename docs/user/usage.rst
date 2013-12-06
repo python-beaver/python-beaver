@@ -510,4 +510,17 @@ You would get the following event in your logstash input (using tcp for an input
                 "host" => "10.21.56.68:36952"
     }
 
-This is functionally equivalent to the logstash environment filter.
+This is functionally equivalent to the logstash environment filter. The information format with add_field_env is
+slightly different than add_field. The add_field keyword will add the values to an array within logstash, whereas
+add_field_env passes it as a string. You end up with a key => value pair, just as you would in the source system's
+environment.
+
+Sample of data from add_field::
+    myKey => [
+        [0] "myValue"
+    ],
+
+Sample of data from add_field_env::
+    myKey => "myValue"
+
+
