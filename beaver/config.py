@@ -17,6 +17,7 @@ class BeaverConfig():
 
         self._section_defaults = {
             'add_field': '',
+            'add_field_env': '',
             'debug': '0',
             'discover_interval': '15',
             'encoding': 'utf_8',
@@ -367,6 +368,29 @@ class BeaverConfig():
 
             if 'add_field' in config:
                 del config['add_field']
+
+            envFields = config.get('add_field_env', '')
+            if type(envFields) != dict:
+                try:
+                    if type(envFields) == str:
+                        envFields = envFields.replace(" ","")
+                        envFields = filter(None, envFields.split(','))
+                    if len(envFields) == 0:
+                        config['envFields'] = {}
+                    elif (len(envFields) % 2) == 1:
+                        if raise_exceptions:
+                            raise Exception('Wrong number of values for add_field_env')
+                    else:
+                        envFieldkeys = envFields[0::2]
+                        envFieldvalues = []
+                        for x in envFields[1::2]:
+                            envFieldvalues.append(os.environ.get(x))
+                        config['fields'].update(dict(zip(envFieldkeys, envFieldvalues)))
+                except TypeError:
+                    config['envFields'] = {}
+
+            if 'add_field_env' in config:
+                del config['add_field_env']
 
             try:
                 tags = config.get('tags', '')

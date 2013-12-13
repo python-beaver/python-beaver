@@ -114,6 +114,10 @@ The following configuration key allows cleaning up the worker and transport sub-
 
 * refresh_worker_process: Default ``None``. Interval between sub-process cleanup
 
+The following configuration key allows the importing of OS environment data into the event.
+
+* add_field_env: Default ``None``. Format is fieldname1,ENVVARIABLE1[,fieldname2,ENVVARIABLE2, ...]
+
 Examples
 --------
 
@@ -475,3 +479,71 @@ Use SSH options for redis transport through SSH Tunnel::
     ssh_tunnel_port: 6379
     ssh_remote_host: 127.0.0.1
     ssh_remote_port: 6379
+
+
+Environment Import Support
+**************************
+
+Using add_field_env allows you to add additional fields based upon OS environment data. For example if you
+want the instance ID from an AWS host (and you've imported that data into the environment before launch),
+you could add the following:
+
+add_field_env: instanceID,INSTANCE_ID
+
+If you're using Asgard to manage your auto scaling groups, you can extract the information that it sets as well.
+
+add_field_env: asgEnvironment,CLOUD_DEV_PHASE,launchConfig,CLOUD_LAUNCH_CONFIG,asgName,CLOUD_CLUSTER
+
+
+Assuming the following items in the environment::
+
+    # printenv | egrep '(CLOUD_LAUNCH_CONFIG|CLOUD_CLUSTER|INSTANCE_ID)'
+    CLOUD_CLUSTER=always-cms-services-ext-d0prod
+    CLOUD_LAUNCH_CONFIG=always-cms-services-ext-d0prod-20131030104814
+    INSTANCE_ID=i-3cf70c0b
+
+And the following beaver.conf file::
+
+    [beaver]
+    tcp_host: 10.21.52.249
+    tcp_port: 9999
+    format: json
+
+    [/mnt/logs/jetty/access.log]
+    type: cms-serv-ext
+    tags: beaver-src
+    add_field_env: launchConfig, CLOUD_LAUNCH_CONFIG, cloudCluster, CLOUD_CLUSTER, instanceID, INSTANCE_ID
+
+You would get the following event in your logstash input (using tcp for an input with an oldlogstashjson codec)::
+
+    {
+             "message" => "10.21.56.244 - - [07/11/2013:22:44:15 +0000] \"GET / HTTP/1.1\" 200 14108 \"-\" \"NING/1.0\"",
+         "source_host" => "ip-10-21-56-68",
+         "source_path" => "/mnt/logs/jetty/access.log",
+              "source" => "file://ip-10-21-56-68/mnt/logs/jetty/access.log",
+                "tags" => [
+            [0] "beaver-src"
+        ],
+                "type" => "cms-serv-ext",
+          "@timestamp" => "2013-11-07T22:44:15.068Z",
+          "instanceID" => "i-3cf70c0b",
+        "cloudCluster" => "always-cms-services-ext-d0prod",
+        "launchConfig" => "always-cms-services-ext-d0prod-20131030104814",
+            "@version" => "1",
+                "host" => "10.21.56.68:36952"
+    }
+
+This is functionally equivalent to the logstash environment filter. The information format with add_field_env is
+slightly different than add_field. The add_field keyword will add the values to an array within logstash, whereas
+add_field_env passes it as a string. You end up with a key => value pair, just as you would in the source system's
+environment.
+
+Sample of data from add_field::
+    myKey => [
+        [0] "myValue"
+    ],
+
+Sample of data from add_field_env::
+    myKey => "myValue"
+
+
