@@ -87,6 +87,10 @@ The following configuration keys are for SinceDB support. Specifying these will 
 
 * sincedb_path: Default ``None``. Full path to an ``sqlite3`` database. Will be created at this path if it does not exist. Beaver process must have read and write access
 
+Logstash 1.2 introduced a JSON schema change. The ``logstash_version`` needs to be set or Beaver will fail to start
+
+* logstash_verion: No default. Set to ``0`` for older versions, ``1`` for Logstash v1.2 and above
+
 The following configuration keys are for building an SSH Tunnel that can be used to proxy from the current host to a desired server. This proxy is torn down when Beaver halts in all cases.
 
 * ssh_key_file: Default ``None``. Full path to ``id_rsa`` key file
