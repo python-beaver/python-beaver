@@ -114,6 +114,7 @@ class BeaverConfig():
             # path to sincedb sqlite db
             'sincedb_path': '',
 
+            # 0 for logstash version < 1.2, 1 for logstash >= 1.2
             'logstash_version': '',
 
             # ssh tunnel support
