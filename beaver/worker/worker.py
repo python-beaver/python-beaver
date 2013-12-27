@@ -338,13 +338,15 @@ class Worker(object):
         self.unwatch_list(unwatch_list)
 
     def _callback_wrapper(self, filename, lines):
+        now = datetime.datetime.utcnow()
+        timestamp = now.strftime("%Y-%m-%dT%H:%M:%S") + ".%03d" % (now.microsecond / 1000) + "Z"
         self._callback(('callback', {
             'fields': self._beaver_config.get_field('fields', filename),
             'filename': filename,
             'format': self._beaver_config.get_field('format', filename),
             'ignore_empty': self._beaver_config.get_field('ignore_empty', filename),
             'lines': lines,
-            'timestamp': datetime.datetime.utcnow().isoformat() + "Z",
+            'timestamp': timestamp,
             'tags': self._beaver_config.get_field('tags', filename),
             'type': self._beaver_config.get_field('type', filename),
         }))
