@@ -269,13 +269,15 @@ class Tail(BaseLog):
             self._sincedb_update_position(lines=line_count, force_update=True)
 
     def _callback_wrapper(self, lines):
+        now = datetime.datetime.utcnow()
+        timestamp = now.strftime("%Y-%m-%dT%H:%M:%S") + ".%03d" % (now.microsecond / 1000) + "Z"
         self._callback(('callback', {
             'fields': self._fields,
             'filename': self._filename,
             'format': self._format,
             'ignore_empty': self._ignore_empty,
             'lines': lines,
-            'timestamp': datetime.datetime.utcnow().isoformat() + 'Z',
+            'timestamp': timestamp,
             'tags': self._tags,
             'type': self._type,
         }))
