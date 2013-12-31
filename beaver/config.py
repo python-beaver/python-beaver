@@ -7,7 +7,7 @@ import warnings
 
 from conf_d import Configuration
 from beaver.utils import eglob
-
+from beaver.glob_safe_config_parser import GlobSafeConfigParser
 
 class BeaverConfig():
 
@@ -148,6 +148,7 @@ class BeaverConfig():
         }
 
         self._configfile = args.config
+        self._config_parser = GlobSafeConfigParser
         self._globbed = []
         self._parse(args)
         for key in self._beaver_config:
@@ -434,7 +435,8 @@ class BeaverConfig():
             section_defaults=self._section_defaults,
             main_parser=_main_parser,
             section_parser=_section_parser,
-            path_from_main='confd_path'
+            path_from_main='confd_path',
+            config_parser=self._config_parser
         )
 
         config = conf.raw()
