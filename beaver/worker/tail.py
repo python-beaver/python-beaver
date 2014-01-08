@@ -96,6 +96,9 @@ class Tail(BaseLog):
 
     def close(self):
         """Closes all currently open file pointers"""
+        if not self.active:
+            return
+
         self.active = False
         if self._file:
             self._file.close()

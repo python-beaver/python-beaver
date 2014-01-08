@@ -565,6 +565,7 @@ class Worker(object):
         else:
             self._logger.info("[{0}] - un-watching logfile".format(fid))
 
+        self._file_map[fid]['file'].close()
         del self._file_map[fid]
 
     def watch(self, fname):
