@@ -120,7 +120,8 @@ class BaseTransport(object):
         """Retrieves the timestamp for a given set of data"""
         timestamp = kwargs.get('timestamp')
         if not timestamp:
-            timestamp = datetime.datetime.utcnow().isoformat() + 'Z'
+            now = datetime.datetime.utcnow()
+            timestamp = now.strftime("%Y-%m-%dT%H:%M:%S") + ".%03d" % (now.microsecond / 1000) + "Z"
 
         return timestamp
 

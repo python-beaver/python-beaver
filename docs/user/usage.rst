@@ -50,10 +50,15 @@ Beaver can optionally get data from a ``configfile`` using the ``-c`` flag. This
 * mqtt_topic: Default ``/logstash``. Topic to publish to
 * rabbitmq_host: Defaults ``localhost``. Host for RabbitMQ
 * rabbitmq_port: Defaults ``5672``. Port for RabbitMQ
+* rabbitmq_ssl: Defaults ``0``. Connect using SSL/TLS
+* rabbitmq_ssl_key: Optional. Defaults ``None``. Path to client private key for SSL/TLS
+* rabbitmq_ssl_cert: Optional. Defaults ``None``. Path to client certificate for SSL/TLS
+* rabbitmq_ssl_cacert: Optional. Defaults ``None``. Path to CA certificate for SSL/TLS
 * rabbitmq_vhost: Default ``/``
 * rabbitmq_username: Default ``guest``
 * rabbitmq_password: Default ``guest``
 * rabbitmq_queue: Default ``logstash-queue``.
+* rabbitmq_queue_durable: Default ``0``.
 * rabbitmq_exchange_type: Default ``direct``.
 * rabbitmq_exchange_durable: Default ``0``.
 * rabbitmq_key: Default ``logstash-key``.
@@ -71,6 +76,7 @@ Beaver can optionally get data from a ``configfile`` using the ``-c`` flag. This
 * zeromq_address: Default ``tcp://localhost:2120``. Zeromq URL
 * zeromq_hwm: Default None. Zeromq HighWaterMark socket option
 * zeromq_bind: Default ``bind``. Whether to bind to zeromq host or simply connect
+* http_url: Default ``None`` http://someserver.com/path
 
 The following are used for instances when a TransportException is thrown - Transport dependent
 
@@ -80,6 +86,10 @@ The following are used for instances when a TransportException is thrown - Trans
 The following configuration keys are for SinceDB support. Specifying these will enable saving the current line number in an sqlite database. This is useful for cases where you may be restarting the Beaver process, such as during a logrotate.
 
 * sincedb_path: Default ``None``. Full path to an ``sqlite3`` database. Will be created at this path if it does not exist. Beaver process must have read and write access
+
+Logstash 1.2 introduced a JSON schema change. The ``logstash_version`` needs to be set or Beaver will fail to start
+
+* logstash_verion: No default. Set to ``0`` for older versions, ``1`` for Logstash v1.2 and above
 
 The following configuration keys are for building an SSH Tunnel that can be used to proxy from the current host to a desired server. This proxy is torn down when Beaver halts in all cases.
 
@@ -396,6 +406,23 @@ Mqtt transport using Mosquitto::
     # From the commandline
     beaver -c /etc/beaver/conf -f /var/log/unmappable.log -t mqtt
 
+HTTP transport::
+    The HTTP transport simply posts the payload data for a log event to the url specified here.
+    You can use this to post directly to elastic search, for example by creating an index and posting json to the index URL:
+    Assuming an elastic search instance running on your localhost: 
+    Create a 'logs' index:
+    curl -XPUT 'http://localhost:9200/logs/'
+
+    A beaver config to post directly to elastic search: 
+    # /etc/beaver/conf
+    [beaver]
+    format: json
+    logstash_version: 1
+    http_url: http://localhost:9200/logs/log
+    
+    #from the commandline
+    beaver -c /etc/beaver/conf -F json -f /var/log/somefile -t http
+    
 Sincedb support using Sqlite3
 *****************************
 

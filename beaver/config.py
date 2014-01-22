@@ -58,6 +58,10 @@ class BeaverConfig():
             'mqtt_keepalive': '60',
             'rabbitmq_host': os.environ.get('RABBITMQ_HOST', 'localhost'),
             'rabbitmq_port': os.environ.get('RABBITMQ_PORT', '5672'),
+            'rabbitmq_ssl': '0',
+            'rabbitmq_ssl_key': '',
+            'rabbitmq_ssl_cert': '',
+            'rabbitmq_ssl_cacert': '',
             'rabbitmq_vhost': os.environ.get('RABBITMQ_VHOST', '/'),
             'rabbitmq_username': os.environ.get('RABBITMQ_USERNAME', 'guest'),
             'rabbitmq_password': os.environ.get('RABBITMQ_PASSWORD', 'guest'),
@@ -110,6 +114,7 @@ class BeaverConfig():
             # path to sincedb sqlite db
             'sincedb_path': '',
 
+            # 0 for logstash version < 1.2, 1 for logstash >= 1.2
             'logstash_version': '',
 
             # ssh tunnel support
@@ -261,7 +266,7 @@ class BeaverConfig():
                     config[key] = None
 
             require_bool = ['debug', 'daemonize', 'fqdn', 'rabbitmq_exchange_durable', 'rabbitmq_queue_durable',
-                            'rabbitmq_ha_queue', 'tcp_ssl_enabled', 'tcp_ssl_verify']
+                            'rabbitmq_ha_queue', 'rabbitmq_ssl', 'tcp_ssl_enabled', 'tcp_ssl_verify']
 
             for key in require_bool:
                 config[key] = bool(int(config[key]))
