@@ -65,6 +65,6 @@ class RedisTransport(BaseTransport):
 
         try:
             self._pipeline.execute()
-        except redis.exceptions.ConnectionError, e:
+        except redis.exceptions.RedisError, e:
             traceback.print_exc()
             raise TransportException(str(e))
