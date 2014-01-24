@@ -73,6 +73,7 @@ class TailManager(BaseLog):
                 self._tails[fid].run(once=True)
 
                 if not self._tails[fid].active:
+                    self._tails[fid].close()
                     del self._tails[fid]
 
             self.update_files()
