@@ -1,4 +1,4 @@
-.. image:: https://secure.travis-ci.org/josegonzalez/beaver.png
+.. image:: https://travis-ci.org/josegonzalez/beaver.png?branch=master   :target: https://travis-ci.org/josegonzalez/beaver
 
 ======
 Beaver
