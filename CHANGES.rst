@@ -1,6 +1,145 @@
 Changelog
 =========
 
+31 (2014-01-25)
+---------------
+
+Fix
+~~~
+
+- Beaver user can't write its pid nor its log. [Mathieu Lecarme]
+
+  Using a folder is the tactic used by Redis on Debian.
+
+Other
+~~~~~
+
+- Add required spacing to readme for proper pypi doc support. [Jose
+  Diaz-Gonzalez]
+
+- Change release process to include processing of documentation. [Jose
+  Diaz-Gonzalez]
+
+- Fix redis_transport.py redis exception handling. Fixes #238. [Hugo
+  Lopes Tavares]
+
+- Allow for newer versions of boto to be used. Closes #236. [Jose Diaz-
+  Gonzalez]
+
+- Attempt to fix memory leaks. Closes #186. [Jose Diaz-Gonzalez]
+
+- Use GlobSafeConfigParser to parse config files. [Clay Pence]
+
+  In order to support all of the kinds of globs, pass
+  GlobSafeConfigParser
+  into the Configuration object so that it parses section headers
+  correctly.
+  
+  Update dependency on conf_d
+  
+  Fix line spacing + trigger travis
+  
+  Remove chdir in test
+  
+  This should fix the unit test to run properly when run from the main
+  directory.
+
+- When shipping logs, use millisecond-precision timestamps. [Ryan Park]
+
+  Logstash 1.3.2 has a problem with microsecond
+  precision timestamps in the
+  @timestamp field, which is the default behavior of Python's .isoformat
+  method. Logstash uses the JodaTime library to parse timestamps, and
+  Joda
+  doesn’t support nanosecond timestamp resolution. As a result,
+  Logstash
+  1.3.2 throws an exception on every log item shipped from Beaver.
+  
+  There's a discussion about this issue in the logstash
+  users mailing list,
+  including an example of the Logstash exception:
+  https://groups.google.com/forum/#!topic/logstash
+  users/wIzdv15Iefs
+  
+  This patch reduces @timestamp to millisecond precision, which should
+  correct the problem with Beaver 1.3.2.
+
+- Improve compatibility with case-sensitive filesystems. [Jose Diaz-
+  Gonzalez]
+
+- Modify test cases to support logstash_version. [Jose Diaz-Gonzalez]
+
+- Document usage of logstash_version. [Peter Burkholder]
+
+- Add add_field_env option to the config file to allow fields to be
+  added using values from the environment. [Lance O'Connor]
+
+  Closes #214
+
+- Add SSL/TLS support to the RabbitMQ transport. Closes #217. [Jonathan
+  Harker]
+
+- Added http transport option. Closes #218. [Jeff Bryner]
+
+- Adding missing config file option 'rabbitmq_queue_durable'. [Daniel
+  Whelan]
+
+- `StrictRedis.from_url` is better than DIY-ing it. [Kristian Glass]
+
+  Note currently `fakeredis` doesn't support `from_url`
+  this is blocking
+  on https://github.com/jamesls/fakeredis/pull/29 being merged in (I've
+  bumped version requirement in `tests.txt` accordingly)
+
+- Python 2.6 ConfigParser does not handle non-string Fixed typo.
+  [tommyulfsparre]
+
+- Dont add empty object to input list. [tommyulfsparre]
+
+- Import threading library in tail manager since we want to use it.
+  [Chris Roberts]
+
+- Add SSL to the TCP Transport. [Simon McCartney]
+
+- Redirect all docs to readthedocs. Refs #150. [Jose Diaz-Gonzalez]
+
+- Readthedocs support. Closes #150. [Jose Diaz-Gonzalez]
+
+- Convert producer to process. Allow timed producer culling. [Chris
+  Roberts]
+
+- Make consumer check threaded to prevent wedge state. [Chris Roberts]
+
+- Don't crash on a string decoding exception. [Adam Twardowski]
+
+- Set transport as valid on connect (properly resets for reconnect)
+  [Chris Roberts]
+
+- Handle publication failures in the TCP transport correctly. [Kiall Mac
+  Innes]
+
+- Add config option to manipulate ssh_options. [Andreas Lappe]
+
+  This option allows to pass all ssh options to the tunnel.
+
+- Fix version lookup. [Jose Diaz-Gonzalez]
+
+- Moved multiline_merge function to utils.py. [Pierre Fersing]
+
+- Support for multi-line and tail_lines options. [Pierre Fersing]
+
+- Support for multi-line events in tail-version. [Pierre Fersing]
+
+- Support for multi-line events. [Pierre Fersing]
+
+- Ignore invalid rawjson log. [Tomoyuki Sakurai]
+
+  this ensures beaver keeps running even when other application logged
+  logs in invalid json format.
+
+- Removed duplicate self._current_host from @source field. Fixes #180.
+  [Alexander Papaspyrou]
+
 30 (2013-08-22)
 ---------------
 

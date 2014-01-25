@@ -23,7 +23,7 @@ From Github::
 
 From PyPI::
 
-    pip install beaver==30
+    pip install beaver==31
 
 Documentation
 =============
