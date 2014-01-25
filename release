@@ -29,7 +29,7 @@ echo -e  "${YELLOW}   >${COLOR_OFF} ${MAGENTA}${current_version}${COLOR_OFF} -> 
 echo -e "${YELLOW}--->${COLOR_OFF} Creating necessary temp file"
 tempfoo=`basename $0`
 TMPFILE=`mktemp /tmp/${tempfoo}.XXXXXX` || {
-  echo -e "${RED}WARNING: Cannot create temp file using mktemp in /tmp dir ${COLOR_OFF}\n"
+    echo -e "${RED}WARNING: Cannot create temp file using mktemp in /tmp dir ${COLOR_OFF}\n"
 	exit 1
 }
 
@@ -45,13 +45,22 @@ replace_with="pip install beaver==$next_version"
 echo -e "${YELLOW}--->${COLOR_OFF} Updating README.rst"
 sed "s/$find_this/$replace_with/" README.rst > $TMPFILE && mv $TMPFILE README.rst
 
+echo -e "${YELLOW}--->${COLOR_OFF} Updating docs"
+find_this="version = '${current_version}'"
+replace_with="version = '${next_version}'"
+sed "s/$find_this/$replace_with/" docs/conf.py > $TMPFILE && mv $TMPFILE docs/conf.py
+
+find_this="version = '${current_version}'"
+replace_with="release = '${next_version}'"
+sed "s/$find_this/$replace_with/" docs/conf.py > $TMPFILE && mv $TMPFILE docs/conf.py
+
 echo -e "${YELLOW}--->${COLOR_OFF} Updating CHANGES.rst for new release"
 version_header="$next_version ($(date +%F))"
 dashes=`yes '-'|head -n ${#version_header}|tr -d '\n'`
 gitchangelog |sed "4s/.*/$version_header/"|sed "5s/.*/$dashes/" > $TMPFILE && mv $TMPFILE CHANGES.rst
 
 echo -e "${YELLOW}--->${COLOR_OFF} Adding changed files to git"
-git add CHANGES.rst README.rst beaver/__init__.py
+git add CHANGES.rst README.rst beaver/__init__.py docs/conf.py
 
 echo -e "${YELLOW}--->${COLOR_OFF} Creating release"
 git commit -q -m "Release version $next_version"
