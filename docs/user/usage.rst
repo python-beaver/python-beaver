@@ -89,7 +89,7 @@ The following configuration keys are for SinceDB support. Specifying these will 
 
 Logstash 1.2 introduced a JSON schema change. The ``logstash_version`` needs to be set or Beaver will fail to start
 
-* logstash_verion: No default. Set to ``0`` for older versions, ``1`` for Logstash v1.2 and above
+* logstash_version: No default. Set to ``0`` for older versions, ``1`` for Logstash v1.2 and above
 
 The following configuration keys are for building an SSH Tunnel that can be used to proxy from the current host to a desired server. This proxy is torn down when Beaver halts in all cases.
 
