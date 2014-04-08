@@ -19,7 +19,11 @@ class ZmqTransport(BaseTransport):
 
         zeromq_hwm = beaver_config.get('zeromq_hwm')
         if zeromq_hwm:
-            self._pub.hwm = zeromq_hwm
+            if hasattr(self._pub, 'HWM'): # ZeroMQ < 3
+                self._pub.setsockopt(zmq.HWM, zeromq_hwm)
+            else:
+                self._pub.setsockopt(zmq.SNDHWM, zeromq_hwm)
+                self._pub.setsockopt(zmq.RCVHWM, zeromq_hwm)
 
         if beaver_config.get('mode') == 'bind':
             for addr in zeromq_addresses:
