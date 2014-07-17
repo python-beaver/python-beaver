@@ -325,7 +325,7 @@ class BeaverConfig():
             if config.get('ssh_options') is not None:
                 csv = config.get('ssh_options')
                 config['ssh_options'] = []
-                if csv == str:
+                if type(csv) == str:
                     for opt in csv.split(','):
                         config['ssh_options'].append('-o %s' % opt.strip())
             else:
