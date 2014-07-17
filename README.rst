@@ -1,5 +1,5 @@
-.. image:: https://travis-ci.org/josegonzalez/beaver.png?branch=master   :target: https://travis-ci.org/josegonzalez/beaver
-
+.. image:: https://travis-ci.org/josegonzalez/beaver.svg?branch=master
+    :target: https://travis-ci.org/josegonzalez/beaver
 ======
 Beaver
 ======
