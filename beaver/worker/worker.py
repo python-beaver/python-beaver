@@ -132,7 +132,6 @@ class Worker(object):
 
     def _run_pass(self, fid, file):
         """Read lines from a file and performs a callback against them"""
-        line_count = 0
         while True:
             try:
                 data = file.read(4096)
@@ -168,11 +167,9 @@ class Worker(object):
 
             if self._sincedb_path:
                 current_line_count = len(lines)
-                if not self._sincedb_update_position(file, fid=fid, lines=current_line_count):
-                    line_count += current_line_count
+                self._sincedb_update_position(file, fid=fid, lines=current_line_count)
 
-        if line_count > 0:
-            self._sincedb_update_position(file, fid=fid, lines=line_count, force_update=True)
+        self._sincedb_update_position(file, fid=fid)
 
     def _buffer_extract(self, data, fid):
         """
@@ -316,6 +313,10 @@ class Worker(object):
             current_position = data['file'].tell()
             self._logger.debug("[{0}] - line count {1} for {2}".format(fid, line_count, data['file'].name))
             self._sincedb_update_position(data['file'], fid=fid, lines=line_count, force_update=True)
+            # Reset this, so line added processed just after this initialization
+            # will update the sincedb. Without this, if beaver run for less than
+            # sincedb_write_interval it will always re-process the last lines.
+            data['update_time'] = 0
 
             tail_lines = self._beaver_config.get_field('tail_lines', data['file'].name)
             tail_lines = int(tail_lines)
@@ -378,6 +379,10 @@ class Worker(object):
         if not fid:
             fid = self.get_file_id(os.stat(file.name))
 
+        self._file_map[fid]['line'] = self._file_map[fid]['line'] + lines
+        old_count = self._file_map[fid]['line_in_sincedb']
+        lines = self._file_map[fid]['line']
+
         current_time = int(time.time())
         update_time = self._file_map[fid]['update_time']
         if not force_update:
@@ -385,15 +390,12 @@ class Worker(object):
             if update_time and current_time - update_time <= sincedb_write_interval:
                 return False
 
-            if lines == 0:
+            if old_count == lines:
                 return False
 
         self._sincedb_init()
 
-        old_count = self._file_map[fid]['line']
         self._file_map[fid]['update_time'] = current_time
-        self._file_map[fid]['line'] = old_count + lines
-        lines = self._file_map[fid]['line']
 
         self._logger.debug("[{0}] - updating sincedb for logfile {1} from {2} to {3}".format(fid, file.name, old_count, lines))
 
@@ -412,6 +414,8 @@ class Worker(object):
             'position': int(lines),
         })
         conn.close()
+
+        self._file_map[fid]['line_in_sincedb'] = lines
 
         return True
 
@@ -589,6 +593,7 @@ class Worker(object):
                     'input_size': 0,
                     'last_activity': time.time(),
                     'line': 0,
+                    'line_in_sincedb': 0,
                     'multiline_regex_after': self._beaver_config.get_field('multiline_regex_after', fname),
                     'multiline_regex_before': self._beaver_config.get_field('multiline_regex_before', fname),
                     'size_limit': self._beaver_config.get_field('size_limit', fname),
