@@ -74,6 +74,7 @@ class Worker(object):
         """Closes all currently open file pointers"""
         for id, data in self._file_map.iteritems():
             data['file'].close()
+            self._sincedb_update_position(data['file'], fid=id, force_update=True)
         self._file_map.clear()
         if self._proc is not None and self._proc.is_alive():
             self._proc.terminate()

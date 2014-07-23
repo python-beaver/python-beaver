@@ -103,6 +103,7 @@ class Tail(BaseLog):
         self.active = False
         if self._file:
             self._file.close()
+            self._sincedb_update_position(force_update=True)
 
         if self._current_event:
             event = '\n'.join(self._current_event)
