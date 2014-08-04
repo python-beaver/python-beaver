@@ -145,7 +145,7 @@ class Worker(object):
 
             if not lines:
                 # Before returning, check if an event (maybe partial) is waiting for too long.
-                if self._file_map[fid]['current_event'] and time.time() - self._file_map[fid]['last_activity'] > 1:
+                if self._file_map[fid]['current_event'] and time.time() - self._file_map[fid]['last_activity'] > self._file_map[fid]['multiline_wait']:
                     event = '\n'.join(self._file_map[fid]['current_event'])
                     self._file_map[fid]['current_event'].clear()
                     self._callback_wrapper(filename=file.name, lines=[event])
@@ -591,6 +591,7 @@ class Worker(object):
                     'line': 0,
                     'multiline_regex_after': self._beaver_config.get_field('multiline_regex_after', fname),
                     'multiline_regex_before': self._beaver_config.get_field('multiline_regex_before', fname),
+                    'multiline_wait': self._beaver_config.get_field('multiline_wait', fname),
                     'size_limit': self._beaver_config.get_field('size_limit', fname),
                     'update_time': None,
                     'active': True,

@@ -40,6 +40,7 @@ class BeaverConfig():
             # multiline events support. Default is disabled
             'multiline_regex_after': '',
             'multiline_regex_before': '',
+            'multiline_wait':'1',
 
             'message_format': '',
             'sincedb_write_interval': '15',
@@ -422,7 +423,7 @@ class BeaverConfig():
             if config['multiline_regex_before']:
                 config['multiline_regex_before'] = re.compile(config['multiline_regex_before'])
 
-            require_int = ['sincedb_write_interval', 'stat_interval', 'tail_lines']
+            require_int = ['multiline_wait', 'sincedb_write_interval', 'stat_interval', 'tail_lines']
             for k in require_int:
                 config[k] = int(config[k])
 
