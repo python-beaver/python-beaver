@@ -28,6 +28,7 @@ class Tail(BaseLog):
         self._last_sincedb_write = None
         self._last_file_mapping_update = None
         self._line_count = 0
+        self._line_count_sincedb = 0
         self._log_template = '[' + self._filename + '] - {0}'
 
         self._sincedb_path = beaver_config.get('sincedb_path')
@@ -102,6 +103,7 @@ class Tail(BaseLog):
         self.active = False
         if self._file:
             self._file.close()
+            self._sincedb_update_position(force_update=True)
 
         if self._current_event:
             event = '\n'.join(self._current_event)
@@ -229,7 +231,6 @@ class Tail(BaseLog):
 
     def _run_pass(self):
         """Read lines from a file and performs a callback against them"""
-        line_count = 0
         while True:
             try:
                 data = self._file.read(4096)
@@ -265,11 +266,9 @@ class Tail(BaseLog):
 
             if self._sincedb_path:
                 current_line_count = len(lines)
-                if not self._sincedb_update_position(lines=current_line_count):
-                    line_count += current_line_count
+                self._sincedb_update_position(lines=current_line_count)
 
-        if line_count > 0:
-            self._sincedb_update_position(lines=line_count, force_update=True)
+        self._sincedb_update_position()
 
     def _callback_wrapper(self, lines):
         now = datetime.datetime.utcnow()
@@ -328,6 +327,10 @@ class Tail(BaseLog):
         self._log_debug('line count {0}'.format(line_count))
         self._log_debug('current position {0}'.format(current_position))
         self._sincedb_update_position(lines=line_count, force_update=True)
+        # Reset this, so line added processed just after this initialization
+        # will update the sincedb. Without this, if beaver run for less than
+        # sincedb_write_interval it will always re-process the last lines.
+        self._last_sincedb_write = 0
 
         if self._tail_lines:
             self._log_debug('tailing {0} lines'.format(self._tail_lines))
@@ -397,20 +400,21 @@ class Tail(BaseLog):
         if not self._sincedb_path:
             return False
 
+        self._line_count = self._line_count + lines
+        old_count = self._line_count_sincedb
+        lines = self._line_count
+
         current_time = int(time.time())
         if not force_update:
             if self._last_sincedb_write and current_time - self._last_sincedb_write <= self._sincedb_write_interval:
                 return False
 
-            if lines == 0:
+            if old_count == lines:
                 return False
 
         self._sincedb_init()
 
-        old_count = self._line_count
         self._last_sincedb_write = current_time
-        self._line_count = old_count + lines
-        lines = self._line_count
 
         self._log_debug('updating sincedb to {0}'.format(lines))
 
@@ -429,6 +433,8 @@ class Tail(BaseLog):
             'position': lines,
         })
         conn.close()
+
+        self._line_count_sincedb = lines
 
         return True
 
