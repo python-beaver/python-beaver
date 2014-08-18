@@ -30,7 +30,7 @@ optional arguments::
     -m {bind,connect}, --mode {bind,connect}
                           bind or connect mode
     -l OUTPUT, --logfile OUTPUT, -o OUTPUT, --output OUTPUT
-                          file to pipe output to (in addition to stdout)
+                          file to pipe output to (in addition to stdout), one can specify syslog socket location (/dev/log) for system logging
     -p PATH, --path PATH  path to log files
     -P PID, --pid PID     path to pid file
     -t {mqtt,rabbitmq,redis,stdout,tcp,udp,zmq}, --transport {mqtt,rabbitmq,redis,sqs,stdout,tcp,udp,zmq}
