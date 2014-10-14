@@ -52,7 +52,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None):
+def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None, config=None):
     logger = logging.getLogger(name)
     logger.propagate = False
     if logger.handlers:
@@ -68,7 +68,10 @@ def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None
 
         handler = logging.StreamHandler()
         if output is None and has_args:
-            output = args.output
+            if config and config.get('output'):
+                output = config.get('output')
+            else:
+                output = args.output
 
         if output:
             output = os.path.realpath(output)

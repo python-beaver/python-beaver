@@ -13,9 +13,12 @@ from beaver.worker.tail_manager import TailManager
 
 
 def run(args=None):
-    logger = setup_custom_logger('beaver', args)
 
+    logger = setup_custom_logger('beaver', args)
     beaver_config = BeaverConfig(args, logger=logger)
+    # so the config file can override the logger
+    logger = setup_custom_logger('beaver', args, config=beaver_config)
+
     if beaver_config.get('logstash_version') not in [0, 1]:
         raise LookupError("Invalid logstash_version")
 
