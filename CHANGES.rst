@@ -1,18 +1,40 @@
 Changelog
 =========
 
-31 (2014-01-25)
+32 (2014-10-14)
 ---------------
 
-Fix
-~~~
+- Merge pull request #267 from AeroNotix/gh-alf-allow-config-files-to-
+  control-log-output. [Jose Diaz-Gonzalez]
 
-- Beaver user can't write its pid nor its log. [Mathieu Lecarme]
+  Allow for the config file to override the logfile's location
 
-  Using a folder is the tactic used by Redis on Debian.
+- Merge pull request #258 from PierreF/sincedb_write_interval. [Jose
+  Diaz-Gonzalez]
 
-Other
-~~~~~
+  Fixed sincedb_write_interval (Bugs #229).
+
+- Update README.rst. [Jose Diaz-Gonzalez]
+
+- Merge pull request #256 from svengerlach/ssh_options. [Jose Diaz-
+  Gonzalez]
+
+  fix config.get('ssh_options')
+
+- Add debian packaging based on dh-virtualenv. [Jose Diaz-Gonzalez]
+
+- Merge pull request #247 from fetep/zeromq-hwm-fix. [Jose Diaz-
+  Gonzalez]
+
+  zmq3 split HWM into SNDHWM/RCVHWM. Closes #246
+
+- Merge pull request #242 from hltbra/patch-1. [Jose Diaz-Gonzalez]
+
+  Fix typo in usage.rst
+
+- Fixed badge to point to master branch only. [Jose Diaz-Gonzalez]
+
+- Release version 31. [Jose Diaz-Gonzalez]
 
 - Add required spacing to readme for proper pypi doc support. [Jose
   Diaz-Gonzalez]
@@ -20,56 +42,40 @@ Other
 - Change release process to include processing of documentation. [Jose
   Diaz-Gonzalez]
 
-- Fix redis_transport.py redis exception handling. Fixes #238. [Hugo
-  Lopes Tavares]
+- Merge branch 'glob_safe_config_parser' of github.com:wayfair/beaver
+  into wayfair-glob_safe_config_parser. [Jose Diaz-Gonzalez]
+
+  Conflicts:         requirements/base.txt
+
+- Merge pull request #239 from hltbra/master. [Jose Diaz-Gonzalez]
+
+  Fix redis_transport.py redis exception handling. Fixes #238
+
+- Merge pull request #237 from josegonzalez/call-close. [Jose Diaz-
+  Gonzalez]
+
+  Attempt to fix memory leaks. Closes #186
 
 - Allow for newer versions of boto to be used. Closes #236. [Jose Diaz-
   Gonzalez]
 
-- Attempt to fix memory leaks. Closes #186. [Jose Diaz-Gonzalez]
+- Merge pull request #230 from Runscope/master. [Jose Diaz-Gonzalez]
 
-- Use GlobSafeConfigParser to parse config files. [Clay Pence]
+  When shipping logs, use millisecond-precision timestamps.
 
-  In order to support all of the kinds of globs, pass
-  GlobSafeConfigParser
-  into the Configuration object so that it parses section headers
-  correctly.
-  
-  Update dependency on conf_d
-  
-  Fix line spacing + trigger travis
-  
-  Remove chdir in test
-  
-  This should fix the unit test to run properly when run from the main
-  directory.
+- Merge pull request #228 from davidgarvey/master. [Jose Diaz-Gonzalez]
 
-- When shipping logs, use millisecond-precision timestamps. [Ryan Park]
-
-  Logstash 1.3.2 has a problem with microsecond
-  precision timestamps in the
-  @timestamp field, which is the default behavior of Python's .isoformat
-  method. Logstash uses the JodaTime library to parse timestamps, and
-  Joda
-  doesn’t support nanosecond timestamp resolution. As a result,
-  Logstash
-  1.3.2 throws an exception on every log item shipped from Beaver.
-  
-  There's a discussion about this issue in the logstash
-  users mailing list,
-  including an example of the Logstash exception:
-  https://groups.google.com/forum/#!topic/logstash
-  users/wIzdv15Iefs
-  
-  This patch reduces @timestamp to millisecond precision, which should
-  correct the problem with Beaver 1.3.2.
+  Update config.py for python 2.6
 
 - Improve compatibility with case-sensitive filesystems. [Jose Diaz-
   Gonzalez]
 
 - Modify test cases to support logstash_version. [Jose Diaz-Gonzalez]
 
-- Document usage of logstash_version. [Peter Burkholder]
+- Merge pull request #224 from pburkholder/logstash_version_help. [Jose
+  Diaz-Gonzalez]
+
+  Document usage of logstash_version
 
 - Add add_field_env option to the config file to allow fields to be
   added using values from the environment. [Lance O'Connor]
@@ -81,151 +87,150 @@ Other
 
 - Added http transport option. Closes #218. [Jeff Bryner]
 
-- Adding missing config file option 'rabbitmq_queue_durable'. [Daniel
-  Whelan]
+- Merge pull request #223 from bearstech/initd. [Jose Diaz-Gonzalez]
+
+  Fix: beaver user can't write its pid nor its log.
+
+- Merge pull request #220 from ophelan/patch-1. [Jose Diaz-Gonzalez]
+
+  Adding missing config file option 'rabbitmq_queue_durable'.
 
 - `StrictRedis.from_url` is better than DIY-ing it. [Kristian Glass]
 
-  Note currently `fakeredis` doesn't support `from_url`
-  this is blocking
-  on https://github.com/jamesls/fakeredis/pull/29 being merged in (I've
-  bumped version requirement in `tests.txt` accordingly)
+  Note currently `fakeredis` doesn't support `from_url` - this is
+  blocking on https://github.com/jamesls/fakeredis/pull/29 being merged
+  in (I've bumped version requirement in `tests.txt` accordingly)
 
-- Python 2.6 ConfigParser does not handle non-string Fixed typo.
-  [tommyulfsparre]
+- Merge pull request #208 from tommyulfsparre/remove-non-string. [Jose
+  Diaz-Gonzalez]
 
-- Dont add empty object to input list. [tommyulfsparre]
+  Remove non string
 
-- Import threading library in tail manager since we want to use it.
-  [Chris Roberts]
+- Merge pull request #206 from tommyulfsparre/skip-empty-input-object.
+  [Jose Diaz-Gonzalez]
 
-- Add SSL to the TCP Transport. [Simon McCartney]
+  Don't append empty strings
+
+- Merge pull request #203 from chrisroberts/bugfix/lost-import-in-
+  rebase-madness. [Jose Diaz-Gonzalez]
+
+  Import threading library in tail manager since we want to use it
+
+- Merge pull request #202 from moniker-dns/feature/add_ssl_support.
+  [Jose Diaz-Gonzalez]
+
+  Feature/add ssl support
 
 - Redirect all docs to readthedocs. Refs #150. [Jose Diaz-Gonzalez]
 
 - Readthedocs support. Closes #150. [Jose Diaz-Gonzalez]
 
-- Convert producer to process. Allow timed producer culling. [Chris
-  Roberts]
+- Merge pull request #199 from chrisroberts/enhancement/worker-process.
+  [Jose Diaz-Gonzalez]
 
-- Make consumer check threaded to prevent wedge state. [Chris Roberts]
+  Convert producer to process. Allow timed producer culling.
 
-- Don't crash on a string decoding exception. [Adam Twardowski]
+- Merge pull request #198 from chrisroberts/enhancement/no-wedgies.
+  [Jose Diaz-Gonzalez]
 
-- Set transport as valid on connect (properly resets for reconnect)
-  [Chris Roberts]
+  Make consumer check threaded to prevent wedge state
 
-- Handle publication failures in the TCP transport correctly. [Kiall Mac
-  Innes]
+- Merge pull request #201 from atwardowski/master. [Jose Diaz-Gonzalez]
+
+  Don't crash on a string decoding exception
+
+- Merge pull request #197 from chrisroberts/bugfix/rabbitmq-revalid.
+  [Jose Diaz-Gonzalez]
+
+  Set transport as valid on connect (properly resets for reconnect)
+
+- Merge pull request #195 from moniker-dns/feature/tcp-transport. [Jose
+  Diaz-Gonzalez]
+
+  Handle publication failures in the TCP transport correctly
 
 - Add config option to manipulate ssh_options. [Andreas Lappe]
 
   This option allows to pass all ssh options to the tunnel.
 
-- Fix version lookup. [Jose Diaz-Gonzalez]
+- Merge pull request #194 from josegonzalez/logstash-format. [Jose Diaz-
+  Gonzalez]
 
-- Moved multiline_merge function to utils.py. [Pierre Fersing]
+  Logstash format
 
-- Support for multi-line and tail_lines options. [Pierre Fersing]
+- Merge pull request #193 from PierreF/multiline. [Jose Diaz-Gonzalez]
 
-- Support for multi-line events in tail-version. [Pierre Fersing]
+  Support for multi-line events.
 
-- Support for multi-line events. [Pierre Fersing]
+- Merge pull request #191 from LambdaDriver/master. [Jose Diaz-Gonzalez]
 
-- Ignore invalid rawjson log. [Tomoyuki Sakurai]
+  Update README.rst
 
-  this ensures beaver keeps running even when other application logged
-  logs in invalid json format.
+- Merge pull request #183 from reallyenglish/ignore_invalid_rawjson.
+  [Jose Diaz-Gonzalez]
 
-- Removed duplicate self._current_host from @source field. Fixes #180.
-  [Alexander Papaspyrou]
+  ignore invalid rawjson log
 
-30 (2013-08-22)
----------------
+- Merge pull request #181 from adesso-mobile/master. [Jose Diaz-
+  Gonzalez]
 
-- Use os._exit over sys.exit in signal handlers to quit cleanly.
-  [Kristian Glass]
+  Deduplication of source host information
 
-  As per
-  http://thushw.blogspot.co.uk/2010/12/python
-  dont
-  use
-  sysexit
-  inside
-  signal.html
-  the use of `sys.exit` inside the signal handlers means that a
-  `SystemExit` exception is raised
-  (http://docs.python.org/2/library/sys.html#sys.exit) which can be
-  caught
-  by try/except blocks that might have been executing at time of signal
-  handling, resulting in beaver failing to quit
+- Release version 30. [Jose Diaz-Gonzalez]
 
-- Allow path to be None. [Lars Hansson]
+- Merge pull request #179 from doismellburning/signal_handler_exit.
+  [Jose Diaz-Gonzalez]
 
-  Allow path to be set empty (None) in the configuration filer. This way
-  all files and globs can be configured in files in confd_path.
+  Use os._exit over sys.exit in signal handlers to quit cleanly
 
-- Fixed example in Readme.rst for sqs_aws_secret_key. [Jonathan Quail]
+- Merge pull request #165 from
+  meekmichael/meekmichael/allow_string_escapes_in_delimiter. [Jose Diaz-
+  Gonzalez]
 
-- Redis 2.4.11 is no longer available on Pypi. [Andrew Gross]
+  Allow string escapes in delimiter
 
-  Fixes issue #167
+- Merge pull request #153 from iyingchi/master. [Jose Diaz-Gonzalez]
 
-- Add a TCP transport. [Kiall Mac Innes]
+  Added some missing confd docs
 
-- Allow string escapes in delimiter. [Michael Mittelstadt]
+- Merge pull request #169 from jonathanq/master. [Jose Diaz-Gonzalez]
 
-  As far as I can tell, there is no way for me to represent a newline as
-  a delimiter in a configuration file with ConfigParser. I want to do
-  this:
-  
-  [/ephemeral_storage/logs/kind_of_special.log]
-  tags: special
-  type: special
-  delimiter: \n\n
-  
-  As the log has a blank line between its multiline entries.
-  
-  My change allows that, by making delimiter not string
-  escaped until
-  after the config file is parsed. I'm naive about python, so there is a
-  strong possibility I've gone about it horribly wrong. This would also
-  easily allow splitting on nulls, tabs, unicode characters and other
-  things that ConfigParser may not find kosher.
-  
-  By doing this sort of multiline parsing with beaver, it allows one to
-  run logstash without the multiline filter, which due to its lack of
-  thread
-  safety, forces you to run logstash with only one worker thread.
+  Fixed example in Readme.rst for sqs_aws_secret_key
 
-- Isolate connection logic. Provide proper reconnect support. [Chris
-  Roberts]
+- Merge pull request #171 from romabysen/master. [Jose Diaz-Gonzalez]
 
-- Fix zmq transport tests. [Scott Smith]
+  Allow path to be empty in configuration file.
 
-- Move zmq address config parsing into _main_parser. [Scott Smith]
+- Merge pull request #159 from ohlol/master. [Jose Diaz-Gonzalez]
 
-- Allow specifying multiple zmq addresses to bind/connect. [Scott Smith]
+  Allow connecting or binding to multiple zmq addresses
+
+- Merge pull request #168 from andrewgross/patch-1. [Jose Diaz-Gonzalez]
+
+  Redis 2.4.11 is no longer available on Pypi
+
+- Merge pull request #166 from moniker-dns/feature/tcp-transport. [Jose
+  Diaz-Gonzalez]
+
+  Add a TCP transport
+
+- Merge pull request #161 from chrisroberts/fix/rabbitmq-reconnect.
+  [Jose Diaz-Gonzalez]
+
+  Add reconnect support for rabbitmq transport
 
 - Corrected documentation for exclude tag. Closes #157. [Jose Diaz-
   Gonzalez]
 
-- Add missing sqlite3 module to documentation. [Andreas Lappe]
+- Merge pull request #155 from alappe/sqlite3_doc. [Jose Diaz-Gonzalez]
 
-- Tests status. [Denis Orlikhin]
+  Add missing sqlite3 module to documentation
 
-- Travis integration. [Denis Orlikhin]
+- Merge pull request #154 from overplumbum/master. [Jose Diaz-Gonzalez]
 
-- Tests fix (conf_d does work without existing file) [Denis Orlikhin]
+  tests fix, travis-ci integration
 
-- CONFIG_DIR to CONFD_PATH. [iyingchi]
-
-- Added doc for -C option for config directory. [iyingchi]
-
-- Implicit broken zmq error handling. [Denis Orlikhin]
-
-29 (2013-05-24)
----------------
+- Release version 29. [Jose Diaz-Gonzalez]
 
 - Do not harcode path in TailManager. Closes #143. [Jose Diaz-Gonzalez]
 
@@ -272,31 +277,25 @@ Other
   of the file, we use `iteritems()` which gives us a generator as
   opposed to a copy such as with `items()`. This generator allows us to
   iterate over the files without having issues where the file handle may
-  open several times or other random Python issues.
-  
-  Using a generator also means that the set that we are iterating over
-  should not change mid
-  iteration, which it does if a file is unwatched. To circumvent this,
-  we should use a separate list to keep track of files we need to
-  unwatch or rewatch, and do it out of band.
-  
-  We should also take care to catch `RuntimeError` which may arise when
-  closing the Worker out of band
-  such as in the `cleanup` step of the worker dispatcher
-  but nowhere else.
-  
-  This should fix issues where logrotate suddenly causes files to
-  disappear for a time and beaver tries to tail the file at the exact
-  time it is being recreated.
+  open several times or other random Python issues.  Using a generator
+  also means that the set that we are iterating over should not change
+  mid-iteration, which it does if a file is unwatched. To circumvent
+  this, we should use a separate list to keep track of files we need to
+  unwatch or rewatch, and do it out of band.  We should also take care
+  to catch `RuntimeError` which may arise when closing the Worker out of
+  band - such as in the `cleanup` step of the worker dispatcher - but
+  nowhere else.  This should fix issues where logrotate suddenly causes
+  files to disappear for a time and beaver tries to tail the file at the
+  exact time it is being recreated.
 
-- Typo in SQS docs. [Jonathan Quail]
+- Merge pull request #140 from jonathanq/master. [Jose Diaz-Gonzalez]
+
+  Fixed a typo on the SQS docs
 
 - Remove ujson requirement. [Jose Diaz-Gonzalez]
 
   This allows users that do not have a compiler in their deployment area
-  to install beaver.
-  
-  Closes #137
+  to install beaver.    Closes #137
 
 - Turn on logfile output when running in non-daemon contexts. Closes
   #131. [Jose Diaz-Gonzalez]
@@ -326,38 +325,28 @@ Other
 - Properly handle redis reconnects when the datastore becomes
   unreacheable. Refs #93. [Jose Diaz-Gonzalez]
 
-- 'type' instead of 'exchange_type' in recent pika vers. [Pravir
-  Chandra]
+- Update required pika version. [Jose Diaz-Gonzalez]
 
-- Adding options to make queues durable and HA. [Pravir Chandra]
+- Merge pull request #129 from pchandra/master. [Jose Diaz-Gonzalez]
+
+  Adding HA options for rabbitmq
 
 - Respect stat_interval file configuration in stable worker. [Jose Diaz-
   Gonzalez]
 
 - Unified configuration file using conf_d module. [Jose Diaz-Gonzalez]
 
-  This change adds support for a conf.d directory
-  configured only via the `
-  
-  confd
-  path` flag
-  which allows beaver to read configuration from multiple files.
-  
-  Please note that the primary `beaver` stanza MUST be located in the
-  file specified by the `
-  
-  configfile` argument. Any other such `beaver` stanzas will be ignored.
-  
-  This change also unifies the `BeaverConfig` and `FileConfig` classes,
-  and simplifies the api for retrieving global vs file
-  specific data.
-  
-  Please note that this commit BREAKS custom transport classes, as the
-  interface for creating a transport class has changed. If you are
-  referencing a `file_config.get(field, filename)` anywhere, please omit
-  this and refer to `beaver_config.get_field(field, filename)`.
-  
-  Closes #107
+  This change adds support for a conf.d directory - configured only via
+  the `--confd-path` flag - which allows beaver to read configuration
+  from multiple files.  Please note that the primary `beaver` stanza
+  MUST be located in the file specified by the `--configfile` argument.
+  Any other such `beaver` stanzas will be ignored.  This change also
+  unifies the `BeaverConfig` and `FileConfig` classes, and simplifies
+  the api for retrieving global vs file-specific data.  Please note that
+  this commit BREAKS custom transport classes, as the interface for
+  creating a transport class has changed. If you are referencing a
+  `file_config.get(field, filename)` anywhere, please omit this and
+  refer to `beaver_config.get_field(field, filename)`.  Closes #107
 
 - Hack to prevent stupid TypeError: 'NoneType' when running tests via
   setup.py. [Jose Diaz-Gonzalez]
@@ -370,18 +359,20 @@ Other
 
 - Speed up experimental worker. [Jose Diaz-Gonzalez]
 
-  Removed inline sleep call, which slowed down passes n*0.1 seconds,
-  where n is the number of files being tailed
-  
-  Inline methods that update data structures which should speed up
-  larger installations
-  
+  - Removed inline sleep call, which slowed down passes n*0.1 seconds,
+  where n is the number of files being tailed - Inline methods that
+  update data structures which should speed up larger installations -
   Make self.active() an attribute lookup instead of a method call
+
+- Update rawjson formatter to build the correct output. Closes #127.
+  [Jose Diaz-Gonzalez]
 
 - Use latest version of message pack interface (0.3.0). Closes #128.
   [Jose Diaz-Gonzalez]
 
-- Alternative for reading python requirements. [Justin Lambert]
+- Merge pull request #126 from jlambert121/120_fix. [Jose Diaz-Gonzalez]
+
+  alternative for reading python requirements
 
 - Fix options sent from original worker to queue. Refs #119. [Jose Diaz-
   Gonzalez]
@@ -424,10 +415,12 @@ Other
 
 - Fix TransportException import. Closes #122. [Jose Diaz-Gonzalez]
 
+- Merge pull request #121 from amfranz/master. [Jose Diaz-Gonzalez]
+
+  SSH tunnel is not re-connecting
+
 - Use an alternative method of reading in requirements. Refs #120. [Jose
   Diaz-Gonzalez]
-
-- Auto-reconnect mechanism for the SSH tunnel. [Michael Franz Aigner]
 
 - Fix import of REOPEN_FILES constant in dispatcher.py. [Jose Diaz-
   Gonzalez]
@@ -460,7 +453,12 @@ Other
 
 - Ignore since.db files. [Jose Diaz-Gonzalez]
 
+- Updated test cases. [Jose Diaz-Gonzalez]
+
 - Simplified sincedb support to handle an edge case. Refs #116. [Jose
+  Diaz-Gonzalez]
+
+- Updated readme to remove old example and add exclusion example. [Jose
   Diaz-Gonzalez]
 
 - Remove errant print. [Jose Diaz-Gonzalez]
@@ -478,6 +476,12 @@ Other
 
 - Convert the 'sincedb_write_interval' option to an integer. Refs #116.
   [Jose Diaz-Gonzalez]
+
+- Updates to tail_lines option. [Jose Diaz-Gonzalez]
+
+  - Fixed issue where the encoding wasn't properly read - Properly
+  handle block stepping - Ensure we don't accidentally read a portion of
+  a line when it has only been partially read
 
 - Moved logger call to a more intelligent spot. [Jose Diaz-Gonzalez]
 
@@ -546,22 +550,22 @@ Other
 
 - Added SQS transport. [Jonathan Quail]
 
-- Fixing outdated transport docs. [Morgan Delagrange]
+- Merge pull request #109 from mdelagralfo/transport-docs. [Jose Diaz-
+  Gonzalez]
 
-28 (2013-03-05)
----------------
+  fixing outdated transport docs
+
+- Release version 28. [Jose Diaz-Gonzalez]
 
 - BeaverSubprocess is now a new-style class. Fixes ssh_tunneling. [Jose
   Diaz-Gonzalez]
 
-27 (2013-03-05)
----------------
+- Release version 27. [Jose Diaz-Gonzalez]
 
 - Fix issue where super method was not called in BeaverSshTunnel. [Jose
   Diaz-Gonzalez]
 
-26 (2013-03-05)
----------------
+- Release version 26. [Jose Diaz-Gonzalez]
 
 - Add optional reconnect support for transports. Refs #93. [Jose Diaz-
   Gonzalez]
@@ -577,15 +581,13 @@ Other
 - Use a larger sleep time to get around redis over ssh connection
   issues. [Jose Diaz-Gonzalez]
 
-25 (2013-03-05)
----------------
+- Release version 25. [Jose Diaz-Gonzalez]
 
 - Use True instead of 1 for while check. [Jose Diaz-Gonzalez]
 
 - Fix orphan child processes. Closes #103. [Jose Diaz-Gonzalez]
 
-24 (2013-02-26)
----------------
+- Release version 24. [Jose Diaz-Gonzalez]
 
 - Ensure new files are added to a transports configuration. Closes #96.
   Closes #101. [Jose Diaz-Gonzalez]
@@ -596,94 +598,76 @@ Other
 
 - Perform all conversions in config.py. Closes #99. [Jose Diaz-Gonzalez]
 
-23 (2013-02-20)
----------------
+- Merge pull request #102 from andrewgross/master. [Jose Diaz-Gonzalez]
 
-- Worker: pretty format debug message "Iteration took %.6f" [Sergey
-  Shepelev]
+  Clarify Docs
 
-- Zeromq_hwm int() conversion moved to config. [Denis Orlikhin]
+- Release version 23. [Jose Diaz-Gonzalez]
 
-- Zeromq_hwm config entry. [Denis Orlikhin]
+- Updated readme. [Jose Diaz-Gonzalez]
 
-- Zeromq_hwm support. [Denis Orlikhin]
+- Merge pull request #100 from temoto/patch-1. [Jose Diaz-Gonzalez]
 
-- Rabbitmq_exchange_type option fixed in the README. [Xabier de Zuazo]
+  worker: pretty format debug message "Iteration took %.6f"
 
-- Add test requirements to setup. [Paul Garner]
+- Merge pull request #98 from overplumbum/master. [Jose Diaz-Gonzalez]
 
-- Allow beaver to accept custom transport classes. [Paul Garner]
+  ZeroMq HighWaterMark socket option
 
-- Make beaver slightly more amenable to test mocking and sort of fix the
-  broken zmq test. [Paul Garner]
+- Merge pull request #95 from anentropic/custom_transports. [Jose Diaz-
+  Gonzalez]
 
-22 (2013-01-15)
----------------
+  allow beaver to accept custom transport classes
+
+- Merge pull request #97 from onddo/README-exchange-type. [Jose Diaz-
+  Gonzalez]
+
+  rabbitmq_exchange_type option fixed in the README
+
+- Merge pull request #94 from anentropic/zmq_test_fix. [Jose Diaz-
+  Gonzalez]
+
+  sort of fix the broken zmq test
+
+- Release version 22. [Jose Diaz-Gonzalez]
 
 - Handle sigterm properly. Refs #87. [Jose Diaz-Gonzalez]
 
 - Add --loglevel as alias for --output. Closes #92. [Jose Diaz-Gonzalez]
 
-- Added logging on connection exception. [Thomas Morse]
+- Merge pull request #90 from Appdynamics/master. [Jose Diaz-Gonzalez]
 
-- Add '--format raw' to pass through input unchanged. [Stephen Sugden]
+  redis connection resiliency
 
-- Fix string & null formatters in beaver.transport. [Stephen Sugden]
+- Merge pull request #89 from grncdr/no-formatting. [Jose Diaz-Gonzalez]
 
-  the inline definitions were expecting a self parameter, which is *not*
-  passed when you assign a function to an attribute on an object
-  instance.
-
-- Adding exception when redis connection can't be confirmed. [William
-  Jimenez]
+  Fix string & null formatter, add CLI option to use null formatter
 
 - Call file.readlines() with sizehint in a loop to avoid reading in
   massive files all at once. [Jose Diaz-Gonzalez]
 
-21 (2013-01-04)
----------------
+- Release version 21. [Jose Diaz-Gonzalez]
 
 - Move runner into a dispatcher class to solve installation issues.
   [Jose Diaz-Gonzalez]
 
 - Added note for Python 2.6+ support. [Jose Diaz-Gonzalez]
 
-20 (2013-01-03)
----------------
+- Release version 20. [Jose Diaz-Gonzalez]
 
 - Copy the readme over to avoid pypi packaging warnings. [Jose Diaz-
   Gonzalez]
 
-- Implement fully recursive file globing. [Brian L. Troutwine]
+- Merge pull request #84 from blt/fully_recursive_globbing. [Jose Diaz-
+  Gonzalez]
 
-  Python's base glob.iglob does not operate as if globstar were in
-  effect. To
-  explain, let's say I have an erlang application with lager logs to
-  
-  /var/log/erl_app/lags.log
-  /var/log/erl_app/console/YEAR_MONTH_DAY.log
-  
-  and webmachine logs to
-  
-  /var/log/erl_app/webmachine/access/YEAR_MONTH_DAY.log
-  
-  Prior to this commit, when configured with the path
-  `/var/log/**/*.log` all
-  webmachine logs would be ignored by beaver. This is no longer the
-  case, to an
-  arbitrary depth.
-  
-  Signed
-  off
-  by: Brian L. Troutwine <brian@troutwine.us>
+  Implement fully recursive file globing.
 
-19 (2013-01-01)
----------------
+- Release version 19. [Jose Diaz-Gonzalez]
 
 - Fix issue with supporting command line args. [Jose Diaz-Gonzalez]
 
-18 (2012-12-31)
----------------
+- Release version 18. [Jose Diaz-Gonzalez]
 
 - Add timing debug information to the worker loop. [Jose Diaz-Gonzalez]
 
@@ -696,13 +680,15 @@ Other
 
 - Pass in logger object to create_ssh_tunnel() [Jose Diaz-Gonzalez]
 
-17 (2012-12-28)
----------------
+- Merge pull request #83 from clarkbk/patch-1. [Jose Diaz-Gonzalez]
+
+  Update .gitignore
+
+- Release version 17. [Jose Diaz-Gonzalez]
 
 - Added missing python-daemon requirement. [Jose Diaz-Gonzalez]
 
-16 (2012-12-27)
----------------
+- Release version 16. [Jose Diaz-Gonzalez]
 
 - Specify a max queue size of 100 to limit overrunning memory. [Jose
   Diaz-Gonzalez]
@@ -711,27 +697,29 @@ Other
   Gonzalez]
 
   Previously there were issues where files that were updated frequently
-  such as varnish or server logs
-  would overwhelm the naive implementation of file.readlines() within
-  Beaver. This would cause Beaver to slowly read larger and larger
-  portions of a file before processing any of the lines, eventually
-  causing Beaver to take forever to process log lines.
-  
-  This patch adds the ability to use an internal work queue for log
-  lines. Whenever file.readlines() is called, the lines are placed in
-  the queue, which is shared with a child process. The child process
-  creates its own transport, allowing us to potentially create a Process
-  Pool in the future to handle a larger queue size.
-  
-  Note that the limitation of file.readlines() reading in too many lines
-  is still in existence, and may continue to cause issues for certain
-  log files.
+  - such as varnish or server logs - would overwhelm the naive
+  implementation of file.readlines() within Beaver. This would cause
+  Beaver to slowly read larger and larger portions of a file before
+  processing any of the lines, eventually causing Beaver to take forever
+  to process log lines.  This patch adds the ability to use an internal
+  work queue for log lines. Whenever file.readlines() is called, the
+  lines are placed in the queue, which is shared with a child process.
+  The child process creates its own transport, allowing us to
+  potentially create a Process Pool in the future to handle a larger
+  queue size.  Note that the limitation of file.readlines() reading in
+  too many lines is still in existence, and may continue to cause issues
+  for certain log files.
+
+- Update file mapping every 10 seconds as opposed to every loop
+  iteration. [Jose Diaz-Gonzalez]
 
 - Add default redis_password to BeaverConfig class. [Jose Diaz-Gonzalez]
 
-- Fix missing underscore causing transport to break. [Norman Joyner]
+- Merge pull request #81 from normanjoyner/master. [Jose Diaz-Gonzalez]
 
-- Implement redis auth support. [Norman Joyner]
+  Implement redis auth support
+
+- Updated readme. [Jose Diaz-Gonzalez]
 
 - Add beaver init script for daemonization mode. [Jose Diaz-Gonzalez]
 
@@ -745,30 +733,29 @@ Other
 
 - Revert "Added a lightweight Event class" [Jose Diaz-Gonzalez]
 
-  After deliberation, beaver is meant to be "light
-  weight". Lets leave
-  the heavy
-  hitting to the big
-  boys.
-  
-  This reverts commit 1619d33ef4803c3fe910cf4ff197d0dd0039d2eb.
+  After deliberation, beaver is meant to be "light-weight". Lets leave
+  the heavy-hitting to the big-boys.  This reverts commit
+  1619d33ef4803c3fe910cf4ff197d0dd0039d2eb.
 
 - Added a lightweight Event class. [Jose Diaz-Gonzalez]
 
   This class's sole responsibility will be the processing of a given
-  line as an event.
-  It's future goal will be to act as a lightweight implementation of the
-  filter system within Logstash
+  line as an event. It's future goal will be to act as a lightweight
+  implementation of the filter system within Logstash
 
 - Remove argparse requirement for python 2.7 and above. [Jose Diaz-
   Gonzalez]
 
-15 (2012-12-25)
----------------
+- Release version 15. [Jose Diaz-Gonzalez]
+
+- Updated readme. [Jose Diaz-Gonzalez]
 
 - Pull argument parsing out of beaver __init__.py. [Jose Diaz-Gonzalez]
 
 - Move app-running into __init__.py. [Jose Diaz-Gonzalez]
+
+- Update worker to follow variable naming conventions. [Jose Diaz-
+  Gonzalez]
 
 - Standardize on _parse() as method for parsing config. [Jose Diaz-
   Gonzalez]
@@ -778,9 +765,8 @@ Other
 - Remove extensions argument on Worker class. [Jose Diaz-Gonzalez]
 
   This argument was only used when no globs were specified in a config
-  file.
-  Since it is not configurable, there is no sense leaving around the
-  extra logic.
+  file. Since it is not configurable, there is no sense leaving around
+  the extra logic.
 
 - Remove extra callback invocation on readlines. [Jose Diaz-Gonzalez]
 
@@ -789,20 +775,15 @@ Other
 - General code reorganization. [Jose Diaz-Gonzalez]
 
   Move both BeaverConfig and FileConfig into a single class
-  
   Consolidated run_worker code with code in beaver binary file. This
   will create a clearer path for Exception handling, as it is now the
   responsibility of the calling class, allowing us to remove duplicative
-  exception handling code.
-  
-  Added docstrings to many fuctions and methods
-  
-  Moved extra configuration and setup code to beaver.utils module. In
-  many cases, code was added hastily before.
-  
-  Made many logger calls debug as opposed to info. The info level should
-  be generally reserved for instances where files are watched,
-  unwatched, or some change in the file state has occurred.
+  exception handling code.  Added docstrings to many fuctions and
+  methods  Moved extra configuration and setup code to beaver.utils
+  module. In many cases, code was added hastily before.  Made many
+  logger calls debug as opposed to info. The info level should be
+  generally reserved for instances where files are watched, unwatched,
+  or some change in the file state has occurred.
 
 - Remove duplicative and old beaver instructions from binary. [Jose
   Diaz-Gonzalez]
@@ -826,11 +807,10 @@ Other
 - Refactored message formatting in base Transport class. [Jose Diaz-
   Gonzalez]
 
-  We now use a `_formatter` property on the Transport class which
-  will properly process the message for output as the user expects.
-  
-  In the case of string output, we define a custom formatter using an
-  anonymous function and specify that as the formatter.
+  We now use a `_formatter` property on the Transport class which will
+  properly process the message for output as the user expects.  In the
+  case of string output, we define a custom formatter using an anonymous
+  function and specify that as the formatter.
 
 - Moved create_transport to transport module. [Jose Diaz-Gonzalez]
 
@@ -846,10 +826,11 @@ Other
 
 - Do not output info level when outputing version. [Jose Diaz-Gonzalez]
 
+- Updated requirements for Python 2.6. Closes #77. [Jose Diaz-Gonzalez]
+
 - Allow usage of ujson >= 1.19. Closes #76. [Jose Diaz-Gonzalez]
 
-14 (2012-12-18)
----------------
+- Release version 14. [Jose Diaz-Gonzalez]
 
 - Removed erroneous redundant code. [Jose Diaz-Gonzalez]
 
@@ -862,19 +843,20 @@ Other
 
 - Fix broken python readme. [Jose Diaz-Gonzalez]
 
-13 (2012-12-17)
----------------
+- Release version 13. [Jose Diaz-Gonzalez]
+
+- Updated readme to include notes on configuration options. [Jose Diaz-
+  Gonzalez]
 
 - Fixed certain environment variables. [Jose Diaz-Gonzalez]
 
 - SSH Tunnel Support. [Jose Diaz-Gonzalez]
 
   This code should allow us to create an ssh tunnel between two distinct
-  servers for the purposes of sending and receiving data.
-  
-  This is useful in certain cases where you would otherwise need to
-  whitelist in your Firewall or iptables setup, such as when running in
-  two different regions on AWS.
+  servers for the purposes of sending and receiving data.  This is
+  useful in certain cases where you would otherwise need to whitelist in
+  your Firewall or iptables setup, such as when running in two different
+  regions on AWS.
 
 - Allow for initial connection lag. Helpful when waiting for an SSH
   proxy to connect. [Jose Diaz-Gonzalez]
@@ -884,155 +866,104 @@ Other
 
 - Allow specifying host via flag. Closes #70. [Jose Diaz-Gonzalez]
 
-12 (2012-12-17)
----------------
+- Updated readme to reference conf file instead of ENV variables. Closes
+  #72. [Jose Diaz-Gonzalez]
 
-- Reload tailed files on non-linux platforms. [Jose Diaz-Gonzalez]
+- Release version 12. [Jose Diaz-Gonzalez]
 
-  Python has an issue on OS X were the underlying C implementation of
-  `file.read()` caches the EOF, therefore causing `readlines()` to only
-  work once. This happens to also fail miserably when you are seeking to
-  the end before calling readlines.
-  
-  This fix solves the issue by constantly re
-  reading the files changed.
-  
-  Note that this also causes debug mode to be very noisy on OS X. We all
-  have to make sacrifices...
+- Merge pull request #73 from josegonzalez/deprecated. [Jose Diaz-
+  Gonzalez]
 
-- Deprecate all environment variables. [Jose Diaz-Gonzalez]
-
-  This shifts configuration management into the BeaverConfig class.
-  Note that we currently throw a warning if you are using environment
-  variables.
-  
-  Refs #72
-  Closes #60
-
-- Warn when using deprecated ENV variables for configuration. Refs #72.
-  [Jose Diaz-Gonzalez]
+  Revamp Beaver configuration
 
 - Minor changes for PEP8 conformance. [Jose Diaz-Gonzalez]
 
-11 (2012-12-16)
----------------
+- Release version 11. [Jose Diaz-Gonzalez]
 
-- Add optional support for socket.getfqdn. [Jeremy Kitchen]
+- Merge pull request #69 from kitchen/fqdnoptional. [Jose Diaz-Gonzalez]
 
-  For my setup I need to have the fqdn used at all times since my
-  hostnames are the same but the environment (among other things) is
-  found in the rest of the FQDN.
-  
-  Since just changing socket.gethostname to socket.getfqdn has lots of
-  potential for breakage, and socket.gethostname doesn't always return
-  an
-  FQDN, it's now an option to explicitly always use the fqdn.
-  
-  Fixes #68
+  add optional support for socket.getfqdn
 
-- Check for log file truncation fixes #55. [Jeremy Kitchen]
+- Merge pull request #67 from kitchen/truncate-check. [Jose Diaz-
+  Gonzalez]
 
-  This adds a simple check for log file truncation and resets the watch
-  when detected.
-  
-  There do exist 2 race conditions here:
-  1. Any log data written prior to truncation which beaver has not yet
-  read and processed is lost. Nothing we can do about that.
-  2. Should the file be truncated, rewritten, and end up being larger
-  than
-  the original file during the sleep interval, beaver won't detect
-  this. After some experimentation, this behavior also exists in GNU
-  tail, so I'm going to call this a "don't do that then" bug :)
-  
-  Additionally, the files beaver will most likely be called upon to
-  watch which may be truncated are generally going to be large enough
-  and slow
-  filling enough that this won't crop up in the wild.
+  check for truncation as well as rotation
 
 - Add a version number to beaver. [Jose Diaz-Gonzalez]
 
-10 (2012-12-15)
----------------
+- Release version 10. [Jose Diaz-Gonzalez]
 
 - Fixed package name. [Jose Diaz-Gonzalez]
 
 - Regenerate CHANGES.rst on release. [Jose Diaz-Gonzalez]
 
-- Adding support for /path/{foo,bar}.log. [Josh Braegger]
+- Merge pull request #66 from rckclmbr/eglob. [Jose Diaz-Gonzalez]
 
-- Ignore file errors in unwatch method -- the file might not exists.
-  [Josh Braegger]
+  Adding support for /path/{foo,bar}.log
 
-- Unwatch file when encountering a stale NFS handle. When an NFS file
-  handle becomes stale (ie, file was removed), it was crashing beaver.
-  Need to just unwatch file. [Josh Braegger]
+- Merge pull request #61 from faulkner/fix-readme. [Jose Diaz-Gonzalez]
 
-- Consistency. [Chris Faulkner]
+  Fix readme
 
-- Pull install requirements from requirements/base.txt so they don't get
-  out of sync. [Chris Faulkner]
+- Merge pull request #65 from rckclmbr/nfsfix. [Jose Diaz-Gonzalez]
 
-- Include changelog in setup. [Chris Faulkner]
+  Ignore file errors in unwatch method -- the file might not exists
 
-- Convert changelog to RST. [Chris Faulkner]
+- Merge pull request #64 from rckclmbr/master. [Jose Diaz-Gonzalez]
 
-- Actually show the license. [Chris Faulkner]
+  Unwatch file when encountering a stale NFS handle.
 
-- Consistent casing. [Chris Faulkner]
+- Merge pull request #63 from faulkner/fix-setup. [Jose Diaz-Gonzalez]
 
-- Consistency. [Chris Faulkner]
+  Fix setup
 
-- Stating the obvious. [Chris Faulkner]
+- Merge pull request #59 from stelmod/master. [Jose Diaz-Gonzalez]
 
-- Grist for the mill. [Chris Faulkner]
+  Beaver sends empty string as tag
 
-- Drop redundant README.txt. [Chris Faulkner]
+- Merge pull request #56 from rckclmbr/master. [Jose Diaz-Gonzalez]
 
-- Don't use empty string for tag when no tags configured in config file.
-  [Stylianos Modes]
+  Making 'mode' option work for zmqtransport
 
-- Making 'mode' option work for zmqtransport.  Adding setuptools and
-  tests (use ./setup.py nosetests).  Adding .gitignore. [Josh Braegger]
-
-9 (2012-11-28)
---------------
+- Release version 9. [Jose Diaz-Gonzalez]
 
 - More release changes. [Jose Diaz-Gonzalez]
 
-- Fixed deprecated warning when declaring exchange type. [Rafael
-  Fonseca]
+- Merge pull request #53 from rafaelmagu/master. [Jose Diaz-Gonzalez]
 
-7 (2012-11-28)
---------------
+  Fixed deprecation warning in rabbitmq_transport.py
+
+- Release version 8. [Jose Diaz-Gonzalez]
+
+- Merge pull request #52 from rafaelmagu/master. [Jose Diaz-Gonzalez]
+
+  Added resiliency to RabbitMQ transport
+
+- Updated release script. [Jose Diaz-Gonzalez]
+
+- Release version 7. [Jose Diaz-Gonzalez]
 
 - Added a helper script for creating releases. [Jose Diaz-Gonzalez]
 
+- Updated changelog. [Jose Diaz-Gonzalez]
+
 - Partial fix for crashes caused by globbed files. [Jose Diaz-Gonzalez]
 
-- Removed deprecated usage of e.message. [Rafael Fonseca]
-
-- Fixed exception trapping code. [Rafael Fonseca]
-
-- Added some resiliency code to rabbitmq transport. [Rafael Fonseca]
-
-6 (2012-11-26)
---------------
+- Release sixth version. [Jose Diaz-Gonzalez]
 
 - Fix issue where polling for files was done incorrectly. [Jose Diaz-
   Gonzalez]
 
 - Added ubuntu init.d example config. [Jose Diaz-Gonzalez]
 
-5 (2012-11-26)
---------------
+- Release version 5. [Jose Diaz-Gonzalez]
 
 - Try to poll for files on startup instead of throwing exceptions.
   Closes #45. [Jose Diaz-Gonzalez]
 
 - Added python 2.6 to classifiers. [Jose Diaz-Gonzalez]
 
-4 (2012-11-26)
---------------
+- Release version 3. [Jose Diaz-Gonzalez]
 
 - Remove unused local vars. [Jose Diaz-Gonzalez]
 
@@ -1046,10 +977,11 @@ Other
 - Use alternate dict syntax for Python 2.6 support. Closes #43. [Jose
   Diaz-Gonzalez]
 
+- Updated and relaxed requirements. [Jose Diaz-Gonzalez]
+
 - Fixed release date for version 3. [Jose Diaz-Gonzalez]
 
-3 (2012-11-25)
---------------
+- Release version 3. [Jose Diaz-Gonzalez]
 
 - Added requirements files to manifest. [Jose Diaz-Gonzalez]
 
@@ -1060,10 +992,14 @@ Other
 
   This reverts commit e667f63706e0af8bc82c0eac6eac43318144e107.
 
+- Updated CHANGES.txt. [Jose Diaz-Gonzalez]
+
 - Added bash startup script. Closes #35. [Jose Diaz-Gonzalez]
 
 - Added an example supervisor config for redis. closes #34. [Jose Diaz-
   Gonzalez]
+
+- Updated changes. [Jose Diaz-Gonzalez]
 
 - Removed redundant README.txt. [Jose Diaz-Gonzalez]
 
@@ -1079,20 +1015,24 @@ Other
 
 - Added changes to changelog for version 3. [Jose Diaz-Gonzalez]
 
-- Timestamp in ISO 8601 format with the "Z" sufix to express UTC.
-  [Xabier de Zuazo]
+- Merge pull request #41 from onddo/timezone-utc. [Jose Diaz-Gonzalez]
 
-- Adding udp support. [Morgan Delagrange]
+  timestamp in ISO 8601 format with the "Z" sufix to express UTC
 
-- Lpush changed to rpush on redis transport. This is required to always
-  read the events in the correct order on the logstash side. See: https:
-  //github.com/logstash/logstash/blob/6f745110671b5d9d66bf082fbfed99d145
-  af4620/lib/logstash/outputs/redis.rb#L4. [Xabier de Zuazo]
+- Merge pull request #40 from mdelagralfo/master. [Jose Diaz-Gonzalez]
 
-2 (2012-10-25)
---------------
+  adding udp transport support
 
-- Example upstart script. [Michael D'Auria]
+- Merge pull request #37 from onddo/redis-rpush. [Jose Diaz-Gonzalez]
+
+  lpush changed to rpush on redis transport
+
+- Release version 2. [Jose Diaz-Gonzalez]
+
+- Merge pull request #32 from michaeldauria/init-script. [Jose Diaz-
+  Gonzalez]
+
+  Example upstart script
 
 - Fixed a few more import statements. [Jose Diaz-Gonzalez]
 
@@ -1107,12 +1047,21 @@ Other
 - Add default stream handler when transport is stdout. Closes #26. [bear
   (Mike Taylor)]
 
-- Handle the case where the config file is not present. [Michael
-  D'Auria]
+- Merge pull request #30 from michaeldauria/better-unhandled-exception-
+  output. [Jose Diaz-Gonzalez]
 
-- Better exception handling for unhandled exceptions. [Michael D'Auria]
+  Better exception handling for unhandled exceptions
 
-- Fix wrong addfield values. [Alexander Fortin]
+- Merge pull request #29 from michaeldauria/fix-getaddfield. [Jose Diaz-
+  Gonzalez]
+
+  Handle the case where the config file is not present
+
+- Merge pull request #25 from shaftoe/fixaddvalues. [Jose Diaz-Gonzalez]
+
+  Fix wrong addfield values
+
+- Updated README.txt. [Jose Diaz-Gonzalez]
 
 - Add add_field to config example. [Alexander Fortin]
 
@@ -1120,31 +1069,33 @@ Other
 
 - Minor readme updates. [Jose Diaz-Gonzalez]
 
+- Merge pull request #21 from librato-peter/master. [Jose Diaz-Gonzalez]
+
+  Fix so that empty file lists do not override the PATH.
+
 - Add support for type reading from INI config file. [Alexander Fortin]
 
-  Add support for symlinks in config file
-  
-  Add support for file globbing in config file
-  
-  Add support for tags
-  
-  
-  a little bit of refactoring, move type and tags check down into
-  transport class
-  
-  create config object (reading /dev/null) even if no config file
-  has been given via cli
-  
-  Add documentation for INI file to readme
-  
-  Remove unused json library
-  
-  Conflicts:
-  README.rst
+  Add support for symlinks in config file  Add support for file globbing
+  in config file  Add support for tags  - a little bit of refactoring,
+  move type and tags check down into   transport class - create config
+  object (reading /dev/null) even if no config file   has been given via
+  cli  Add documentation for INI file to readme  Remove unused json
+  library
+  Conflicts:         README.rst
 
-- When sending data over the wire, use UTC timestamps. [Darren Worrall]
+- Merge pull request #17 from librato-peter/master. [Jose Diaz-Gonzalez]
 
-- Support globs in file paths. [Darren Worrall]
+  Updating docs for zmq transport method
+
+- Merge pull request #13 from DazWorrall/globs. [Jose Diaz-Gonzalez]
+
+  Support globs in file paths
+
+- Merge pull request #14 from DazWorrall/utc. [Jose Diaz-Gonzalez]
+
+  When sending data over the wire, use UTC timestamps
+
+- Updated readme. [Jose Diaz-Gonzalez]
 
 - Added msgpack support. [Jose Diaz-Gonzalez]
 
@@ -1156,24 +1107,39 @@ Other
 
 - Refactor transports. [Jose Diaz-Gonzalez]
 
-  Fix the json import to use the fastest json module available
-  
-  Move formatting into Transport class
+  - Fix the json import to use the fastest json module available - Move
+  formatting into Transport class
 
 - Attempt to fix defaults from env variables. [Jose Diaz-Gonzalez]
 
-- Fix README and beaver CLI help to reference correct RABBITMQ_HOST
-  environment variable. [jdutton]
+- Merge pull request #8 from jdutton/master. [Jose Diaz-Gonzalez]
 
-- Add RabbitMQ support. [Alexander Fortin]
+  Fixed typos in docs to reference RABBITMQ_HOST rather than
+  RABBITMQ_ADDRESS
+
+- Update README.txt. [Jose Diaz-Gonzalez]
+
+- Update README.rst. [Jose Diaz-Gonzalez]
+
+- Merge pull request #4 from shaftoe/master. [Jose Diaz-Gonzalez]
+
+  Add RabbitMQ support
 
 - Added real-world example of beaver usage for tailing a file. [Jose
   Diaz-Gonzalez]
 
+- Updated readme to include libzmq as a dependency. [Jose Diaz-Gonzalez]
+
 - Removed unused argument. [Jose Diaz-Gonzalez]
+
+- Updated installation instructions. [Jose Diaz-Gonzalez]
 
 - Ensure that python-compatible readme is included in package. [Jose
   Diaz-Gonzalez]
+
+- Updated manifest. [Jose Diaz-Gonzalez]
+
+- Updated readme todo list. [Jose Diaz-Gonzalez]
 
 - Fix variable naming and timeout for redis transport. [Jose Diaz-
   Gonzalez]
@@ -1184,9 +1150,6 @@ Other
   Gonzalez]
 
 - Removed unnecessary .gitignore. [Jose Diaz-Gonzalez]
-
-1 (2012-08-06)
---------------
 
 - Moved app into python package format. [Jose Diaz-Gonzalez]
 
@@ -1213,6 +1176,8 @@ Other
 - Support usage of environment variables instead of arguments. [Jose
   Diaz-Gonzalez]
 
+- Updated logging statements. [Jose Diaz-Gonzalez]
+
 - Fixed files argument parsing. [Jose Diaz-Gonzalez]
 
 - One does not simply license all the things. [Jose Diaz-Gonzalez]
@@ -1222,6 +1187,8 @@ Other
 - Added version to pyzmq. [Jose Diaz-Gonzalez]
 
 - Added license. [Jose Diaz-Gonzalez]
+
+- Updated readme. [Jose Diaz-Gonzalez]
 
 - Reordered imports. [Jose Diaz-Gonzalez]
 
@@ -1237,6 +1204,8 @@ Other
 
 - Removed another compiled python file. [Jose Diaz-Gonzalez]
 
+- Updated requirements.txt file. [Jose Diaz-Gonzalez]
+
 - Use ujson instead of simplejson. [Jose Diaz-Gonzalez]
 
 - Ignore compiled python files. [Jose Diaz-Gonzalez]
@@ -1245,8 +1214,12 @@ Other
 
 - Fixed up readme instructions. [Jose Diaz-Gonzalez]
 
+- Updated readme tagline. [Jose Diaz-Gonzalez]
+
 - Refactor transports so that connections are no longer global. [Jose
   Diaz-Gonzalez]
+
+- Updated docblocks. [Jose Diaz-Gonzalez]
 
 - Readme and License. [Jose Diaz-Gonzalez]
 

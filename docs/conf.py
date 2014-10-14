@@ -53,7 +53,7 @@ copyright = u'2013, Jose Diaz-Gonzalez'
 # built documents.
 #
 # The short X.Y version.
-version = '31'
+version = '32'
 # The full version, including alpha/beta/rc tags.
 release = '31'
 
