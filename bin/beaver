@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from beaver.dispatcher.tail import run as tail_run
-from beaver.dispatcher.worker import run as worker_run
 from beaver.pidfile import PidFile
 from beaver.utils import CAN_DAEMONIZE, parse_args, version
 
@@ -20,12 +19,6 @@ if args.daemonize:
         context = daemon.DaemonContext(pidfile=PidFile(args.pid))
 
     with context:
-        if args.experimental:
-            tail_run(args)
-        else:
-            worker_run(args)
-else:
-    if args.experimental:
         tail_run(args)
-    else:
-        worker_run(args)
+else:
+    tail_run(args)
