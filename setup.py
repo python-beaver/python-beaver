@@ -46,6 +46,11 @@ requirements = open('requirements/base.txt').readlines()
 if sys.version_info[:2] <= (2, 6):
     requirements.extend(open('requirements/base26.txt').readlines())
 
+# python-daemon is not supported on windows
+if sys.platform == 'win32':
+    pd = filter(lambda r: r.startswith('python-daemon'), requirements)[0]
+    requirements.remove(pd)
+
 setup(
     name='Beaver',
     version=__version__,
