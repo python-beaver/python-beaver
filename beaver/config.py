@@ -48,6 +48,9 @@ class BeaverConfig():
             'tags': '',
             'tail_lines': '0',
             'type': '',
+            # Redis specific namespace
+            'redis_namespace': ''
+
         }
 
         self._main_defaults = {
