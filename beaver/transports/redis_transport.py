@@ -57,9 +57,14 @@ class RedisTransport(BaseTransport):
         if kwargs.get('timestamp', False):
             del kwargs['timestamp']
 
+        rn = self._beaver_config.get_field('redis_namespace',filename)
+        if not rn:
+            rn = self._redis_namespace
+        self._logger.debug('redis_namespace: '+rn)
+
         for line in lines:
             self._pipeline.rpush(
-                self._redis_namespace,
+                rn,
                 self.format(filename, line, timestamp, **kwargs)
             )
 
