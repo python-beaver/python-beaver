@@ -122,6 +122,10 @@ The following configuration key allows the importing of OS environment data into
 
 * add_field_env: Default ``None``. Format is fieldname1,ENVVARIABLE1[,fieldname2,ENVVARIABLE2, ...]
 
+The following configuration key allows to set a redis_namespace per files stanza. It will override the global [beaver] setting fo the same key.
+
+* redis_namespace: Defaults to Null string. Redis key namespace
+
 Examples
 --------
 
@@ -226,6 +230,20 @@ Sending logs from /var/log files to a redis list::
     # /etc/beaver/conf
     [beaver]
     redis_url: redis://localhost:6379/0
+
+    # From the commandline
+    beaver  -c /etc/beaver/conf -t redis
+
+Sending logs from /tmp/somefile files to a redis list, with custom namespace::
+
+    # /etc/beaver/conf
+    [beaver]
+    redis_url: redis://localhost:6379/0
+
+    [/tmp/somefile]
+    type: mytype
+    tags: tag1,tag2
+    redis_namespace: some:space
 
     # From the commandline
     beaver  -c /etc/beaver/conf -t redis
