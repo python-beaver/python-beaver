@@ -50,7 +50,6 @@ class BeaverConfig():
             'type': '',
             # Redis specific namespace
             'redis_namespace': ''
-
         }
 
         self._main_defaults = {
