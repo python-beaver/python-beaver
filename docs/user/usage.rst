@@ -63,6 +63,7 @@ Beaver can optionally get data from a ``configfile`` using the ``-c`` flag. This
 * rabbitmq_exchange_durable: Default ``0``.
 * rabbitmq_key: Default ``logstash-key``.
 * rabbitmq_exchange: Default ``logstash-exchange``.
+* rabbitmq_delivery_mode: Default ``1``.
 * redis_url: Default ``redis://localhost:6379/0``. Redis URL
 * redis_namespace: Default ``logstash:beaver``. Redis key namespace
 * sqs_aws_access_key: Can be left blank to use IAM Roles or AWS_ACCESS_KEY_ID environment variable (see: https://github.com/boto/boto#getting-started-with-boto)
