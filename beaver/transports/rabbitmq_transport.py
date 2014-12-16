@@ -15,7 +15,7 @@ class RabbitmqTransport(BaseTransport):
         config_to_store = [
             'key', 'exchange', 'username', 'password', 'host', 'port', 'vhost',
             'queue', 'queue_durable', 'ha_queue', 'exchange_type', 'exchange_durable',
-            'ssl', 'ssl_key', 'ssl_cert', 'ssl_cacert'
+            'ssl', 'ssl_key', 'ssl_cert', 'ssl_cacert', 'delivery_mode'
         ]
 
         for key in config_to_store:
@@ -84,13 +84,13 @@ class RabbitmqTransport(BaseTransport):
                         body=self.format(filename, line, timestamp, **kwargs),
                         properties=pika.BasicProperties(
                             content_type='text/json',
-                            delivery_mode=1
+                            delivery_mode=self._rabbitmq_config['delivery_mode']
                         )
                     )
             except UserWarning:
                 self._is_valid = False
                 raise TransportException('Connection appears to have been lost')
-            except Exception, e:
+            except Exception as e:
                 self._is_valid = False
                 try:
                     raise TransportException(e.strerror)
