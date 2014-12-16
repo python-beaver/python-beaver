@@ -90,7 +90,7 @@ class RabbitmqTransport(BaseTransport):
             except UserWarning:
                 self._is_valid = False
                 raise TransportException('Connection appears to have been lost')
-            except Exception, e:
+            except Exception as e:
                 self._is_valid = False
                 try:
                     raise TransportException(e.strerror)
