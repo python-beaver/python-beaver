@@ -2,6 +2,8 @@
 import boto.sqs
 import uuid
 
+from boto.sqs.message import Message
+
 from beaver.transports.base_transport import BaseTransport
 from beaver.transports.exception import TransportException
 
@@ -40,20 +42,37 @@ class SqsTransport(BaseTransport):
         if kwargs.get('timestamp', False):
             del kwargs['timestamp']
 
+        message_batch_size = 0
         message_batch = []
         for line in lines:
-            message_batch.append((uuid.uuid4(), self.format(filename, line, timestamp, **kwargs), 0))
-            if len(message_batch) == 10:  # SQS can only handle up to 10 messages in batch send
-                self._logger.debug('Flushing 10 messages to SQS queue')
+            m = Message
+            m.set_body(self.format(filename, line, timestamp, **kwargs))
+            message_length = len(m)
+            message_tuple = (uuid.uuid4(), self.format(filename, line, timestamp, **kwargs), 0)
+
+            if message_length > 250000:
+                self._logger.debug('Dropping message as it is too long to send ({0} bytes)'.format(message_length))
+                continue
+
+            if message_batch_size + message_length < 250000:
+                message_batch.append(message_tuple)
+            else:
+                self._send_message_batch(message_batch)
+                message_batch = []
+                message_batch.append(message_tuple)
+                continue
+
+            # SQS can only handle up to 10 messages in batch send
+            if len(message_batch) == 10:
                 self._send_message_batch(message_batch)
                 message_batch = []
 
         if len(message_batch) > 0:
-            self._logger.debug('Flushing last {0} messages to SQS queue'.format(len(message_batch)))
             self._send_message_batch(message_batch)
         return True
 
     def _send_message_batch(self, message_batch):
+        self._logger.debug('Flushing {0} messages to SQS queue'.format(len(message_batch)))
         try:
             result = self._queue.write_batch(message_batch)
             if not result:
