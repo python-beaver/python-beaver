@@ -2,6 +2,7 @@
 import boto.sqs
 import uuid
 
+from boto.sqs.message import Message
 from beaver.transports.base_transport import BaseTransport
 from beaver.transports.exception import TransportException
 
@@ -41,19 +42,33 @@ class SqsTransport(BaseTransport):
             del kwargs['timestamp']
 
         message_batch = []
-        message_batch_length = 0
+        message_batch_size = 0
+        message_batch_size_max = 250000 # Max 256KiB but leave some headroom
+
         for line in lines:
-            message_batch_length = message_batch_length+len(line)
-            message_batch.append((uuid.uuid4(), self.format(filename, line, timestamp, **kwargs), 0))
-            if (len(message_batch) == 10) or (message_batch_length >= 250000):  # SQS can only handle up to 10 messages in batch send and it can not exceed 256KiB (leave a little headroom)
-                self._logger.debug('Flushing last {0} messages to SQS queue {1} bytes'.format(len(message_batch),message_batch_length))
+            m = Message()
+            m.set_body(self.format(filename, line, timestamp, **kwargs))
+            message_size = len(m)
+
+            if (message_size > message_batch_size_max):
+                self._logger.debug('Dropping the message as it is too large to send ({0} bytes)'.format(message_size))
+                continue
+
+            # SQS can only handle up to 10 messages in batch send and it can not exceed 256KiB (see above)
+            # Check the new total size before adding a new message and don't try to send an empty batch
+            if (len(message_batch) > 0) and (((message_batch_size + message_size) >= message_batch_size_max) or (len(message_batch) == 10)):
+                self._logger.debug('Flushing {0} messages to SQS queue {1} bytes'.format(len(message_batch), message_batch_size))
                 self._send_message_batch(message_batch)
                 message_batch = []
-                message_batch_length = 0
+                message_batch_size = 0
+
+            message_batch_size = message_batch_size + message_size
+            message_batch.append((uuid.uuid4(), self.format(filename, line, timestamp, **kwargs), 0))
 
         if len(message_batch) > 0:
-            self._logger.debug('Flushing last {0} messages to SQS queue {1} bytes'.format(len(message_batch),message_batch_length))
+            self._logger.debug('Flushing the last {0} messages to SQS queue {1} bytes'.format(len(message_batch), message_batch_size))
             self._send_message_batch(message_batch)
+
         return True
 
     def _send_message_batch(self, message_batch):
