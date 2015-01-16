@@ -4,5 +4,5 @@ glob2==0.3
 mosquitto>=1.1
 msgpack-pure>=0.1.3
 pika>=0.9.12
-python-daemon>=1.5.2
+python-daemon>=1.5.2,<=1.6.1
 redis>=2.7.5
