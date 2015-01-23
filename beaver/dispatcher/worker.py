@@ -19,7 +19,7 @@ def run(args=None):
     logger = setup_custom_logger('beaver', args, config=beaver_config)
 
     if beaver_config.get('logstash_version') not in [0, 1]:
-        raise LookupError("Invalid logstash_version")
+        raise LookupError("Invalid logstash_version. Set it to 0 or 1 in your config.")
 
     queue = multiprocessing.Queue(beaver_config.get('max_queue_size'))
 
