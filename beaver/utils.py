@@ -3,6 +3,7 @@ import argparse
 import glob2
 import itertools
 import logging
+from logging.handlers import RotatingFileHandler
 import platform
 import re
 import os
@@ -48,11 +49,13 @@ def parse_args():
     parser.add_argument('-e', '--experimental', help='use experimental version of beaver', dest='experimental', default=False, action='store_true')
     parser.add_argument('-v', '--version', help='output version and quit', dest='version', default=False, action='store_true')
     parser.add_argument('--fqdn', help='use the machine\'s FQDN for source_host', dest='fqdn', default=False, action='store_true')
+    parser.add_argument('--max-bytes', action='store', dest='max_bytes', type=int, default=64 * 1024 * 1024, help='Maximum bytes per a logfile.')
+    parser.add_argument('--backup-count', action='store', dest='backup_count', type=int, default=1, help='Maximum number of logfiles to backup.')
 
     return parser.parse_args()
 
 
-def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None, config=None):
+def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None, config=None, max_bytes=None, backup_count=None):
     logger = logging.getLogger(name)
     logger.propagate = False
     if logger.handlers:
@@ -81,6 +84,18 @@ def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None
             if formatter is not False:
                 file_handler.setFormatter(formatter)
             logger.addHandler(file_handler)
+
+            if has_args and backup_count is None:
+                backup_count = args.backup_count
+
+            if has_args and max_bytes is None:
+                max_bytes = args.max_bytes
+
+            if backup_count is not None and max_bytes is not None:
+                assert backup_count > 0
+                assert max_bytes > 0
+                ch = RotatingFileHandler(output, 'a', max_bytes, backup_count)
+                logger.addHandler(ch)
 
         if formatter is not False:
             handler.setFormatter(formatter)
