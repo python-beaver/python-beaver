@@ -80,11 +80,6 @@ def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None
             output = os.path.realpath(output)
 
         if output is not None:
-            file_handler = logging.FileHandler(output)
-            if formatter is not False:
-                file_handler.setFormatter(formatter)
-            logger.addHandler(file_handler)
-
             if has_args and backup_count is None:
                 backup_count = args.backup_count
 
@@ -95,6 +90,8 @@ def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None
                 assert backup_count > 0
                 assert max_bytes > 0
                 ch = RotatingFileHandler(output, 'a', max_bytes, backup_count)
+                if formatter is not False:
+                    ch.setFormatter(formatter)
                 logger.addHandler(ch)
 
         if formatter is not False:
