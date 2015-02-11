@@ -3,16 +3,20 @@ import Queue
 import signal
 import sys
 import time
+import os
 
 from beaver.transports import create_transport
 from beaver.transports.exception import TransportException
 from unicode_dammit import unicode_dammit
+from beaver.utils import setup_custom_logger
 
 
-def run_queue(queue, beaver_config, logger=None):
+def run_queue(queue, beaver_config, logger_name=None):
+
     signal.signal(signal.SIGTERM, signal.SIG_DFL)
     signal.signal(signal.SIGINT, signal.SIG_DFL)
-    signal.signal(signal.SIGQUIT, signal.SIG_DFL)
+    if os.name != 'nt':
+        signal.signal(signal.SIGQUIT, signal.SIG_DFL)
 
     last_update_time = int(time.time())
     queue_timeout = beaver_config.get('queue_timeout')
@@ -21,9 +25,9 @@ def run_queue(queue, beaver_config, logger=None):
 
     transport = None
     try:
+        logger = setup_custom_logger(logger_name)
         logger.debug('Logging using the {0} transport'.format(beaver_config.get('transport')))
         transport = create_transport(beaver_config, logger=logger)
-
         failure_count = 0
         while True:
             if not transport.valid():
@@ -69,7 +73,6 @@ def run_queue(queue, beaver_config, logger=None):
                 if len(data['lines']) == 0:
                     logger.debug('0 active lines sent from worker')
                     continue
-
                 while True:
                     try:
                         transport.callback(**data)

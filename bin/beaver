@@ -1,24 +1,39 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from beaver.dispatcher.tail import run as tail_run
+from beaver.dispatcher.tail import TailRunner as tail_runner
+from beaver.dispatcher.worker import WorkerRunner as worker_runner
 from beaver.pidfile import PidFile
 from beaver.utils import CAN_DAEMONIZE, parse_args, version
+import os
 
 args = parse_args()
 version(args)
 
-if args.daemonize:
-    assert CAN_DAEMONIZE, "Daemonization is unimplemented on the Windows Platform"
-    assert args.pid, "A pid path must be specified in the beaver config or via the -P flag"
-
-    import daemon
-
-    if args.output:
-        context = daemon.DaemonContext(pidfile=PidFile(args.pid), stdout=open(args.output, "wb"), stderr=open(args.output, "wb"))
+if os.name == 'nt':
+    if args.experimental:
+        tail_runner(args).run()
     else:
-        context = daemon.DaemonContext(pidfile=PidFile(args.pid))
+        worker_runner(args).run()
 
-    with context:
-        tail_run(args)
 else:
-    tail_run(args)
+    if args.daemonize:
+        assert CAN_DAEMONIZE, "Daemonization is unimplemented on the Windows Platform"
+        assert args.pid, "A pid path must be specified in the beaver config or via the -P flag"
+
+        import daemon
+
+        if args.output:
+            context = daemon.DaemonContext(pidfile=PidFile(args.pid), stdout=open(args.output, "wb"), stderr=open(args.output, "wb"))
+        else:
+            context = daemon.DaemonContext(pidfile=PidFile(args.pid))
+
+        with context:
+            if args.experimental:
+                tail_runner(args).run()
+            else:
+                worker_runner(args).run()
+    else:
+        if args.experimental:
+            tail_runner(args).run()
+        else:
+            worker_runner(args).run()

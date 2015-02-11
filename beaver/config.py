@@ -6,14 +6,14 @@ import socket
 import warnings
 
 from conf_d import Configuration
-from beaver.utils import eglob
+from beaver.utils import eglob, setup_custom_logger
 from beaver.glob_safe_config_parser import GlobSafeConfigParser
 
 class BeaverConfig():
 
     def __init__(self, args, logger=None):
-        self._logger = logger or logging.getLogger(__name__)
-        self._logger.debug('Processing beaver portion of config file %s' % args.config)
+        self.logger = logger or logging.getLogger(__name__)
+        self.logger.debug('Processing beaver portion of config file %s' % args.config)
 
         self._section_defaults = {
             'add_field': '',
@@ -186,16 +186,25 @@ class BeaverConfig():
             # Ignore files older then n days, use 0 to disable
             'ignore_old_files': 0
         }
-
+        if os.name == 'nt' and self._main_defaults['path'] == '/var/log':
+            self._main_defaults['path'] = ''
         self._configfile = args.config
         self._config_parser = GlobSafeConfigParser
         self._globbed = []
         self._parse(args)
         for key in self._beaver_config:
-            self._logger.debug('[CONFIG] "{0}" => "{1}"'.format(key, self._beaver_config.get(key)))
+            self.logger.debug('[CONFIG] "{0}" => "{1}"'.format(key, self._beaver_config.get(key)))
 
         self._update_files()
         self._check_for_deprecated_usage()
+    def __getstate__(self):
+        orig_dict = self.__dict__.copy()
+        orig_dict['logger'] = self.logger.name
+        return orig_dict
+
+    def __setstate__(self, orig_dict):
+        self.__dict__.update(orig_dict)
+        self.logger = setup_custom_logger(orig_dict['logger'])
 
     def beaver_config(self):
         return self._beaver_config
@@ -211,11 +220,11 @@ class BeaverConfig():
 
     def addglob(self, globname, globbed):
         if globname not in self._globbed:
-            self._logger.debug('Adding glob {0}'.format(globname))
+            self.logger.debug('Adding glob {0}'.format(globname))
             config = self._file_config[globname]
             self._file_config[globname] = config
             for key in config:
-                self._logger.debug('Config: "{0}" => "{1}"'.format(key, config[key]))
+                self.logger.debug('Config: "{0}" => "{1}"'.format(key, config[key]))
         else:
             config = self._file_config.get(globname)
 
@@ -242,7 +251,7 @@ class BeaverConfig():
 
         has = len(filter(lambda x: self.get(x) is not None, required))
         if has > 0 and has != len(required):
-            self._logger.warning('Missing {0} of {1} required config variables for ssh'.format(len(required) - has, len(required)))
+            self.logger.warning('Missing {0} of {1} required config variables for ssh'.format(len(required) - has, len(required)))
 
         return has == len(required)
 
@@ -497,7 +506,7 @@ class BeaverConfig():
         for section in config['sections']:
             globs = eglob(section, config['sections'][section].get('exclude', ''))
             if not globs:
-                self._logger.debug('Skipping glob due to no files found: %s' % section)
+                self.logger.debug('Skipping glob due to no files found: %s' % section)
                 continue
 
             for globbed_file in globs:
