@@ -210,6 +210,17 @@ Listen to all files in the default path of /var/log on standard out as a string:
     #   '[{host}] [{timestamp}] {message}'
     beaver --format string
 
+Running in Windows platform:
+***************************
+
+Beaver on windows platform has limitation in using different options. 
+However the same set of options can be passed by putting required information
+in beaver.conf file. The beaver config file is placed at a fixed folder as
+<PYTHON-FOLDER>\etc\beaver\beaver.conf. 
+Beaver runs as a service in windows platform. following command starts beaver as a service
+python <PYTHON-FOLDER>\Scripts\beaver_win_service_runner
+
+
 Configuration files
 *******************
 
@@ -237,6 +248,14 @@ Read config from config.ini and put to stdout::
     # From the commandline
     beaver -c /etc/beaver/conf -t stdout
 
+For Windows' environment config data are in <PYTHON-FOLDER>\etc\beaver\beaver.conf file.
+
+    # <PYTHON-FOLDER>\etc\beaver\beaver.conf:
+    ; follow a single file, add a type, some tags and fields
+    [\Program Files (x86)\Some-Company\Some-Product\Log\some-product.log]
+    type: mytype
+    tags: tag1,tag2
+    add_field: fieldname1,fieldvalue1[,fieldname2,fieldvalue2, ...]
 
 Loading stanzas from /etc/beaver/conf.d/* support::
 
