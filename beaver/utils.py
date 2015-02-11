@@ -85,6 +85,12 @@ def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None
                 file_handler.setFormatter(formatter)
             logger.addHandler(file_handler)
 
+            if has_args and backup_count is None:
+                backup_count = args.backup_count
+
+            if has_args and max_bytes is None:
+                max_bytes = args.max_bytes
+
             if backup_count is not None and max_bytes is not None:
                 assert backup_count > 0
                 assert max_bytes > 0
