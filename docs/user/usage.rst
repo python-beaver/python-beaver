@@ -70,6 +70,7 @@ Beaver can optionally get data from a ``configfile`` using the ``-c`` flag. This
 * sqs_aws_secret_key: Can be left blank to use IAM Roles or AWS_SECRET_ACCESS_KEY environment variable (see: https://github.com/boto/boto#getting-started-with-boto)
 * sqs_aws_region: Default ``us-east-1``. AWS Region
 * sqs_aws_queue: SQS queue (must exist)
+* sqs_aws_queue_owner_acct_id: Optional. Defaults ``None``. Account ID or Principal allowed to write to queue
 * tcp_host: Default ``127.0.0.1``. TCP Host
 * tcp_port: Default ``9999``. TCP Port
 * udp_host: Default ``127.0.0.1``. UDP Host
