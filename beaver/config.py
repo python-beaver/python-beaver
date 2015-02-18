@@ -82,6 +82,7 @@ class BeaverConfig():
             'sqs_aws_secret_key': '',
             'sqs_aws_region': 'us-east-1',
             'sqs_aws_queue': '',
+            'sqs_aws_queue_owner_acct_id': '',
             'tcp_host': '127.0.0.1',
             'tcp_port': '9999',
             'tcp_ssl_enabled': '0',
