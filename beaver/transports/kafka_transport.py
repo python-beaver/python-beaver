@@ -18,27 +18,31 @@ class KafkaTransport(BaseTransport):
         for key in config_to_store:
             self._kafka_config[key] = beaver_config.get('kafka_' + key)
 
-        self._client = KafkaClient(self._kafka_config['hosts'], self._kafka_config['client_id'])
-        self._key = self._kafka_config['key']
+        try:
+            self._client = KafkaClient(self._kafka_config['hosts'], self._kafka_config['client_id'])
+            self._key = self._kafka_config['key']
 
-        if self._key is None:
-            self._prod = SimpleProducer(self._client, async=self._kafka_config['async'],
-                                    req_acks=SimpleProducer.ACK_AFTER_LOCAL_WRITE,
-                                    ack_timeout=self._kafka_config['ack_timeout'],
-                                    codec=self._kafka_config['codec'],
-                                    batch_send=True,
-                                    batch_send_every_n=self._kafka_config['batch_n'],
-                                    batch_send_every_t=self._kafka_config['batch_t'])
-        else:
-            self._prod = KeyedProducer(self._client, async=self._kafka_config['async'],
-                                    req_acks=SimpleProducer.ACK_AFTER_LOCAL_WRITE,
-                                    ack_timeout=self._kafka_config['ack_timeout'],
-                                    codec=self._kafka_config['codec'],
-                                    batch_send=True,
-                                    batch_send_every_n=self._kafka_config['batch_n'],
-                                    batch_send_every_t=self._kafka_config['batch_t'])
+            if self._key is None:
+                self._prod = SimpleProducer(self._client, async=self._kafka_config['async'],
+                                        req_acks=SimpleProducer.ACK_AFTER_LOCAL_WRITE,
+                                        ack_timeout=self._kafka_config['ack_timeout'],
+                                        codec=self._kafka_config['codec'],
+                                        batch_send=True,
+                                        batch_send_every_n=self._kafka_config['batch_n'],
+                                        batch_send_every_t=self._kafka_config['batch_t'])
+            else:
+                self._prod = KeyedProducer(self._client, async=self._kafka_config['async'],
+                                        req_acks=SimpleProducer.ACK_AFTER_LOCAL_WRITE,
+                                        ack_timeout=self._kafka_config['ack_timeout'],
+                                        codec=self._kafka_config['codec'],
+                                        batch_send=True,
+                                        batch_send_every_n=self._kafka_config['batch_n'],
+                                        batch_send_every_t=self._kafka_config['batch_t'])
 
-        self._is_valid = True;
+            self._is_valid = True;
+            
+        except Exception, e:
+            raise TransportException(e.message)
 
 
     def callback(self, filename, lines, **kwargs):
