@@ -10,7 +10,7 @@ usage::
     beaver [-h] [-c CONFIG] [-C CONFD_PATH] [-d] [-D] [-f FILES [FILES ...]]
            [-F {json,msgpack,raw,rawjson,string}] [-H HOSTNAME] [-m {bind,connect}]
            [-l OUTPUT] [-p PATH] [-P PID]
-           [-t {mqtt,rabbitmq,redis,sqs,stdout,tcp,udp,zmq}] [-v] [--fqdn]
+           [-t {kafka,mqtt,rabbitmq,redis,sqs,stdout,tcp,udp,zmq}] [-v] [--fqdn]
 
 optional arguments::
 
@@ -33,7 +33,7 @@ optional arguments::
                           file to pipe output to (in addition to stdout)
     -p PATH, --path PATH  path to log files
     -P PID, --pid PID     path to pid file
-    -t {mqtt,rabbitmq,redis,stdout,tcp,udp,zmq}, --transport {mqtt,rabbitmq,redis,sqs,stdout,tcp,udp,zmq}
+    -t {kafka,mqtt,rabbitmq,redis,stdout,tcp,udp,zmq}, --transport {kafka,mqtt,rabbitmq,redis,sqs,stdout,tcp,udp,zmq}
                           log transport method
     -v, --version         output version and quit
     --fqdn                use the machine's FQDN for source_host
@@ -43,6 +43,15 @@ Configuration File Options
 
 Beaver can optionally get data from a ``configfile`` using the ``-c`` flag. This file is in ``ini`` format. Global configuration will be under the ``beaver`` stanza. The following are global beaver configuration keys with their respective meanings:
 
+* kafka_client_id: Default ``beaver-kafka``. Kafka client id
+* kafka_hosts: Default ``localhost:9092``. Seed list of hosts (host:port)separated by commas for kafka cluster
+* kafka_async: Default ``True``.
+* kafka_topic: Default ``logstash-topic``
+* kafka_key: Optional. Defaults ``None``. Target specific partition
+* kafka_codec: Optional. Defaults ``None``. GZIP supported with 0x01. SNAPPY requires to install python-snappy anbd use codec = 0x02
+* kafka_ack_timeout: Default ``2000``. Acknowledge timeout
+* kafka_batch_n: Default ``10``. Batch log message size
+* kafka_batch_t: Default ``10``. Batch log message timeout
 * mqtt_host: Default ``localhost``. Host for mosquitto
 * mqtt_port: Default ``1883``. Port for mosquitto
 * mqtt_clientid: Default ``mosquitto``. Mosquitto client id

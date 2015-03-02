@@ -25,6 +25,11 @@ with mock.patch('pika.adapters.BlockingConnection', autospec=True) as mock_pika:
             empty_conf = tempfile.NamedTemporaryFile(delete=True)
             return BeaverConfig(mock.Mock(config=empty_conf.name, **kwargs))
 
+        def test_builtin_kafka(self):
+            beaver_config = self._get_config(transport='kafka')
+            transport = create_transport(beaver_config, logger=self.logger)
+            self.assertIsInstance(transport, beaver.transports.kafka_transport.KafkaTransport)
+
         @mock.patch('pika.adapters.BlockingConnection', mock_pika)
         def test_builtin_rabbitmq(self):
             beaver_config = self._get_config(transport='rabbitmq')
