@@ -347,6 +347,41 @@ RabbitMQ connecting to defaults on remote broker::
     # From the commandline
     beaver -c /etc/beaver/conf -t rabbitmq
 
+Kafka transport::
+
+    # /etc/beaver/conf
+    [beaver]
+    kafka_client_id: beaver-kafka-1
+    kafka_hosts: kafkahost1:9092,kafkahost2:9092
+    kafka_key: logstash
+    kafka_topic: mylogs-topic
+    kafka_batch_n: 10
+    kafka_batch_t: 10
+
+    # logstash indexer config:
+    input {
+      kafka {
+        zk_connect => 'zk1:2181' # string (optional), default: "localhost:2181"
+        group_id => 'logstash' # string (optional), default: "logstash"
+        topic_id => 'mylogs-topic' # string (optional), default: "test"
+        reset_beginning => false # boolean (optional), default: false
+        consumer_threads => 25 # number (optional), default: 1
+        queue_size => 20 # number (optional), default: 20
+        rebalance_max_retries => 4 # number (optional), default: 4
+        rebalance_backoff_ms => 2000 # number (optional), default:  2000
+        consumer_timeout_ms => -1 # number (optional), default: -1
+        consumer_restart_on_error => true # boolean (optional), default: true
+        consumer_restart_sleep_ms => 0 # number (optional), default: 0
+        decorate_events => false # boolean (optional), default: false
+        consumer_id => 'logstash-kafka-1' # string (optional) default: nil
+        fetch_message_max_bytes => 1048576 # number (optional) default: 1048576
+      }
+    }
+    output { stdout { debug => true } }
+
+    # From the commandline
+    beaver -c /etc/beaver/conf -t kafka
+
 TCP transport::
 
     # /etc/beaver/conf
