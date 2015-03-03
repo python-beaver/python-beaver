@@ -79,5 +79,5 @@ setup(
                 open('CHANGES.rst').read(),
     tests_require=open('requirements/tests.txt').readlines(),
     test_suite='nose.collector',
-    install_requires=requirements,
+    install_requires=requirements, requires=['six']
 )

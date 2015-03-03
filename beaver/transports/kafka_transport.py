@@ -20,6 +20,7 @@ class KafkaTransport(BaseTransport):
 
         try:
             self._client = KafkaClient(self._kafka_config['hosts'], self._kafka_config['client_id'])
+            self._client.ensure_topic_exists(self._kafka_config['topic'])
             self._key = self._kafka_config['key']
 
             if self._key is None:
@@ -40,7 +41,7 @@ class KafkaTransport(BaseTransport):
                                         batch_send_every_t=self._kafka_config['batch_t'])
 
             self._is_valid = True;
-            
+
         except Exception, e:
             raise TransportException(e.message)
 
