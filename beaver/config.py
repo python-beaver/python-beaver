@@ -53,6 +53,15 @@ class BeaverConfig():
         }
 
         self._main_defaults = {
+            'kafka_client_id': os.environ.get('KAFKA_CLIENT_ID', 'beaver-kafka'),
+            'kafka_hosts': os.environ.get('KAFKA_HOSTS', 'localhost:9092'),
+            'kafka_async': os.environ.get('KAFKA_ASYNC', True),
+            'kafka_topic': os.environ.get('KAFKA_TOPIC', 'logstash-topic'),
+            'kafka_key': os.environ.get('KAFKA_KEY'),
+            'kafka_codec': os.environ.get('KAFKA_CODEC'),
+            'kafka_ack_timeout': os.environ.get('KAFKA_ACK_TIMEOUT', 2000),
+            'kafka_batch_n': os.environ.get('KAFKA_BATCH_N', 10),
+            'kafka_batch_t': os.environ.get('KAFKA_BATCH_T', 10),
             'mqtt_clientid': 'mosquitto',
             'mqtt_host': 'localhost',
             'mqtt_port': '1883',
@@ -290,6 +299,9 @@ class BeaverConfig():
                 'wait_timeout',
                 'zeromq_hwm',
                 'logstash_version',
+                'kafka_batch_n',
+                'kafka_batch_t',
+                'kafka_ack_timeout'
             ]
             for key in require_int:
                 if config[key] is not None:
