@@ -4,6 +4,7 @@ import unittest
 import tempfile
 import logging
 
+from kafka import KafkaClient, MultiProcessConsumer
 
 import beaver
 from beaver.config import BeaverConfig
@@ -49,8 +50,14 @@ class KafkaTests(unittest.TestCase):
         cls.beaver_config.set('kafka_hosts', cls.server.host + ":" + str(cls.server.port))
 
         transport = create_transport(cls.beaver_config, logger=cls.logger)
+
+        cls.assertIsInstance(transport, beaver.transports.kafka_transport.KafkaTransport)
+
         data = {}
-        lines = ['log1\n', 'log2\n']
+        lines = []
+        n=100
+        for i in range(n):
+            lines.append('log' + str(i) + '\n')
         new_lines = []
         for line in lines:
             message = unicode_dammit(line)
@@ -60,8 +67,18 @@ class KafkaTests(unittest.TestCase):
         data['lines'] = new_lines
         data['fields'] = []
         transport.callback("test.log", **data)
+
+        messages = cls._consume_messages(cls.server.host, cls.server.port)
+        cls.assertEqual(n, messages.__len__())
+        for message in messages:
+            cls.assertIn('"file": "test.log", "message": "log', message.message.value);
+            print(message)
+        print('\n')
+
         transport.interrupt()
-        cls.assertIsInstance(transport, beaver.transports.kafka_transport.KafkaTransport)
 
-
+    def _consume_messages(cls, host, port):
+        kafka = KafkaClient(cls.server.host + ":" + str(cls.server.port))
+        consumer = MultiProcessConsumer(kafka, None, cls.beaver_config.get('kafka_topic'), num_procs=5)
+        return consumer.get_messages(count=100, block=True, timeout=5)
 
