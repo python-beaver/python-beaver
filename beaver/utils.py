@@ -52,7 +52,12 @@ def parse_args():
     parser.add_argument('--max-bytes', action='store', dest='max_bytes', type=int, default=64 * 1024 * 1024, help='Maximum bytes per a logfile.')
     parser.add_argument('--backup-count', action='store', dest='backup_count', type=int, default=1, help='Maximum number of logfiles to backup.')
 
-    return parser.parse_args()
+    args = parser.parse_args()
+
+    if args.config != "/dev/null":
+        args.config = os.path.realpath(args.config)
+
+    return args
 
 
 def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None, config=None, max_bytes=None, backup_count=None):
