@@ -69,7 +69,6 @@ def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None
         if formatter is None:
             formatter = logging.Formatter('[%(asctime)s] %(levelname)-7s %(message)s')
 
-        handler = logging.StreamHandler()
         if output is None and has_args:
             if config and config.get('output'):
                 output = config.get('output')
@@ -93,11 +92,13 @@ def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None
                 if formatter is not False:
                     ch.setFormatter(formatter)
                 logger.addHandler(ch)
+	else:
+            handler = logging.StreamHandler()
 
-        if formatter is not False:
-            handler.setFormatter(formatter)
+            if formatter is not False:
+                handler.setFormatter(formatter)
 
-        logger.addHandler(handler)
+            logger.addHandler(handler)
 
     if debug:
         logger.setLevel(logging.DEBUG)
