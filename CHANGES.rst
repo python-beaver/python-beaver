@@ -1,6 +1,27 @@
 Changelog
 =========
 
+33.2.0 (2015-03-11)
+-------------------
+
+- Improved kafka test. [Marcel Casado]
+
+- Added example of kafka transport usage in the user docs. [Marcel
+  Casado]
+
+- Added placeholder "dist" directory to download kafka binaries. [Marcel
+  Casado]
+
+- Added integration test support for Kafka transport. [Marcel Casado]
+
+- Wrapped kafka client init in a try catch. [Marcel Casado]
+
+- Initial kafka transport impl. [Marcel Casado]
+
+- Updating config examples and docs. [Jonathan Sabo]
+
+- Adding support for sqs queues in different accounts. [Jonathan Sabo]
+
 33.1.0 (2015-02-04)
 -------------------
 
