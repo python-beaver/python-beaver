@@ -54,9 +54,21 @@ def run(args=None):
             logger.info('Shutdown complete.')
             return os._exit(signalnum)
 
+    def adjust_logger_level(signalnum, frame):
+        if signalnum == signal.SIGUSR1:
+            logger.setLevel(logging.DEBUG)
+        elif signalnum == signal.SIGUSR2:
+            logger.setLevel(logging.INFO)
+        else:
+            return
+
+        cleanup(None, None)
+
     signal.signal(signal.SIGTERM, cleanup)
     signal.signal(signal.SIGINT, cleanup)
     signal.signal(signal.SIGQUIT, cleanup)
+    signal.signal(signal.SIGUSR1, adjust_logger_level)
+    signal.signal(signal.SIGUSR2, adjust_logger_level)
 
     def create_queue_consumer():
         process_args = (queue, beaver_config, logger)
