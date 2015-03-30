@@ -23,7 +23,7 @@ optional arguments::
     -f FILES [FILES ...], --files FILES [FILES ...]
                           space-separated filelist to watch, can include globs
                           (*.log). Overrides --path argument
-    -F {json,msgpack,raw,rawjson,string}, --format {json,msgpack,raw,rawjson,string}
+    -F {json,msgpack,raw,rawjson,string,gelf}, --format {json,msgpack,raw,rawjson,string,gelf}
                           format to use when sending to transport
     -H HOSTNAME, --hostname HOSTNAME
                           manual hostname override for source_host
@@ -118,7 +118,7 @@ The following configuration keys are for multi-line events support and are per f
 
 The following can also be passed via argparse. Argparse will override all options in the configfile, when specified.
 
-* format: Default ``json``. Options ``[ json, msgpack, string ]``. Format to use when sending to transport
+* format: Default ``json``. Options ``[ json, msgpack, string, raw, rawjson, gelf ]``. Format to use when sending to transport
 * files: Default ``files``. Space-separated list of files to tail. (Comma separated if specified in the config file)
 * path: Default ``/var/log``. Path glob to tail.
 * transport: Default ``stdout``. Transport to use when log changes are detected
@@ -470,22 +470,35 @@ Mqtt transport using Mosquitto::
     # From the commandline
     beaver -c /etc/beaver/conf -f /var/log/unmappable.log -t mqtt
 
-HTTP transport::
-    The HTTP transport simply posts the payload data for a log event to the url specified here.
-    You can use this to post directly to elastic search, for example by creating an index and posting json to the index URL:
-    Assuming an elastic search instance running on your localhost: 
-    Create a 'logs' index:
+HTTP transport
+
+The HTTP transport simply posts the payload data for a log event to the url specified here.
+You can use this to post directly to elastic search, for example by creating an index and posting json to the index URL::
+
+    # Assuming an elastic search instance running on your localhost, 
+    # create a 'logs' index:
     curl -XPUT 'http://localhost:9200/logs/'
 
-    A beaver config to post directly to elastic search: 
+    # A beaver config to post directly to elastic search: 
     # /etc/beaver/conf
     [beaver]
     format: json
     logstash_version: 1
     http_url: http://localhost:9200/logs/log
     
-    #from the commandline
+    # From the commandline
     beaver -c /etc/beaver/conf -F json -f /var/log/somefile -t http
+    
+GELF using HTTP transport
+
+To ship logs directly to a Graylog server, start with this configuration::
+
+    # /etc/beaver/conf, GELF HTTP input on port 12200
+    [beaver]
+    http_url: 'http://graylog.example.com:12200/gelf'
+
+    # From the commandline
+    beaver -c /etc/beaver/conf -f /var/log/somefile -t http -F gelf
     
 Sincedb support using Sqlite3
 *****************************
@@ -613,5 +626,3 @@ Sample of data from add_field::
 
 Sample of data from add_field_env::
     myKey => "myValue"
-
-

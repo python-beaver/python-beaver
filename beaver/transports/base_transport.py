@@ -31,6 +31,7 @@ class BaseTransport(object):
         self._formatters = {}
         self._is_valid = True
         self._logger = logger
+        self._epoch = datetime.datetime.utcfromtimestamp(0)
 
         self._logstash_version = beaver_config.get('logstash_version')
         if self._logstash_version == 0:
@@ -73,6 +74,28 @@ class BaseTransport(object):
 
             return json.dumps(data)
 
+        def gelf_formatter(data):
+            message = data[self._fields.get('message')]
+            short_message = message.split('\n', 1)[0]
+            short_message = short_message[:250]
+            
+            timestampDate = datetime.datetime.strptime(data['@timestamp'], "%Y-%m-%dT%H:%M:%S.%fZ")
+            
+            delta = timestampDate - self._epoch
+            timestampSeconds = delta.days*86400+delta.seconds+delta.microseconds/1e6
+            
+            gelf_data = {
+                'version': '1.1',
+                'host': data[self._fields.get('host')],
+                'short_message': short_message,
+                'full_message': message,
+                'timestamp': timestampSeconds,
+                'level': 6,
+                '_file': data[self._fields.get('file')],
+            }
+            
+            return json.dumps(gelf_data)
+
         def string_formatter(data):
             return '[{0}] [{1}] {2}'.format(data[self._fields.get('host')], data['@timestamp'], data[self._fields.get('message')])
 
@@ -81,6 +104,7 @@ class BaseTransport(object):
         self._formatters['raw'] = raw_formatter
         self._formatters['rawjson'] = rawjson_formatter
         self._formatters['string'] = string_formatter
+        self._formatters['gelf'] = gelf_formatter
 
     def addglob(self, globname, globbed):
         """Adds a set of globbed files to the attached beaver_config"""
