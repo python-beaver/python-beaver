@@ -61,9 +61,9 @@ class HttpTransport(BaseTransport):
                 self._logger.debug('writing to : {0}'.format(self._url))
                 self._logger.debug('writing data: {0}'.format(edata))
                 r = requests.post(url=self._url, data=edata)
-                if r.status_code == 200:
+                if r.status_code >= 200 and r.status_code < 300:
                     res = r.content
                 else:
-                    self._logger.error('Post returned non 200 http status: {0}/{1}'.format(r.status_code, r.reason))
+                    self._logger.error('Post returned non 2xx http status: {0}/{1}'.format(r.status_code, r.reason))
         except Exception as e:
             self._logger.error('Exception caught in urlopen connection: ' + str(e))
