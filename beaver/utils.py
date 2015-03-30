@@ -38,7 +38,7 @@ def parse_args():
     parser.add_argument('-d', '--debug', help='enable debug mode', dest='debug', default=False, action='store_true')
     parser.add_argument('-D', '--daemonize', help='daemonize in the background', dest='daemonize', default=False, action='store_true')
     parser.add_argument('-f', '--files', help='space-separated filelist to watch, can include globs (*.log). Overrides --path argument', dest='files', default=None, nargs='+')
-    parser.add_argument('-F', '--format', help='format to use when sending to transport', default=None, dest='format', choices=['json', 'msgpack', 'raw', 'rawjson', 'string'])
+    parser.add_argument('-F', '--format', help='format to use when sending to transport', default=None, dest='format', choices=['json', 'msgpack', 'raw', 'rawjson', 'string', 'gelf'])
     parser.add_argument('-H', '--hostname', help='manual hostname override for source_host', default=None, dest='hostname')
     parser.add_argument('-m', '--mode', help='bind or connect mode', dest='mode', default=None, choices=['bind', 'connect'])
     parser.add_argument('-l', '--logfile', '-o', '--output', help='file to pipe output to (in addition to stdout)', default=None, dest='output')
