@@ -10,7 +10,7 @@ usage::
     beaver [-h] [-c CONFIG] [-C CONFD_PATH] [-d] [-D] [-f FILES [FILES ...]]
            [-F {json,msgpack,raw,rawjson,string}] [-H HOSTNAME] [-m {bind,connect}]
            [-l OUTPUT] [-p PATH] [-P PID]
-           [-t {kafka,mqtt,rabbitmq,redis,sqs,stdout,tcp,udp,zmq}] [-v] [--fqdn]
+           [-t {kafka,mqtt,rabbitmq,redis,sqs,kinesis,stdout,tcp,udp,zmq}] [-v] [--fqdn]
 
 optional arguments::
 
@@ -33,7 +33,7 @@ optional arguments::
                           file to pipe output to (in addition to stdout)
     -p PATH, --path PATH  path to log files
     -P PID, --pid PID     path to pid file
-    -t {kafka,mqtt,rabbitmq,redis,stdout,tcp,udp,zmq}, --transport {kafka,mqtt,rabbitmq,redis,sqs,stdout,tcp,udp,zmq}
+    -t {kafka,mqtt,rabbitmq,redis,sqs,kinesis,stdout,tcp,udp,zmq}, --transport {kafka,mqtt,rabbitmq,redis,sqs,kinesis,stdout,tcp,udp,zmq}
                           log transport method
     -v, --version         output version and quit
     --fqdn                use the machine's FQDN for source_host
@@ -80,6 +80,11 @@ Beaver can optionally get data from a ``configfile`` using the ``-c`` flag. This
 * sqs_aws_region: Default ``us-east-1``. AWS Region
 * sqs_aws_queue: SQS queue (must exist)
 * sqs_aws_queue_owner_acct_id: Optional. Defaults ``None``. Account ID or Principal allowed to write to queue
+* kinesis_aws_access_key: Can be left blank to use IAM roles or AWS_ACCESS_KEY_ID environment variable (see: https://github.com/boto/boto#getting-started-with-boto)
+* kinesis_aws_secret_key: Can be left blank to use IAM Roles or AWS_SECRET_ACCESS_KEY environment variable (see: https://github.com/boto/boto#getting-started-with-boto)
+* kinesis_aws_region: Default ``us-east-1``. AWS Region
+* kinesis_aws_stream: Optional. Defaults ``None``. Name of the Kinesis stream to ship logs to
+* kinesis_aws_batch_size_max: Default ``512000``. Arbitrary flush size to limit size of logs in transit.
 * tcp_host: Default ``127.0.0.1``. TCP Host
 * tcp_port: Default ``9999``. TCP Port
 * udp_host: Default ``127.0.0.1``. UDP Host
@@ -445,6 +450,20 @@ SQS Transport::
 
     # From the commandline
     beaver -c /etc/beaver/conf -t sqs
+
+Kinesis Transport::
+
+    # /etc/beaver/conf
+    [beaver]
+    kinesis_aws_region: us-east-1
+    kinesis_aws_stream: logstash-stream
+    kinesis_aws_access_key: <access_key>
+    kinesis_aws_secret_key: <secret_key>
+
+    # ingest process (not via Logstash): https://github.com/awslabs/amazon-kinesis-connectors
+
+    # From the commandline
+    beaver -c /etc/beaver/conf -t kinesis
 
 Mqtt transport using Mosquitto::
 

@@ -1,4 +1,4 @@
-boto>=2.8.0
+boto>=2.18.0
 conf_d>=0.0.4
 glob2==0.3
 kafka-python>=0.9.3
