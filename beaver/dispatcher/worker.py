@@ -45,6 +45,9 @@ def run(args=None):
                 worker_proc.join()
             except RuntimeError:
                 pass
+            except AttributeError, e:
+                logger.warn('[%s] AttributeError: %s', __name__, e)
+                pass
 
         if ssh_tunnel is not None:
             logger.info('Closing ssh tunnel...')
