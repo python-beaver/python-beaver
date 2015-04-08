@@ -52,7 +52,12 @@ def parse_args():
     parser.add_argument('--max-bytes', action='store', dest='max_bytes', type=int, default=64 * 1024 * 1024, help='Maximum bytes per a logfile.')
     parser.add_argument('--backup-count', action='store', dest='backup_count', type=int, default=1, help='Maximum number of logfiles to backup.')
 
-    return parser.parse_args()
+    args = parser.parse_args()
+
+    if args.config != "/dev/null":
+        args.config = os.path.realpath(args.config)
+
+    return args
 
 
 def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None, config=None, max_bytes=None, backup_count=None):
@@ -69,7 +74,6 @@ def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None
         if formatter is None:
             formatter = logging.Formatter('[%(asctime)s] %(levelname)-7s %(message)s')
 
-        handler = logging.StreamHandler()
         if output is None and has_args:
             if config and config.get('output'):
                 output = config.get('output')
@@ -93,11 +97,13 @@ def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None
                 if formatter is not False:
                     ch.setFormatter(formatter)
                 logger.addHandler(ch)
+	else:
+            handler = logging.StreamHandler()
 
-        if formatter is not False:
-            handler.setFormatter(formatter)
+            if formatter is not False:
+                handler.setFormatter(formatter)
 
-        logger.addHandler(handler)
+            logger.addHandler(handler)
 
     if debug:
         logger.setLevel(logging.DEBUG)
