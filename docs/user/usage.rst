@@ -73,7 +73,7 @@ Beaver can optionally get data from a ``configfile`` using the ``-c`` flag. This
 * rabbitmq_key: Default ``logstash-key``.
 * rabbitmq_exchange: Default ``logstash-exchange``.
 * rabbitmq_delivery_mode: Default ``1``. Message deliveryMode. 1: non persistent 2: persistent
-* redis_url: Default ``redis://localhost:6379/0``. Redis URL
+* redis_url: Default ``redis://localhost:6379/0``. Comma separated redis URLs
 * redis_namespace: Default ``logstash:beaver``. Redis key namespace
 * sqs_aws_access_key: Can be left blank to use IAM Roles or AWS_ACCESS_KEY_ID environment variable (see: https://github.com/boto/boto#getting-started-with-boto)
 * sqs_aws_secret_key: Can be left blank to use IAM Roles or AWS_SECRET_ACCESS_KEY environment variable (see: https://github.com/boto/boto#getting-started-with-boto)
@@ -250,6 +250,15 @@ Sending logs from /var/log files to a redis list::
     # From the commandline
     beaver  -c /etc/beaver/conf -t redis
 
+Sending logs from /var/log files to multiple redis servers using round robin strategy::
+
+    # /etc/beaver/conf
+    [beaver]
+    redis_url: redis://broker01:6379/0,redis://broker02:6379/0,redis://broker03:6379/0
+
+    # From the commandline
+    beaver  -c /etc/beaver/conf -t redis
+
 Sending logs from /tmp/somefile files to a redis list, with custom namespace::
 
     # /etc/beaver/conf
@@ -308,17 +317,29 @@ Zeromq connecting to remote port 5556 on indexer::
 Real-world usage of Redis as a transport::
 
     # in /etc/hosts
-    192.168.0.10 redis-internal
+    192.168.0.10 redis-internal01
+    192.168.0.11 redis-internal02
 
     # /etc/beaver/conf
     [beaver]
-    redis_url: redis://redis-internal:6379/0
+    redis_url: redis://redis-internal01:6379/0,redis://redis-internal02:6379/0
     redis_namespace: app:unmappable
 
-    # logstash indexer config:
+    # logstash indexer01 config:
     input {
       redis {
-        host => 'redis-internal'
+        host => 'redis-internal01'
+        data_type => 'list'
+        key => 'app:unmappable'
+        type => 'app:unmappable'
+      }
+    }
+    output { stdout { debug => true } }
+
+    # logstash indexer02 config:
+    input {
+      redis {
+        host => 'redis-internal02'
         data_type => 'list'
         key => 'app:unmappable'
         type => 'app:unmappable'
