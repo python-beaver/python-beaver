@@ -17,7 +17,7 @@ class MqttTransport(BaseTransport):
         self._client = Mosquitto(beaver_config.get('mqtt_clientid'), clean_session=True)
         self._topic = beaver_config.get('mqtt_topic')
         self._client.connect(
-            host=beaver_config.get('mqtt_hostname'),
+            host=beaver_config.get('mqtt_host'),
             port=beaver_config.get('mqtt_port'),
             keepalive=beaver_config.get('mqtt_keepalive')
         )
