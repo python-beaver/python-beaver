@@ -62,6 +62,7 @@ class BeaverConfig():
             'kafka_ack_timeout': os.environ.get('KAFKA_ACK_TIMEOUT', 2000),
             'kafka_batch_n': os.environ.get('KAFKA_BATCH_N', 10),
             'kafka_batch_t': os.environ.get('KAFKA_BATCH_T', 10),
+            'kafka_round_robin': os.environ.get('KAFKA_ROUND_ROBIN', False),
             'mqtt_clientid': 'mosquitto',
             'mqtt_host': 'localhost',
             'mqtt_port': '1883',
