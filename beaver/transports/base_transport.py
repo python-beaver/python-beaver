@@ -78,12 +78,12 @@ class BaseTransport(object):
             message = data[self._fields.get('message')]
             short_message = message.split('\n', 1)[0]
             short_message = short_message[:250]
-            
+
             timestampDate = datetime.datetime.strptime(data['@timestamp'], "%Y-%m-%dT%H:%M:%S.%fZ")
-            
+
             delta = timestampDate - self._epoch
             timestampSeconds = delta.days*86400+delta.seconds+delta.microseconds/1e6
-            
+
             gelf_data = {
                 'version': '1.1',
                 'host': data[self._fields.get('host')],
@@ -93,8 +93,8 @@ class BaseTransport(object):
                 'level': 6,
                 '_file': data[self._fields.get('file')],
             }
-            
-            return json.dumps(gelf_data)
+
+            return json.dumps(gelf_data) + '\0'
 
         def string_formatter(data):
             return '[{0}] [{1}] {2}'.format(data[self._fields.get('host')], data['@timestamp'], data[self._fields.get('message')])
