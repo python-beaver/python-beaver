@@ -597,6 +597,7 @@ class Worker(object):
                     'line_in_sincedb': 0,
                     'multiline_regex_after': self._beaver_config.get_field('multiline_regex_after', fname),
                     'multiline_regex_before': self._beaver_config.get_field('multiline_regex_before', fname),
+                    'remove_filter_regex': self._beaver_config.get_field('remove_filter_regex', fname),
                     'size_limit': self._beaver_config.get_field('size_limit', fname),
                     'update_time': None,
                     'active': True,
