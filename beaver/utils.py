@@ -204,3 +204,23 @@ def multiline_merge(lines, current_event, re_after, re_before):
             current_event.append(line)
 
     return events
+
+
+def remove_filter_line(lines, remove_filter_regex):
+    """ Remove some useless log data use regex.
+
+        Some event is useless and confuse our attention.
+
+        This function will remove them using regular
+        expression: remove_filter_regex
+
+        This function return a list of complet event.
+    """
+    events = []
+    for line in lines:
+        if remove_filter_regex and remove_filter_regex.match(line):
+            continue
+        else:
+            events.append(line)
+
+    return events

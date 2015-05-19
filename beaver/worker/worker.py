@@ -11,7 +11,8 @@ import stat
 import time
 import threading
 
-from beaver.utils import IS_GZIPPED_FILE, REOPEN_FILES, eglob, multiline_merge
+from beaver.utils import IS_GZIPPED_FILE, REOPEN_FILES, eglob
+from beaver.utils import multiline_merge, remove_filter_line
 from beaver.unicode_dammit import ENCODINGS
 
 
@@ -148,7 +149,14 @@ class Worker(object):
                 if self._file_map[fid]['current_event'] and time.time() - self._file_map[fid]['last_activity'] > 1:
                     event = '\n'.join(self._file_map[fid]['current_event'])
                     self._file_map[fid]['current_event'].clear()
-                    self._callback_wrapper(filename=file.name, lines=[event])
+
+                    if self._file_map[fid]['remove_filter_regex']:
+                        events = remove_filter_line([event], self._file_map[fid]['remove_filter_regex'])
+                    else:
+                        events = [event]
+
+                    if events:
+                        self._callback_wrapper(filename=file.name, lines=events)
                 break
 
             self._file_map[fid]['last_activity'] = time.time()
@@ -162,6 +170,9 @@ class Worker(object):
                         self._file_map[fid]['multiline_regex_before'])
             else:
                 events = lines
+
+            if events and self._file_map[fid]['remove_filter_regex']:
+                events = remove_filter_line(events, self._file_map[fid]['remove_filter_regex'])
 
             if events:
                 self._callback_wrapper(filename=file.name, lines=events)
@@ -335,7 +346,12 @@ class Worker(object):
                                 self._file_map[fid]['multiline_regex_before'])
                     else:
                         events = lines
-                    self._callback_wrapper(filename=data['file'].name, lines=events)
+
+                    if events and self._file_map[fid]['remove_filter_regex']:
+                        events = remove_filter_line(events, self._file_map[fid]['remove_filter_regex'])
+
+                    if events:
+                        self._callback_wrapper(filename=data['file'].name, lines=events)
 
         self.unwatch_list(unwatch_list)
 
@@ -560,7 +576,14 @@ class Worker(object):
                 if self._file_map[fid]['current_event']:
                     event = '\n'.join(self._file_map[fid]['current_event'])
                     self._file_map[fid]['current_event'].clear()
-                    self._callback_wrapper(filename=file.name, lines=[event])
+
+                    if self._file_map[fid]['remove_filter_regex']:
+                        events = remove_filter_line([event], self._file_map[fid]['remove_filter_regex'])
+                    else:
+                        events = [event]
+
+                    if events:
+                        self._callback_wrapper(filename=file.name, lines=[event])
         except IOError:
             # Silently ignore any IOErrors -- file is gone
             pass
