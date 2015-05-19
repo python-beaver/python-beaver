@@ -51,7 +51,7 @@ class GlobSafeConfigParser(ConfigParser.RawConfigParser):
                         self._sections[sectname] = cursect
                     optname = None
                 elif cursect is None:
-                    raise MissingSectionHeaderError(fpname, lineno, line)
+                    raise ConfigParser.MissingSectionHeaderError(fpname, lineno, line)
                 else:
                     mo = self.OPTCRE.match(line)
                     if mo:
@@ -67,7 +67,7 @@ class GlobSafeConfigParser(ConfigParser.RawConfigParser):
                         cursect[optname] = optval
                     else:
                         if not e:
-                            e = ParsingError(fpname)
+                            e = ConfigParser.ParsingError(fpname)
                         e.append(lineno, repr(line))
         if e:
             raise e
