@@ -109,6 +109,11 @@ class BeaverConfig():
             'zeromq_address': os.environ.get('ZEROMQ_ADDRESS', 'tcp://localhost:2120'),
             'zeromq_pattern': 'push',
             'zeromq_hwm': os.environ.get('ZEROMQ_HWM', ''),
+            'stomp_host' : 'localhost',
+            'stomp_port' : '61613',
+            'stomp_user' : 'user',
+            'stomp_password' : None,
+            'stomp_queue' : 'queue/logstash',
 
             # exponential backoff
             'respawn_delay': '3',

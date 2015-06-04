@@ -10,7 +10,7 @@ usage::
     beaver [-h] [-c CONFIG] [-C CONFD_PATH] [-d] [-D] [-f FILES [FILES ...]]
            [-F {json,msgpack,raw,rawjson,string}] [-H HOSTNAME] [-m {bind,connect}]
            [-l OUTPUT] [-p PATH] [-P PID]
-           [-t {kafka,mqtt,rabbitmq,redis,sqs,kinesis,stdout,tcp,udp,zmq}] [-v] [--fqdn]
+           [-t {kafka,mqtt,rabbitmq,redis,sqs,kinesis,stdout,tcp,udp,zmq,stomp}] [-v] [--fqdn]
 
 optional arguments::
 
@@ -33,7 +33,7 @@ optional arguments::
                           file to pipe output to (in addition to stdout)
     -p PATH, --path PATH  path to log files
     -P PID, --pid PID     path to pid file
-    -t {kafka,mqtt,rabbitmq,redis,sqs,kinesis,stdout,tcp,udp,zmq}, --transport {kafka,mqtt,rabbitmq,redis,sqs,kinesis,stdout,tcp,udp,zmq}
+    -t {kafka,mqtt,rabbitmq,redis,sqs,kinesis,stdout,tcp,udp,zmq,stomp}, --transport {kafka,mqtt,rabbitmq,redis,sqs,kinesis,stdout,tcp,udp,zmq,stomp}
                           log transport method
     -v, --version         output version and quit
     --fqdn                use the machine's FQDN for source_host
@@ -93,6 +93,12 @@ Beaver can optionally get data from a ``configfile`` using the ``-c`` flag. This
 * zeromq_hwm: Default None. Zeromq HighWaterMark socket option
 * zeromq_bind: Default ``bind``. Whether to bind to zeromq host or simply connect
 * http_url: Default ``None`` http://someserver.com/path
+* stomp_host: Default ``localhost``
+* stomp_port: Default ``61613``
+* stomp_user: Default ``None``
+* stomp_password: Default ``None``
+* stomp_queue: Default ``queue/logstash``
+
 
 The following are used for instances when a TransportException is thrown - Transport dependent
 
@@ -539,6 +545,29 @@ To ship logs directly to a Graylog server, start with this configuration::
 
     # From the commandline
     beaver -c /etc/beaver/conf -f /var/log/somefile -t http -F gelf
+
+Stomp transport using Stomp.py::
+
+    # /etc/beaver/conf
+    [beaver]
+    stomp_host: 'localhost'
+    stomp_port: '61613'
+    stomp_user: 'producer-user'
+    stomp_password : 'password'
+    stomp_queue : 'queue/logstash'
+
+    # logstash indexer config:
+    stomp {
+        user => "consumer-user"
+        password => "consumer-password"
+        destination => "logstash"
+        host => "localhost"
+        port => "61613"
+    }
+    output { stdout { debug => true } }
+
+    # From the commandline
+    beaver -c /etc/beaver/conf -f /var/log/somefile.log -t stomp
     
 Sincedb support using Sqlite3
 *****************************
