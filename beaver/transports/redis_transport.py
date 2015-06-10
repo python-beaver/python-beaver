@@ -84,19 +84,18 @@ class RedisTransport(BaseTransport):
 
         pipeline = server['redis'].pipeline(transaction=False)
 
+        if data_type == 'list':
+            data_type_method = pipeline.rpush
+        elif data_type == 'channel':
+            data_type_method = pipeline.publish
+        else:
+            raise TransportException('Unknown Redis data type')
+
         for line in lines:
-            if data_type == 'list':
-                pipeline.rpush(
-                    namespace,
-                    self.format(filename, line, timestamp, **kwargs)
-                )
-            elif data_type == 'channel':
-                pipeline.publish(
-                    namespace,
-                    self.format(filename, line, timestamp, **kwargs)
-                )
-            else:
-                raise TransportException('Unknown Redis data type')
+            data_type_method(
+                namespace,
+                self.format(filename, line, timestamp, **kwargs)
+            )
 
         try:
             pipeline.execute()
