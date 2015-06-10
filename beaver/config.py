@@ -87,6 +87,7 @@ class BeaverConfig():
             'rabbitmq_delivery_mode': 1,
             'redis_url': os.environ.get('REDIS_URL', 'redis://localhost:6379/0'),
             'redis_namespace': os.environ.get('REDIS_NAMESPACE', 'logstash:beaver'),
+            'redis_data_type': os.environ.get('REDIS_DATA_TYPE', 'list'),
             'redis_password': '',
             'sqs_aws_access_key': '',
             'sqs_aws_secret_key': '',

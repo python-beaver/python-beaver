@@ -24,6 +24,7 @@ class RedisTransport(BaseTransport):
             )
 
         self._namespace = beaver_config.get('redis_namespace')
+        self._data_type = beaver_config.get('redis_data_type')
         self._current_server_index = 0
 
         self._check_connections()
@@ -75,16 +76,27 @@ class RedisTransport(BaseTransport):
             namespace = self._namespace
         self._logger.debug('Got namespace: ' + namespace)
 
+        data_type = self._data_type
+        self._logger.debug('Got data type: ' + data_type)
+
         server = self._get_next_server()
         self._logger.debug('Got redis server: ' + server['url'])
 
         pipeline = server['redis'].pipeline(transaction=False)
 
         for line in lines:
-            pipeline.rpush(
-                namespace,
-                self.format(filename, line, timestamp, **kwargs)
-            )
+            if data_type == 'list':
+                pipeline.rpush(
+                    namespace,
+                    self.format(filename, line, timestamp, **kwargs)
+                )
+            elif data_type == 'channel':
+                pipeline.publish(
+                    namespace,
+                    self.format(filename, line, timestamp, **kwargs)
+                )
+            else:
+                raise TransportException('Unknown Redis data type')
 
         try:
             pipeline.execute()
