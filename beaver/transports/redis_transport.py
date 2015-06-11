@@ -8,6 +8,8 @@ from beaver.transports.exception import TransportException
 
 
 class RedisTransport(BaseTransport):
+    LIST_DATA_TYPE = 'list'
+    CHANNEL_DATA_TYPE = 'channel'
 
     def __init__(self, beaver_config, logger=None):
         super(RedisTransport, self).__init__(beaver_config, logger=logger)
@@ -25,6 +27,11 @@ class RedisTransport(BaseTransport):
 
         self._namespace = beaver_config.get('redis_namespace')
         self._current_server_index = 0
+
+        self._data_type = beaver_config.get('redis_data_type')
+        if self._data_type not in [self.LIST_DATA_TYPE,
+                                   self.CHANNEL_DATA_TYPE]:
+            raise TransportException('Unknown Redis data type')
 
         self._check_connections()
 
@@ -75,13 +82,22 @@ class RedisTransport(BaseTransport):
             namespace = self._namespace
         self._logger.debug('Got namespace: ' + namespace)
 
+        data_type = self._data_type
+        self._logger.debug('Got data type: ' + data_type)
+
         server = self._get_next_server()
         self._logger.debug('Got redis server: ' + server['url'])
 
         pipeline = server['redis'].pipeline(transaction=False)
 
+        callback_map = {
+            self.LIST_DATA_TYPE: pipeline.rpush,
+            self.CHANNEL_DATA_TYPE: pipeline.publish,
+        }
+        callback_method = callback_map[data_type]
+
         for line in lines:
-            pipeline.rpush(
+            callback_method(
                 namespace,
                 self.format(filename, line, timestamp, **kwargs)
             )
