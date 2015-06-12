@@ -10,7 +10,7 @@ usage::
     beaver [-h] [-c CONFIG] [-C CONFD_PATH] [-d] [-D] [-f FILES [FILES ...]]
            [-F {json,msgpack,raw,rawjson,string}] [-H HOSTNAME] [-m {bind,connect}]
            [-l OUTPUT] [-p PATH] [-P PID]
-           [-t {kafka,mqtt,rabbitmq,redis,sqs,stdout,tcp,udp,zmq}] [-v] [--fqdn]
+           [-t {kafka,mqtt,rabbitmq,redis,sqs,kinesis,stdout,tcp,udp,zmq,stomp}] [-v] [--fqdn]
 
 optional arguments::
 
@@ -23,7 +23,7 @@ optional arguments::
     -f FILES [FILES ...], --files FILES [FILES ...]
                           space-separated filelist to watch, can include globs
                           (*.log). Overrides --path argument
-    -F {json,msgpack,raw,rawjson,string}, --format {json,msgpack,raw,rawjson,string}
+    -F {json,msgpack,raw,rawjson,string,gelf}, --format {json,msgpack,raw,rawjson,string,gelf}
                           format to use when sending to transport
     -H HOSTNAME, --hostname HOSTNAME
                           manual hostname override for source_host
@@ -33,7 +33,7 @@ optional arguments::
                           file to pipe output to (in addition to stdout)
     -p PATH, --path PATH  path to log files
     -P PID, --pid PID     path to pid file
-    -t {kafka,mqtt,rabbitmq,redis,stdout,tcp,udp,zmq}, --transport {kafka,mqtt,rabbitmq,redis,sqs,stdout,tcp,udp,zmq}
+    -t {kafka,mqtt,rabbitmq,redis,sqs,kinesis,stdout,tcp,udp,zmq,stomp}, --transport {kafka,mqtt,rabbitmq,redis,sqs,kinesis,stdout,tcp,udp,zmq,stomp}
                           log transport method
     -v, --version         output version and quit
     --fqdn                use the machine's FQDN for source_host
@@ -73,13 +73,19 @@ Beaver can optionally get data from a ``configfile`` using the ``-c`` flag. This
 * rabbitmq_key: Default ``logstash-key``.
 * rabbitmq_exchange: Default ``logstash-exchange``.
 * rabbitmq_delivery_mode: Default ``1``. Message deliveryMode. 1: non persistent 2: persistent
-* redis_url: Default ``redis://localhost:6379/0``. Redis URL
+* redis_url: Default ``redis://localhost:6379/0``. Comma separated redis URLs
 * redis_namespace: Default ``logstash:beaver``. Redis key namespace
+* redis_data_type: Default ``list``, but can also be ``channel``. Redis data type used for transporting log messages
 * sqs_aws_access_key: Can be left blank to use IAM Roles or AWS_ACCESS_KEY_ID environment variable (see: https://github.com/boto/boto#getting-started-with-boto)
 * sqs_aws_secret_key: Can be left blank to use IAM Roles or AWS_SECRET_ACCESS_KEY environment variable (see: https://github.com/boto/boto#getting-started-with-boto)
 * sqs_aws_region: Default ``us-east-1``. AWS Region
 * sqs_aws_queue: SQS queue (must exist)
 * sqs_aws_queue_owner_acct_id: Optional. Defaults ``None``. Account ID or Principal allowed to write to queue
+* kinesis_aws_access_key: Can be left blank to use IAM roles or AWS_ACCESS_KEY_ID environment variable (see: https://github.com/boto/boto#getting-started-with-boto)
+* kinesis_aws_secret_key: Can be left blank to use IAM Roles or AWS_SECRET_ACCESS_KEY environment variable (see: https://github.com/boto/boto#getting-started-with-boto)
+* kinesis_aws_region: Default ``us-east-1``. AWS Region
+* kinesis_aws_stream: Optional. Defaults ``None``. Name of the Kinesis stream to ship logs to
+* kinesis_aws_batch_size_max: Default ``512000``. Arbitrary flush size to limit size of logs in transit.
 * tcp_host: Default ``127.0.0.1``. TCP Host
 * tcp_port: Default ``9999``. TCP Port
 * udp_host: Default ``127.0.0.1``. UDP Host
@@ -88,6 +94,12 @@ Beaver can optionally get data from a ``configfile`` using the ``-c`` flag. This
 * zeromq_hwm: Default None. Zeromq HighWaterMark socket option
 * zeromq_bind: Default ``bind``. Whether to bind to zeromq host or simply connect
 * http_url: Default ``None`` http://someserver.com/path
+* stomp_host: Default ``localhost``
+* stomp_port: Default ``61613``
+* stomp_user: Default ``None``
+* stomp_password: Default ``None``
+* stomp_queue: Default ``queue/logstash``
+
 
 The following are used for instances when a TransportException is thrown - Transport dependent
 
@@ -118,7 +130,7 @@ The following configuration keys are for multi-line events support and are per f
 
 The following can also be passed via argparse. Argparse will override all options in the configfile, when specified.
 
-* format: Default ``json``. Options ``[ json, msgpack, string ]``. Format to use when sending to transport
+* format: Default ``json``. Options ``[ json, msgpack, string, raw, rawjson, gelf ]``. Format to use when sending to transport
 * files: Default ``files``. Space-separated list of files to tail. (Comma separated if specified in the config file)
 * path: Default ``/var/log``. Path glob to tail.
 * transport: Default ``stdout``. Transport to use when log changes are detected
@@ -245,6 +257,15 @@ Sending logs from /var/log files to a redis list::
     # From the commandline
     beaver  -c /etc/beaver/conf -t redis
 
+Sending logs from /var/log files to multiple redis servers using round robin strategy::
+
+    # /etc/beaver/conf
+    [beaver]
+    redis_url: redis://broker01:6379/0,redis://broker02:6379/0,redis://broker03:6379/0
+
+    # From the commandline
+    beaver  -c /etc/beaver/conf -t redis
+
 Sending logs from /tmp/somefile files to a redis list, with custom namespace::
 
     # /etc/beaver/conf
@@ -303,17 +324,29 @@ Zeromq connecting to remote port 5556 on indexer::
 Real-world usage of Redis as a transport::
 
     # in /etc/hosts
-    192.168.0.10 redis-internal
+    192.168.0.10 redis-internal01
+    192.168.0.11 redis-internal02
 
     # /etc/beaver/conf
     [beaver]
-    redis_url: redis://redis-internal:6379/0
+    redis_url: redis://redis-internal01:6379/0,redis://redis-internal02:6379/0
     redis_namespace: app:unmappable
 
-    # logstash indexer config:
+    # logstash indexer01 config:
     input {
       redis {
-        host => 'redis-internal'
+        host => 'redis-internal01'
+        data_type => 'list'
+        key => 'app:unmappable'
+        type => 'app:unmappable'
+      }
+    }
+    output { stdout { debug => true } }
+
+    # logstash indexer02 config:
+    input {
+      redis {
+        host => 'redis-internal02'
         data_type => 'list'
         key => 'app:unmappable'
         type => 'app:unmappable'
@@ -446,6 +479,20 @@ SQS Transport::
     # From the commandline
     beaver -c /etc/beaver/conf -t sqs
 
+Kinesis Transport::
+
+    # /etc/beaver/conf
+    [beaver]
+    kinesis_aws_region: us-east-1
+    kinesis_aws_stream: logstash-stream
+    kinesis_aws_access_key: <access_key>
+    kinesis_aws_secret_key: <secret_key>
+
+    # ingest process (not via Logstash): https://github.com/awslabs/amazon-kinesis-connectors
+
+    # From the commandline
+    beaver -c /etc/beaver/conf -t kinesis
+
 Mqtt transport using Mosquitto::
 
     # /etc/beaver/conf
@@ -470,22 +517,58 @@ Mqtt transport using Mosquitto::
     # From the commandline
     beaver -c /etc/beaver/conf -f /var/log/unmappable.log -t mqtt
 
-HTTP transport::
-    The HTTP transport simply posts the payload data for a log event to the url specified here.
-    You can use this to post directly to elastic search, for example by creating an index and posting json to the index URL:
-    Assuming an elastic search instance running on your localhost: 
-    Create a 'logs' index:
+HTTP transport
+
+The HTTP transport simply posts the payload data for a log event to the url specified here.
+You can use this to post directly to elastic search, for example by creating an index and posting json to the index URL::
+
+    # Assuming an elastic search instance running on your localhost, 
+    # create a 'logs' index:
     curl -XPUT 'http://localhost:9200/logs/'
 
-    A beaver config to post directly to elastic search: 
+    # A beaver config to post directly to elastic search: 
     # /etc/beaver/conf
     [beaver]
     format: json
     logstash_version: 1
     http_url: http://localhost:9200/logs/log
     
-    #from the commandline
+    # From the commandline
     beaver -c /etc/beaver/conf -F json -f /var/log/somefile -t http
+    
+GELF using HTTP transport
+
+To ship logs directly to a Graylog server, start with this configuration::
+
+    # /etc/beaver/conf, GELF HTTP input on port 12200
+    [beaver]
+    http_url: 'http://graylog.example.com:12200/gelf'
+
+    # From the commandline
+    beaver -c /etc/beaver/conf -f /var/log/somefile -t http -F gelf
+
+Stomp transport using Stomp.py::
+
+    # /etc/beaver/conf
+    [beaver]
+    stomp_host: 'localhost'
+    stomp_port: '61613'
+    stomp_user: 'producer-user'
+    stomp_password : 'password'
+    stomp_queue : 'queue/logstash'
+
+    # logstash indexer config:
+    stomp {
+        user => "consumer-user"
+        password => "consumer-password"
+        destination => "logstash"
+        host => "localhost"
+        port => "61613"
+    }
+    output { stdout { debug => true } }
+
+    # From the commandline
+    beaver -c /etc/beaver/conf -f /var/log/somefile.log -t stomp
     
 Sincedb support using Sqlite3
 *****************************
@@ -613,5 +696,3 @@ Sample of data from add_field::
 
 Sample of data from add_field_env::
     myKey => "myValue"
-
-

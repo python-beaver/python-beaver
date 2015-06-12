@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from kafka import SimpleProducer, KeyedProducer, KafkaClient
+from kafka import SimpleProducer, KeyedProducer, KafkaClient, RoundRobinPartitioner
 
 from beaver.transports.base_transport import BaseTransport
 from beaver.transports.exception import TransportException
@@ -12,7 +12,7 @@ class KafkaTransport(BaseTransport):
         self._kafka_config = {}
         config_to_store = [
             'client_id', 'hosts', 'async', 'topic', 'key',
-            'ack_timeout', 'codec', 'batch_n', 'batch_t'
+            'ack_timeout', 'codec', 'batch_n', 'batch_t', 'round_robin'
         ]
 
         for key in config_to_store:
@@ -22,7 +22,6 @@ class KafkaTransport(BaseTransport):
             self._client = KafkaClient(self._kafka_config['hosts'], self._kafka_config['client_id'])
             self._client.ensure_topic_exists(self._kafka_config['topic'])
             self._key = self._kafka_config['key']
-
             if self._key is None:
                 self._prod = SimpleProducer(self._client, async=self._kafka_config['async'],
                                         req_acks=SimpleProducer.ACK_AFTER_LOCAL_WRITE,
@@ -32,7 +31,11 @@ class KafkaTransport(BaseTransport):
                                         batch_send_every_n=self._kafka_config['batch_n'],
                                         batch_send_every_t=self._kafka_config['batch_t'])
             else:
+                partitioner = None
+                if self._kafka_config['round_robin']:
+                    partitioner = RoundRobinPartitioner
                 self._prod = KeyedProducer(self._client, async=self._kafka_config['async'],
+                                        partitioner=partitioner,
                                         req_acks=SimpleProducer.ACK_AFTER_LOCAL_WRITE,
                                         ack_timeout=self._kafka_config['ack_timeout'],
                                         codec=self._kafka_config['codec'],
@@ -40,7 +43,7 @@ class KafkaTransport(BaseTransport):
                                         batch_send_every_n=self._kafka_config['batch_n'],
                                         batch_send_every_t=self._kafka_config['batch_t'])
 
-            self._is_valid = True;
+            self._is_valid = True
 
         except Exception, e:
             raise TransportException(e.message)

@@ -2,107 +2,158 @@
 import redis
 import traceback
 import time
-import urlparse
-import random
 
 from beaver.transports.base_transport import BaseTransport
 from beaver.transports.exception import TransportException
 
 
 class RedisTransport(BaseTransport):
+    LIST_DATA_TYPE = 'list'
+    CHANNEL_DATA_TYPE = 'channel'
 
     def __init__(self, beaver_config, logger=None):
         super(RedisTransport, self).__init__(beaver_config, logger=logger)
 
-        redis_url = beaver_config.get('redis_url')
-        self._redis_password = beaver_config.get('redis_password')
-        self._redishosts = str(redis_url).split(',')
-        self._current_redis = 0
-        self._redis_url = self._redishosts[self._current_redis]
-        self._redis = redis.StrictRedis.from_url(self._redis_url, socket_timeout=10)
-        self._redis_namespace = beaver_config.get('redis_namespace')
-        self._is_valid = False
-        self._blacklisted_hosts = set()
+        urls = beaver_config.get('redis_url')
+        self._servers = []
+        for url in urls.split(','):
+            self._servers.append(
+                {
+                     'redis': redis.StrictRedis.from_url(url, socket_timeout=10),
+                     'url': url,
+                     'down_until': 0
+                }
+            )
 
-        self._connect()
+        self._namespace = beaver_config.get('redis_namespace')
+        self._current_server_index = 0
 
-    def _pick_connection(self):
-        """Picks up a random redis url for connection."""
-        for self._current_redis in xrange(self._current_redis + 1, len(self._redishosts)):
-            host = self._redishosts[self._current_redis]
-            if host not in self._blacklisted_hosts:
-                break
-        else:
-            self._logger.info('No more healthy hosts, retry with previously blacklisted')
-            random.shuffle(self._redishosts)
-            self._blacklisted_hosts.clear()
-            self._current_redis = 0
-            host = self._redishosts[self._current_redis]
+        self._data_type = beaver_config.get('redis_data_type')
+        if self._data_type not in [self.LIST_DATA_TYPE,
+                                   self.CHANNEL_DATA_TYPE]:
+            raise TransportException('Unknown Redis data type')
 
-        self._redis_url = host
-        self._redis = redis.StrictRedis.from_url(self._redis_url, socket_timeout=10)
-        self._logger.info('Selected connection: %s', self._redis_url)
+        self._check_connections()
 
-    def _blacklist_connection(self):
-        """Marks the current redis host we're trying to use as blacklisted.
+    def _check_connections(self):
+        """Checks if all configured redis servers are reachable"""
 
-           Blacklisted hosts will get another chance to be elected once there
-           will be no more healthy hosts."""
-        # FIXME: Enhance this naive strategy.
-        self._logger.info('Blacklisting %s for a while', self._redis_url)
-        self._blacklisted_hosts.add(self._redis_url)
+        for server in self._servers:
+            if self._is_reachable(server):
+                server['down_until'] = 0
+            else:
+                server['down_until'] = time.time() + 5
 
-    def _connect(self):
-        wait = -1
-        while True:
-            wait += 1
-            time.sleep(wait)
-            if wait == 20:
-                return False
+    def _is_reachable(self, server):
+        """Checks if the given redis server is reachable"""
 
-            if wait > 0:
-                self._logger.info("Retrying connection, attempt {0}".format(wait + 1))
-                self._blacklist_connection()
-                self._pick_connection()
+        try:
+            server['redis'].ping()
+            return True
+        except UserWarning:
+            self._logger.warn('Cannot reach redis server: ' + server['url'])
+        except Exception:
+            self._logger.warn('Cannot reach redis server: ' + server['url'])
 
-            try:
-                self._redis.ping()
-                break
-            except UserWarning:
-                traceback.print_exc()
-            except Exception:
-                traceback.print_exc()
-
-        self._is_valid = True
-        self._pipeline = self._redis.pipeline(transaction=False)
+        return False
 
     def reconnect(self):
-        self._connect()
+        self._check_connections()
 
     def invalidate(self):
-        """Invalidates the current transport"""
+        """Invalidates the current transport and disconnects all redis connections"""
+
         super(RedisTransport, self).invalidate()
-        self._redis.connection_pool.disconnect()
+        for server in self._servers:
+            server['redis'].connection_pool.disconnect()
         return False
 
     def callback(self, filename, lines, **kwargs):
+        """Sends log lines to redis servers"""
+
+        self._logger.debug('Redis transport called')
+
         timestamp = self.get_timestamp(**kwargs)
         if kwargs.get('timestamp', False):
             del kwargs['timestamp']
 
-        rn = self._beaver_config.get_field('redis_namespace', filename)
-        if not rn:
-            rn = self._redis_namespace
-        self._logger.debug('redis_namespace: '+rn)
+        namespace = self._beaver_config.get_field('redis_namespace', filename)
+        if not namespace:
+            namespace = self._namespace
+        self._logger.debug('Got namespace: ' + namespace)
+
+        data_type = self._data_type
+        self._logger.debug('Got data type: ' + data_type)
+
+        server = self._get_next_server()
+        self._logger.debug('Got redis server: ' + server['url'])
+
+        pipeline = server['redis'].pipeline(transaction=False)
+
+        callback_map = {
+            self.LIST_DATA_TYPE: pipeline.rpush,
+            self.CHANNEL_DATA_TYPE: pipeline.publish,
+        }
+        callback_method = callback_map[data_type]
 
         for line in lines:
-            self._pipeline.rpush(
-                rn,
+            callback_method(
+                namespace,
                 self.format(filename, line, timestamp, **kwargs)
             )
 
         try:
-            self._pipeline.execute()
-        except redis.exceptions.RedisError, e:
-            traceback.print_exc()
-            raise TransportException(str(e))
+            pipeline.execute()
+        except redis.exceptions.RedisError, exception:
+            self._logger.warn('Cannot push lines to redis server: ' + server['url'])
+            raise TransportException(exception)
+
+    def _get_next_server(self):
+        """Returns a valid redis server or raises a TransportException"""
+
+        current_try = 0
+        max_tries = len(self._servers)
+
+        while current_try < max_tries:
+
+            server_index = self._raise_server_index()
+            server = self._servers[server_index]
+            down_until = server['down_until']
+
+            self._logger.debug('Checking server ' + str(current_try + 1) + '/' + str(max_tries) + ': ' + server['url'])
+
+            if down_until == 0:
+                self._logger.debug('Elected server: ' + server['url'])
+                return server
+
+            if down_until < time.time():
+                if self._is_reachable(server):
+                    server['down_until'] = 0
+                    self._logger.debug('Elected server: ' + server['url'])
+
+                    return server
+                else:
+                    self._logger.debug('Server still unavailable: ' + server['url'])
+                    server['down_until'] = time.time() + 5
+
+            current_try += 1
+
+        raise TransportException('Cannot reach any redis server')
+
+    def _raise_server_index(self):
+        """Round robin magic: Raises the current redis server index and returns it"""
+
+        self._current_server_index = (self._current_server_index + 1) % len(self._servers)
+
+        return self._current_server_index
+
+
+    def valid(self):
+        """Returns whether or not the transport can send data to any redis server"""
+
+        valid_servers = 0
+        for server in self._servers:
+            if server['down_until'] <= time.time():
+                valid_servers += 1
+
+        return valid_servers > 0

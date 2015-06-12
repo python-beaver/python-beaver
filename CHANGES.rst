@@ -1,6 +1,23 @@
 Changelog
 =========
 
+33.3.0 (2015-04-08)
+-------------------
+
+- Basic docs for GELF formatter. [Oleg Rekutin]
+
+  Also fixes formatting issues with the immediately-preceding HTTP
+  transport example section.
+
+
+- Adds a GELF formatter. [Oleg Rekutin]
+
+  short_message is truncated to 250 characters and only the first line is
+  retained. Pair with the HTTP POST output to write directly to graylog2.
+
+
+- Issue #305, accept any 2xx code for http_transport. [Oleg Rekutin]
+
 33.2.0 (2015-03-11)
 -------------------
 
