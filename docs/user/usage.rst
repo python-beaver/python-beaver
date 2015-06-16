@@ -128,6 +128,10 @@ The following configuration keys are for multi-line events support and are per f
 * multiline_regex_after: Default ``None``. If a line match this regular expression, it will be merged with next line(s).
 * multiline_regex_before: Default ``None``. If a line match this regular expression, it will be merged with previous line(s).
 
+The following configuration keys are for including defined log lines and droping the rest, good for where you have a very verbose application but are only interested in a subset of the logs.
+
+* include_filter_regex: Default ``None``. If a line match this regular expression, it will be accepted, if it fails the log line will be dropped, if not set all log lines will be matched.
+
 The following can also be passed via argparse. Argparse will override all options in the configfile, when specified.
 
 * format: Default ``json``. Options ``[ json, msgpack, string, raw, rawjson, gelf ]``. Format to use when sending to transport
@@ -613,6 +617,21 @@ Multi-line event for Python traceback::
       File "doerr.py", line 7, in faulty_function
         0 / 0
     ZeroDivisionError: integer division or modulo by zero
+
+Include line Parsing
+*******************
+
+Use regex filter only select the lines you are interested in::
+    # /etc/beaver/conf
+    [/tmp/somefile]
+    include_filter_regex = .*ERROR.*
+
+You can also send in multiple regex patterns to match on::
+    # /etc/beaver/conf
+    [/tmp/somefile]
+    include_filter_regex = .*ERROR.*
+        .*Yellow elephant.*
+        .*Pink zebra.*
 
 SSH Tunneling Support
 *********************
