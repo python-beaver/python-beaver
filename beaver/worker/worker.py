@@ -171,7 +171,7 @@ class Worker(object):
                 events = lines
 
             if events and self._file_map[fid]['include_filter_regex']:
-                events = remove_filter_line(events, self._file_map[fid]['include_filter_regex'])
+                events = include_filter_line(events, self._file_map[fid]['include_filter_regex'])
 
             if events:
                 self._callback_wrapper(filename=file.name, lines=events)
@@ -347,7 +347,7 @@ class Worker(object):
                         events = lines
                     
                     if events and self._file_map[fid]['include_filter_regex']:
-                        events = remove_filter_line(events, self._file_map[fid]['include_filter_regex'])
+                        events = include_filter_line(events, self._file_map[fid]['include_filter_regex'])
 
                     if events:
                         self._callback_wrapper(filename=data['file'].name, lines=events)
@@ -576,7 +576,7 @@ class Worker(object):
                     event = '\n'.join(self._file_map[fid]['current_event'])
                     self._file_map[fid]['current_event'].clear()
                     if self._file_map[fid]['include_filter_regex']:
-                        events = remove_filter_line([event], self._file_map[fid]['include_filter_regex'])
+                        events = include_filter_line([event], self._file_map[fid]['include_filter_regex'])
                     else:
                         events = [event]
 
