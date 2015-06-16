@@ -154,6 +154,24 @@ def _replace_all(path, replacements):
         path = path.replace(*j)
     return path
 
+def include_filter_line(lines, include_filter_regex):
+    """ Only send particular log data use regex.
+
+        A lot of the log is useless just extract what we are intersted in
+
+        This function will include them using regular
+        expression: include_filter_regex
+
+        This function return a list of complet event.
+    """
+    events = []
+    for line in lines:
+        if include_filter_regex and include_filter_regex.match(line):
+            events.append(line)
+        else:
+            continue
+
+    return events
 
 def multiline_merge(lines, current_event, re_after, re_before):
     """ Merge multi-line events based.
