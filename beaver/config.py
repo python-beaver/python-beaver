@@ -41,6 +41,10 @@ class BeaverConfig():
             'multiline_regex_after': '',
             'multiline_regex_before': '',
 
+            # filter regex for only include lines that appear in the regex. Default is disabled
+            'include_filter_regex': '',
+
+
             'message_format': '',
             'sincedb_write_interval': '15',
             'stat_interval': '1',
@@ -450,6 +454,9 @@ class BeaverConfig():
                 config['multiline_regex_after'] = re.compile(config['multiline_regex_after'])
             if config['multiline_regex_before']:
                 config['multiline_regex_before'] = re.compile(config['multiline_regex_before'])
+
+            if config['include_filter_regex']:
+                config['include_filter_regex'] = re.compile(config['include_filter_regex'])
 
             require_int = ['sincedb_write_interval', 'stat_interval', 'tail_lines']
             for k in require_int:
