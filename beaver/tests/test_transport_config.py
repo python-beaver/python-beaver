@@ -10,6 +10,14 @@ from beaver.config import BeaverConfig
 from beaver.transports import create_transport
 from beaver.transports.base_transport import BaseTransport
 
+try:
+    from beaver.transports.zmq_transport import ZmqTransport
+    zmqSkip = False
+except ImportError, e:
+    if e.message == 'No module named zmq':
+        zmqSkip = True
+    else:
+        raise
 
 class DummyTransport(BaseTransport):
     pass
@@ -47,6 +55,7 @@ with mock.patch('pika.adapters.BlockingConnection', autospec=True) as mock_pika:
             transport = create_transport(beaver_config, logger=self.logger)
             self.assertIsInstance(transport, beaver.transports.udp_transport.UdpTransport)
 
+        @unittest.skipIf(zmqSkip, 'zmq not installed')
         def test_builtin_zmq(self):
             beaver_config = self._get_config(transport='zmq')
             transport = create_transport(beaver_config, logger=self.logger)
