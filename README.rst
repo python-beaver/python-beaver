@@ -1,8 +1,9 @@
-.. image:: https://travis-ci.org/josegonzalez/python-beaver.svg?branch=master
-    :target: https://travis-ci.org/josegonzalez/python-beaver
 ======
 Beaver
 ======
+
+.. image:: https://travis-ci.org/josegonzalez/python-beaver.svg?branch=master
+    :target: https://travis-ci.org/josegonzalez/python-beaver
 
 python daemon that munches on logs and sends their contents to logstash
 
