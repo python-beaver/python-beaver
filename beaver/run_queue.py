@@ -17,6 +17,7 @@ def run_queue(queue, beaver_config, logger=None):
     last_update_time = int(time.time())
     queue_timeout = beaver_config.get('queue_timeout')
     wait_timeout = beaver_config.get('wait_timeout')
+    count = 0
 
     transport = None
     try:
@@ -34,6 +35,10 @@ def run_queue(queue, beaver_config, logger=None):
                 break
 
             try:
+                if queue.full():
+                    logger.debug("Queue is full")
+                else:
+                    logger.debug("Queue Size is: " + str(queue.qsize()))
                 command, data = queue.get(block=True, timeout=wait_timeout)
                 if command == "callback":
                     last_update_time = int(time.time())
@@ -61,6 +66,8 @@ def run_queue(queue, beaver_config, logger=None):
                 while True:
                     try:
                         transport.callback(**data)
+                        count += 1
+                        logger.debug("Number of transports: " + str(count))
                         break
                     except TransportException:
                         failure_count = failure_count + 1
