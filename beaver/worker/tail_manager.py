@@ -22,7 +22,8 @@ class TailManager(BaseLog):
         self._create_queue_consumer = queue_consumer_function
         self._discover_interval = beaver_config.get('discover_interval', 15)
         self._log_template = "[TailManager] - {0}"
-        self._proc = None
+        self._number_of_consumer_processes = int(self._beaver_config.get('number_of_consumer_processes'))
+        self._proc = [None] * self._number_of_consumer_processes
         self._tails = {}
         self._update_time = None
 
@@ -52,8 +53,10 @@ class TailManager(BaseLog):
                 self._tails[tail.fid()] = tail
 
     def create_queue_consumer_if_required(self, interval=5.0):
-        if not (self._proc and self._proc.is_alive()):
-            self._proc = self._create_queue_consumer()
+        for n in range(0,self._number_of_consumer_processes):
+            if not (self._proc[n] and self._proc[n].is_alive()):
+                self._logger.debug("creating consumer process: " + str(n))
+                self._proc[n] = self._create_queue_consumer()
         timer = threading.Timer(interval, self.create_queue_consumer_if_required)
         timer.start()
 
@@ -128,9 +131,11 @@ class TailManager(BaseLog):
         self._active = False
         for fid in self._tails:
             self._tails[fid].close()
-        if self._proc is not None and self._proc.is_alive():
-            self._proc.terminate()
-            self._proc.join()
+        for n in range(0,self._number_of_consumer_processes):
+            if self._proc[n] is not None and self._proc[n].is_alive():
+                self._logger.debug("Terminate Process: " + str(n))
+                self._proc[n].terminate()
+                self._proc[n].join()
 
     @staticmethod
     def get_file_id(st):
