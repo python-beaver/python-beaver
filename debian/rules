@@ -1,4 +1,6 @@
 #!/usr/bin/make -f
 
+export DH_VIRTUALENV_INSTALL_ROOT=/usr/share
+
 %:
-	dh $@ --with python-virtualenv --setuptools --preinstall requirements/base.txt
+	dh $@ --with python-virtualenv --setuptools

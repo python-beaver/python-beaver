@@ -8,5 +8,5 @@ Standards-Version: 3.9.5
 Package: python-beaver
 Architecture: all
 Depends: ${python:Depends}, ${misc:Depends}
-Homepage: http://github.com/josegonzalez/beaver
+Homepage: http://github.com/josegonzalez/python-beaver
 Description: Outputs a valid hostname for a given autoscale group instance

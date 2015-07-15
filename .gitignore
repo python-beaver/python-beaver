@@ -25,3 +25,5 @@ doc/_build
 
 # Generated man page
 doc/aws_hostname.1
+
+beaver/tests/servers/0.8.2.0/kafka-bin/
