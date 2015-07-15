@@ -1,12 +1,12 @@
-Source: beaver
+Source: python-beaver
 Section: python
 Priority: extra
 Maintainer: Jose Diaz-Gonzalez <email@josediazgonzalez.com>
 Build-Depends: debhelper (>= 9), python, dh-virtualenv
 Standards-Version: 3.9.5
 
-Package: beaver
+Package: python-beaver
 Architecture: all
 Depends: ${python:Depends}, ${misc:Depends}
-Homepage: http://github.com/josegonzalez/beaver
+Homepage: http://github.com/josegonzalez/python-beaver
 Description: Outputs a valid hostname for a given autoscale group instance

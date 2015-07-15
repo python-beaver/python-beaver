@@ -22,13 +22,13 @@ case "$1" in
     configure)
         if ! id beaver > /dev/null 2>&1 ; then
             echo -n "Creating 'beaver' user..."
-            useradd --home /usr/share/beaver \
+            useradd --home /usr/share/python-beaver \
                 --no-create-home \
                 --shell /bin/false \
                 beaver
             echo " OK"
         fi
-	chown -R beaver:beaver /usr/share/beaver
+	chown -R beaver:beaver /usr/share/python-beaver
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

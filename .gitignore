@@ -18,7 +18,7 @@ pkg
 
 # Debian Files
 debian/files
-debian/beaver*
+debian/python-beaver*
 
 # Sphinx build
 doc/_build
