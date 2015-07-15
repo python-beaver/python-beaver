@@ -1,4 +1,3 @@
-dh_installdeb will replace this with shell code automatically
 #!/bin/sh
 # postinst script for mypackage
 #
