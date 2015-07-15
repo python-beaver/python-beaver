@@ -15,11 +15,11 @@
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="Log forwarding daemon."
-NAME=beaver
+NAME=python-beaver
 PIDFILE=/var/run/$NAME.pid
-DAEMON=/usr/bin/beaver
+DAEMON=/usr/bin/python-beaver
 # @todo why does beaver need to know where PID is??
-DAEMON_ARGS="-c /etc/beaver/beaver.conf -D -P $PIDFILE"
+DAEMON_ARGS="-c /etc/python-beaver/beaver.conf -D -P $PIDFILE"
 SCRIPTNAME=/etc/init.d/$NAME
 
 # Exit if the package is not installed
