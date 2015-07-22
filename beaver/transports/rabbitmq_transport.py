@@ -86,8 +86,10 @@ class RabbitmqTransport(BaseTransport):
 
 
 
-    def _on_connection_open_error(self):
+    def _on_connection_open_error(self,non_used_connection=None,error=None):
         self._logger.debug("connection open error")
+        if not error==None:
+            self._logger.error(error)
 
     def _on_connection_closed(self, connection, reply_code, reply_text):
         self._channel = None
@@ -110,7 +112,11 @@ class RabbitmqTransport(BaseTransport):
 
     def _connection_start(self):
         self._logger.debug("Creating Connection")
-        self._connection = pika.adapters.SelectConnection(parameters=self._parameters,on_open_callback=self._on_connection_open,on_open_error_callback=self._on_connection_open_error,on_close_callback=self._on_connection_closed,stop_ioloop_on_close=False)
+        try:
+            self._connection = pika.adapters.SelectConnection(parameters=self._parameters,on_open_callback=self._on_connection_open,on_open_error_callback=self._on_connection_open_error,on_close_callback=self._on_connection_closed,stop_ioloop_on_close=False)
+        except Exception,e:
+            self._logger.error("Failed Creating RabbitMQ connection")
+            self._logger.error(e)
         self._logger.debug("Starting ioloop")
         self._connection.ioloop.start()
 
