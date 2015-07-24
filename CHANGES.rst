@@ -1,8 +1,64 @@
 Changelog
 =========
 
-33.3.0 (2015-04-08)
+34.0.0 (2015-07-24)
 -------------------
+
+- Added ssl-tcp key file support. [babbleshack]
+
+- Rename configuration dir and debian bin to python-beaver. [David
+  Moravek]
+
+- Rename debian package back to python-beaver. [David Moravek]
+
+- Debian packaging code review; thx @mnicky. [David Moravek]
+
+- Improves debian packaging. [David Moravek]
+
+- Fix tests when ZMQ is not installed. [David Moravek]
+
+- Fix tests for python 2.7 (add funcsigs test dependency) [David
+  Moravek]
+
+- Move badge to below header. [Jose Diaz-Gonzalez]
+
+- Add constants for data types, validate in init, use callback map.
+  [Hector Castro]
+
+- Move data type method conditional outside of loop. [Hector Castro]
+
+- Add channel support to Redis transport. [Hector Castro]
+
+  This changeset adds support for publishing log entries to a Redis
+  channel, which is also supported by Logstash's Redis input.
+
+  Beaver configuration files can now supply a `redis_data_type` key. Valid
+  values for this key are `list` and `channel`. If left unset, the default
+  is `list`.
+
+  Attempts to resolve #266.
+
+
+- Introduced a stomp transport for beaver using stomp.py. [Peter
+  Lenderyou]
+
+- Fix references to ConfigParser error classes. [Jose Diaz-Gonzalez]
+
+- Redis transport: handle multiple connections and use them in round
+  robin style. [musil]
+
+- Fixes GELF format according to specs. [Marvin Frick]
+
+  GELF formatted messages need to be \0 ended. At least for sending over
+  TCP.
+
+
+- Kafka round robin partitioner. [David Moravek]
+
+- Solve error: cannot convert argument to integer. [Theofilis George-
+  Nektarios]
+
+  See at #312
 
 - Basic docs for GELF formatter. [Oleg Rekutin]
 

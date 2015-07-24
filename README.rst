@@ -20,11 +20,11 @@ Using PIP:
 
 From Github::
 
-    pip install git+git://github.com/josegonzalez/python-beaver.git@33.3.0#egg=beaver
+    pip install git+git://github.com/josegonzalez/python-beaver.git@34.0.0#egg=beaver
 
 From PyPI::
 
-    pip install beaver==33.3.0
+    pip install beaver==34.0.0
 
 Documentation
 =============
