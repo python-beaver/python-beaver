@@ -20,6 +20,7 @@ class TcpTransport(BaseTransport):
         self._tcp_ssl_verify = beaver_config.get('tcp_ssl_verify')
         self._tcp_ssl_cacert = beaver_config.get('tcp_ssl_cacert')
         self._tcp_ssl_cert = beaver_config.get('tcp_ssl_cert')
+        self._tcp_ssl_key = beaver_config.get('tcp_ssl_key')
 
         self._connect()
 
@@ -42,6 +43,7 @@ class TcpTransport(BaseTransport):
                 if self._tcp_ssl_enabled:
                     self._logger.debug("SSL wrapping")
                     self._sock = ssl.wrap_socket(self._sock,
+                                                 keyfile=self._tcp_ssl_key,
                                                  certfile=self._tcp_ssl_cert,
                                                  ssl_version=ssl.PROTOCOL_TLSv1,
                                                  ca_certs=self._tcp_ssl_cacert)

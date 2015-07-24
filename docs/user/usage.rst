@@ -88,6 +88,10 @@ Beaver can optionally get data from a ``configfile`` using the ``-c`` flag. This
 * kinesis_aws_batch_size_max: Default ``512000``. Arbitrary flush size to limit size of logs in transit.
 * tcp_host: Default ``127.0.0.1``. TCP Host
 * tcp_port: Default ``9999``. TCP Port
+* tcp_ssl Defaults ``0``. Connect using SSL/TLS
+* tcp_ssl_key Optional. Defaults ``None``. Path to client private key for SSL/TLS
+* tcp_ssl_cert Optional. Defaults ``None``. Path to client certificate for SSL/TLS
+* tcp_ssl_cacert Optional. Defaults ``None``. Path to CA certificate for SSL/TLS
 * udp_host: Default ``127.0.0.1``. UDP Host
 * udp_port: Default ``9999``. UDP Port
 * zeromq_address: Default ``tcp://localhost:2120``. Zeromq URL
