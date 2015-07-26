@@ -15,7 +15,7 @@ class DummyTransport(BaseTransport):
     pass
 
 
-with mock.patch('pika.adapters.BlockingConnection', autospec=True) as mock_pika:
+with mock.patch('pika.adapters.SelectConnection', autospec=True) as mock_pika:
 
     class TransportConfigTests(unittest.TestCase):
         def setUp(self):
@@ -25,7 +25,7 @@ with mock.patch('pika.adapters.BlockingConnection', autospec=True) as mock_pika:
             empty_conf = tempfile.NamedTemporaryFile(delete=True)
             return BeaverConfig(mock.Mock(config=empty_conf.name, **kwargs))
 
-        @mock.patch('pika.adapters.BlockingConnection', mock_pika)
+        @mock.patch('pika.adapters.SelectConnection', mock_pika)
         def test_builtin_rabbitmq(self):
             beaver_config = self._get_config(transport='rabbitmq')
             transport = create_transport(beaver_config, logger=self.logger)
