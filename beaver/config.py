@@ -121,6 +121,9 @@ class BeaverConfig():
             'respawn_delay': '3',
             'max_failure': '7',
 
+            # consumer processes
+            'number_of_consumer_processes': '1',
+
             # interprocess queue max size before puts block
             'max_queue_size': '100',
 
@@ -314,7 +317,8 @@ class BeaverConfig():
                 'logstash_version',
                 'kafka_batch_n',
                 'kafka_batch_t',
-                'kafka_ack_timeout'
+                'kafka_ack_timeout',
+                'number_of_consumer_processes'
             ]
             for key in require_int:
                 if config[key] is not None:

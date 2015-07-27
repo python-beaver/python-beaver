@@ -53,7 +53,8 @@ class Worker(object):
         self._folder = self._beaver_config.get('path')
         self._last_file_mapping_update = {}
         self._logger = logger
-        self._proc = None
+        self._number_of_consumer_processes = int(self._beaver_config.get('number_of_consumer_processes'))
+        self._proc = [None] * self._number_of_consumer_processes
         self._sincedb_path = self._beaver_config.get('sincedb_path')
         self._update_time = None
         self._running = True
@@ -76,9 +77,11 @@ class Worker(object):
             data['file'].close()
             self._sincedb_update_position(data['file'], fid=id, force_update=True)
         self._file_map.clear()
-        if self._proc is not None and self._proc.is_alive():
-            self._proc.terminate()
-            self._proc.join()
+        for n in range(0,self._number_of_consumer_processes):
+            if self._proc[n] is not None and self._proc[n].is_alive():
+                self._logger.debug("Terminate Process: " + str(n))
+                self._proc[n].terminate()
+                self._proc[n].join()
 
 
     def listdir(self):
@@ -93,8 +96,11 @@ class Worker(object):
             return []
 
     def create_queue_consumer_if_required(self, interval=5.0):
-        if not (self._proc and self._proc.is_alive()):
-            self._proc = self._create_queue_consumer()
+
+        for n in range(0,self._number_of_consumer_processes):
+            if not (self._proc[n] and self._proc[n].is_alive()):
+                self._logger.debug("creating consumer process: " + str(n))
+                self._proc[n] = self._create_queue_consumer()
         timer = threading.Timer(interval, self.create_queue_consumer_if_required)
         timer.start()
 
@@ -102,7 +108,6 @@ class Worker(object):
         """Start the loop.
         If async is True make one loop then return.
         """
-
         self.create_queue_consumer_if_required()
 
         while self._running:
