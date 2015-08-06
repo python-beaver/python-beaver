@@ -34,6 +34,7 @@ def run_queue(queue, beaver_config, logger=None):
                 logger.info('Main consumer queue timeout of "{0}" seconds exceeded, stopping queue'.format(queue_timeout))
                 break
 
+            command = None
             try:
                 if queue.full():
                     logger.error("Main consumer queue is full")
