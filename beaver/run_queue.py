@@ -31,22 +31,22 @@ def run_queue(queue, beaver_config, logger=None):
                 break
 
             if int(time.time()) - last_update_time > queue_timeout:
-                logger.info('Main consumer queue timeout of "{0}" seconds exceeded, stopping queue'.format(queue_timeout))
+                logger.info('Queue timeout of "{0}" seconds exceeded, stopping queue'.format(queue_timeout))
                 break
 
             command = None
             try:
                 if queue.full():
-                    logger.error("Main consumer queue is full")
+                    logger.error("Queue is full")
 
                 else:
                     if count == 1000:
                         logger.debug("Main consumer queue Size is: " + str(queue.qsize()))
                         count = 0
-                    command, data = queue.get(block=True, timeout=wait_timeout)
-                    if command == "callback":
-                        last_update_time = int(time.time())
-                        logger.debug('Last update time now {0}'.format(last_update_time))
+                command, data = queue.get(block=True, timeout=wait_timeout)
+                if command == "callback":
+                    last_update_time = int(time.time())
+                    logger.debug('Last update time now {0}'.format(last_update_time))
             except Queue.Empty:
                 if not queue.empty():
                     logger.error('Recieved timeout from main consumer queue - stopping queue')
@@ -74,15 +74,15 @@ def run_queue(queue, beaver_config, logger=None):
                     try:
                         transport.callback(**data)
                         count += 1
+                        logger.debug("Number of transports: " + str(count))
                         break
-                    except TransportException,e:
+                    except TransportException:
                         failure_count = failure_count + 1
                         if failure_count > beaver_config.get('max_failure'):
                             failure_count = beaver_config.get('max_failure')
 
                         sleep_time = beaver_config.get('respawn_delay') ** failure_count
                         logger.info('Caught transport exception, reconnecting in %d seconds' % sleep_time)
-                        logger.debug(e)
 
                         try:
                             transport.invalidate()
