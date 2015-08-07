@@ -1,6 +1,40 @@
 Changelog
 =========
 
+34.0.1 (2015-08-07)
+-------------------
+
+- Revert some breakages caused by
+  d159ec579c01b8fab532b3814c64b0ff8b2063ff. [Jose Diaz-Gonzalez]
+
+  Closes #331
+
+- Set default for command. [Jose Diaz-Gonzalez]
+
+- #323 - fix tests to run with pika SelectConnection. [Tom Kregenbild]
+
+- #323 - fix RabbitMQ transport _on_open_connection_error function to
+  print connection errors. [Tom Kregenbild]
+
+- #323 1. Add clear debug prints with queue size (one print every 1000
+  items in order not to hurt performance) 2. If main queue is empty keep
+  running and do nothing 3. In case of a timeout from main queue restart
+  queue. [Tom Kregenbild]
+
+- #323 - Change RabbitMQ pika to use Asynchronous SelectConnection
+  instead of BlockingConnection for better performance. [Tom Kregenbild]
+
+- #323 - add the ability to increase the number of Queue consumers by
+  creating additional processes while running with --experimental flag.
+  [Tom Kregenbild]
+
+- #323 - add the ability to increase the number of Queue consumers by
+  creating additional processes. [Tom Kregenbild]
+
+- #323 - print current queue size and number of total number transports
+  in debug mode in order to find problem in transport rate. [Tom
+  Kregenbild]
+
 34.0.0 (2015-07-24)
 -------------------
 
