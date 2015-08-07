@@ -31,7 +31,7 @@ Documentation
 
 Full documentation is available online at http://beaver.readthedocs.org/
 
-You can also build the docs locally:
+You can also build the docs locally::
 
     # get sphinx installed
     pip install sphinx
