@@ -10,7 +10,7 @@ usage::
     beaver [-h] [-c CONFIG] [-C CONFD_PATH] [-d] [-D] [-f FILES [FILES ...]]
            [-F {json,msgpack,raw,rawjson,string}] [-H HOSTNAME] [-m {bind,connect}]
            [-l OUTPUT] [-p PATH] [-P PID]
-           [-t {kafka,mqtt,rabbitmq,redis,sqs,kinesis,stdout,tcp,udp,zmq,stomp}] [-v] [--fqdn]
+           [-t {kafka,mqtt,rabbitmq,redis,sns,sqs,kinesis,stdout,tcp,udp,zmq,stomp}] [-v] [--fqdn]
 
 optional arguments::
 
@@ -33,7 +33,7 @@ optional arguments::
                           file to pipe output to (in addition to stdout)
     -p PATH, --path PATH  path to log files
     -P PID, --pid PID     path to pid file
-    -t {kafka,mqtt,rabbitmq,redis,sqs,kinesis,stdout,tcp,udp,zmq,stomp}, --transport {kafka,mqtt,rabbitmq,redis,sqs,kinesis,stdout,tcp,udp,zmq,stomp}
+    -t {kafka,mqtt,rabbitmq,redis,sns,sqs,kinesis,stdout,tcp,udp,zmq,stomp}, --transport {kafka,mqtt,rabbitmq,redis,sns,sqs,kinesis,stdout,tcp,udp,zmq,stomp}
                           log transport method
     -v, --version         output version and quit
     --fqdn                use the machine's FQDN for source_host
@@ -76,6 +76,11 @@ Beaver can optionally get data from a ``configfile`` using the ``-c`` flag. This
 * redis_url: Default ``redis://localhost:6379/0``. Comma separated redis URLs
 * redis_namespace: Default ``logstash:beaver``. Redis key namespace
 * redis_data_type: Default ``list``, but can also be ``channel``. Redis data type used for transporting log messages
+* sns_aws_access_key: Can be left blank to use IAM Roles or AWS_ACCESS_KEY_ID environment variable (see: https://github.com/boto/boto#getting-started-with-boto)
+* sns_aws_secret_key: Can be left blank to use IAM Roles or AWS_SECRET_ACCESS_KEY environment variable (see: https://github.com/boto/boto#getting-started-with-boto)
+* sns_aws_profile_name: Can be left blank to use IAM Roles AWS_SECRET_ACCESS_KEY environment variable, or fixed keypair (above) (see: https://github.com/boto/boto#getting-started-with-boto)
+* sns_aws_region: Default ``us-east-1``. AWS Region
+* sns_aws_topic_arn: Topic ARN (must exist)
 * sqs_aws_access_key: Can be left blank to use IAM Roles or AWS_ACCESS_KEY_ID environment variable (see: https://github.com/boto/boto#getting-started-with-boto)
 * sqs_aws_secret_key: Can be left blank to use IAM Roles or AWS_SECRET_ACCESS_KEY environment variable (see: https://github.com/boto/boto#getting-started-with-boto)
 * sqs_aws_region: Default ``us-east-1``. AWS Region
@@ -458,6 +463,31 @@ UDP transport::
 
     # From the commandline
     beaver -c /etc/beaver/conf -t udp
+
+SNS Transport::
+
+    # /etc/beaver/conf
+    [beaver]
+    sns_aws_region: us-east-1
+    sns_aws_topic_arn: arn:aws:sns:us-east-1:123456789123:logstash-topic
+    sns_aws_access_key: <access_key>
+    sns_aws_secret_key: <secret_key>
+    sns_aws_profile_name: <proflie_name>
+
+    # logstash indexer config:
+    input {
+      sqs {
+        queue => "sns-subscriber"
+        type => "shipper-input"
+        format => "json_event"
+        access_key => "<access_key>"
+        secret_key => "<secret_key>"
+      }
+    }
+    output { stdout { debug => true } }
+
+    # From the commandline
+    beaver -c /etc/beaver/conf -t sns
 
 SQS Transport::
 
