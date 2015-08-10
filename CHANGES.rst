@@ -1,6 +1,11 @@
 Changelog
 =========
 
+34.1.0 (2015-08-10)
+-------------------
+
+- Adding AWS SNS as a transport option. [Jamie Cressey]
+
 34.0.1 (2015-08-07)
 -------------------
 
