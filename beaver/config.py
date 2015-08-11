@@ -96,6 +96,7 @@ class BeaverConfig():
             'sns_aws_topic_arn': '',
             'sqs_aws_access_key': '',
             'sqs_aws_secret_key': '',
+            'sqs_aws_profile_name': '',
             'sqs_aws_region': 'us-east-1',
             'sqs_aws_queue': '',
             'sqs_aws_queue_owner_acct_id': '',
