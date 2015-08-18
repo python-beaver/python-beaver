@@ -16,8 +16,8 @@ class SqsTransport(BaseTransport):
         self._secret_key = beaver_config.get('sqs_aws_secret_key')
         self._profile = beaver_config.get('sqs_aws_profile_name')
         self._region = beaver_config.get('sqs_aws_region')
-        self._queue_name = beaver_config.get('sqs_aws_queue')
         self._queue_owner_acct_id = beaver_config.get('sqs_aws_queue_owner_acct_id')
+        self._queues = beaver_config.get('sqs_aws_queue').split(',')
 
         try:
             if self._profile:
@@ -34,14 +34,19 @@ class SqsTransport(BaseTransport):
                 self._logger.warn('Unable to connect to AWS - check your AWS credentials')
                 raise TransportException('Unable to connect to AWS - check your AWS credentials')
 
-            if self._queue_owner_acct_id is None:
-                self._queue = self._connection.get_queue(self._queue_name)
-            else:
-                self._queue = self._connection.get_queue(self._queue_name, 
-                                                         owner_acct_id=self._queue_owner_acct_id)
+            self._queue = {}
+            for queue in self._queues:
+                self._logger.debug('Attempting to load SQS queue: {}'.format(queue))
+                if self._queue_owner_acct_id is None:
+                    self._queue[queue] = self._connection.get_queue(queue)
+                else:
+                    self._queue[queue] = self._connection.get_queue(queue, 
+                                                             owner_acct_id=self._queue_owner_acct_id)
 
-            if self._queue is None:
-                raise TransportException('Unable to access queue with name {0}'.format(self._queue_name))
+                if self._queue[queue] is None:
+                    raise TransportException('Unable to access queue with name {0}'.format(queue))
+
+                self._logger.debug('Successfully loaded SQS queue: {}'.format(queue))
         except Exception, e:
             raise TransportException(e.message)
 
@@ -81,15 +86,18 @@ class SqsTransport(BaseTransport):
         return True
 
     def _send_message_batch(self, message_batch):
-        try:
-            result = self._queue.write_batch(message_batch)
-            if not result:
-                self._logger.error('Error occurred sending messages to SQS queue {0}. result: {1}'.format(
-                    self._queue_name, result))
-                raise TransportException('Error occurred sending message to queue {0}'.format(self._queue_name))
-        except Exception, e:
-            self._logger.exception('Exception occurred sending batch to SQS queue')
-            raise TransportException(e.message)
+        for queue in self._queue:
+            try:
+                self._logger.debug('Attempting to push batch message to SQS queue: {}'.format(queue))
+                result = self._queue[queue].write_batch(message_batch)
+                if not result:
+                    self._logger.error('Error occurred sending messages to SQS queue {0}. result: {1}'.format(
+                        queue, result))
+                    raise TransportException('Error occurred sending message to queue {0}'.format(queue))
+                self._logger.debug('Successfully pushed batch message to SQS queue: {}'.format(queue))
+            except Exception, e:
+                self._logger.exception('Exception occurred sending batch to SQS queue')
+                raise TransportException(e.message)
 
     def interrupt(self):
         return True
