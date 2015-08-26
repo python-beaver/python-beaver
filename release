@@ -86,8 +86,12 @@ version_header="$next_version ($(date +%F))"
 dashes=`yes '-'|head -n ${#version_header}|tr -d '\n'`
 gitchangelog |sed "4s/.*/$version_header/"|sed "5s/.*/$dashes/" > $TMPFILE && mv $TMPFILE CHANGES.rst
 
+echo -e "${YELLOW}--->${COLOR_OFF} Updating debian/changelog"
+dch -v $next_version "Release version $next_version"
+dch -r stable
+
 echo -e "${YELLOW}--->${COLOR_OFF} Adding changed files to git"
-git add CHANGES.rst README.rst ${PACKAGE_NAME}/__init__.py
+git add CHANGES.rst README.rst debian/changelog ${PACKAGE_NAME}/__init__.py
 if [ -f docs/conf.py ]; then git add docs/conf.py; fi
 
 echo -e "${YELLOW}--->${COLOR_OFF} Creating release"
