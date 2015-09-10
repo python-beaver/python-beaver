@@ -18,7 +18,7 @@ class RabbitmqTransport(BaseTransport):
         config_to_store = [
             'key', 'exchange', 'username', 'password', 'host', 'port', 'vhost',
             'queue', 'queue_durable', 'ha_queue', 'exchange_type', 'exchange_durable',
-            'ssl', 'ssl_key', 'ssl_cert', 'ssl_cacert', 'delivery_mode'
+            'ssl', 'ssl_key', 'ssl_cert', 'ssl_cacert', 'timeout', 'delivery_mode'
         ]
 
         for key in config_to_store:
@@ -139,7 +139,8 @@ class RabbitmqTransport(BaseTransport):
             port=self._rabbitmq_config['port'],
             ssl=self._rabbitmq_config['ssl'],
             ssl_options=ssl_options,
-            virtual_host=self._rabbitmq_config['vhost']
+            virtual_host=self._rabbitmq_config['vhost'],
+            socket_timeout=self._rabbitmq_config['timeout']
         )
         Thread(target=self._connection_start).start()
 

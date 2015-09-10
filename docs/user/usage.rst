@@ -72,6 +72,7 @@ Beaver can optionally get data from a ``configfile`` using the ``-c`` flag. This
 * rabbitmq_exchange_durable: Default ``0``.
 * rabbitmq_key: Default ``logstash-key``.
 * rabbitmq_exchange: Default ``logstash-exchange``.
+* rabbitmq_timeout: Default ``2``. The timeout in seconds for the connection to the RabbitMQ broker
 * rabbitmq_delivery_mode: Default ``1``. Message deliveryMode. 1: non persistent 2: persistent
 * redis_url: Default ``redis://localhost:6379/0``. Comma separated redis URLs
 * redis_namespace: Default ``logstash:beaver``. Redis key namespace
