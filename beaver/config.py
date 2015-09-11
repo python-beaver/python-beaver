@@ -84,7 +84,7 @@ class BeaverConfig():
             'rabbitmq_ha_queue': os.environ.get('RABBITMQ_HA_QUEUE', '0'),
             'rabbitmq_key': os.environ.get('RABBITMQ_KEY', 'logstash-key'),
             'rabbitmq_exchange': os.environ.get('RABBITMQ_EXCHANGE', 'logstash-exchange'),
-            'rabbitmq_timeout': '2',
+            'rabbitmq_timeout': '1',
             'rabbitmq_delivery_mode': 1,
             'redis_url': os.environ.get('REDIS_URL', 'redis://localhost:6379/0'),
             'redis_namespace': os.environ.get('REDIS_NAMESPACE', 'logstash:beaver'),
