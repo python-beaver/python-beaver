@@ -94,7 +94,13 @@ class RabbitmqTransport(BaseTransport):
 
     def _on_connection_closed(self, connection, reply_code, reply_text):
         self._channel = None
-        if self._connection.is_closing:
+        if hasattr(self._connection, '_closing'):
+            closing = self._connection._closing
+        elif hasattr(self._connection, 'is_closing'):
+            closing = self._connection.is_closing
+        else:
+            raise NotImplementedError('Unsure how to check whether the connection is closing.')
+        if closing:
             try:
                 self._connection.ioloop.stop()
             except:
