@@ -72,14 +72,15 @@ class RabbitmqTransport(BaseTransport):
                     self._count = 0
                 else:
                     self._count += 1
-                self._channel.basic_publish(
-                        exchange=self._rabbitmq_config['exchange'],
-                        routing_key=self._rabbitmq_config['key'],
-                        body=line,
-                        properties=pika.BasicProperties(
-                            content_type='text/json',
-                            delivery_mode=self._rabbitmq_config['delivery_mode']
-                        ))
+                if self._channel != None:
+                    self._channel.basic_publish(
+                            exchange=self._rabbitmq_config['exchange'],
+                            routing_key=self._rabbitmq_config['key'],
+                            body=line,
+                            properties=pika.BasicProperties(
+                                content_type='text/json',
+                                delivery_mode=self._rabbitmq_config['delivery_mode']
+                            ))
             else:
                 self._logger.debug("RabbitMQ transport queue is empty, sleeping for 1 second.")
                 time.sleep(1)
@@ -93,7 +94,7 @@ class RabbitmqTransport(BaseTransport):
 
     def _on_connection_closed(self, connection, reply_code, reply_text):
         self._channel = None
-        if self._connection._closing:
+        if self._connection.is_closing:
             try:
                 self._connection.ioloop.stop()
             except:
@@ -101,7 +102,8 @@ class RabbitmqTransport(BaseTransport):
         else:
             self._logger.warning('RabbitMQ Connection closed, reopening in 1 seconds: (%s) %s',
                            reply_code, reply_text)
-            self._connection.add_timeout(1, self.reconnect)
+            time.sleep(1)
+            self.reconnect()
 
     def reconnect(self):
         try:
