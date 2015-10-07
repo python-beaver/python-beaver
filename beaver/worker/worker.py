@@ -168,6 +168,15 @@ class Worker(object):
             else:
                 events = lines
 
+            # Applying logfilter. Log gets removed when regex doesnt match AND excluding is
+            # deactivated (0) or when regex matches AND excluding is activated (1)
+            if self._file_map[fid]['logfilter_regex']:
+                logfilter = self._file_map[fid]['logfilter_regex']
+                exclude_match = self._file_map[fid]['logfilter_exclude']
+                for current_log in list(events):
+                    if (logfilter.match(current_log) != None) == exclude_match:
+                        events.remove(current_log)
+
             if events:
                 self._callback_wrapper(filename=file.name, lines=events)
 
@@ -602,6 +611,8 @@ class Worker(object):
                     'line_in_sincedb': 0,
                     'multiline_regex_after': self._beaver_config.get_field('multiline_regex_after', fname),
                     'multiline_regex_before': self._beaver_config.get_field('multiline_regex_before', fname),
+                    'logfilter_regex': self._beaver_config.get_field('logfilter_regex', fname),
+                    'logfilter_exclude': int(self._beaver_config.get_field('logfilter_exclude', fname)),
                     'size_limit': self._beaver_config.get_field('size_limit', fname),
                     'update_time': None,
                     'active': True,

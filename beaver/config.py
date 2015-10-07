@@ -41,6 +41,10 @@ class BeaverConfig():
             'multiline_regex_after': '',
             'multiline_regex_before': '',
 
+            # only ship logs matching given regex (or exclude them)
+            'logfilter_regex': '',
+            'logfilter_exclude': '0',
+
             'message_format': '',
             'sincedb_write_interval': '15',
             'stat_interval': '1',
@@ -463,6 +467,9 @@ class BeaverConfig():
                 config['multiline_regex_after'] = re.compile(config['multiline_regex_after'])
             if config['multiline_regex_before']:
                 config['multiline_regex_before'] = re.compile(config['multiline_regex_before'])
+
+            if config['logfilter_regex']:
+                config['logfilter_regex'] = re.compile(config['logfilter_regex'])
 
             require_int = ['sincedb_write_interval', 'stat_interval', 'tail_lines']
             for k in require_int:
