@@ -74,6 +74,15 @@ class BaseTransport(object):
 
             return json.dumps(data)
 
+        def rawjsonmsgpack_formatter(data):
+            try:
+                json_data = json.loads(data[self._fields.get('message')])
+            except ValueError:
+                self._logger.warning("cannot parse as rawjson: {0}".format(self._fields.get('message')))
+                json_data = json.loads("{}")
+
+            return msgpack.packb(json_data)
+
         def gelf_formatter(data):
             message = data[self._fields.get('message')]
             short_message = message.split('\n', 1)[0]
@@ -103,6 +112,7 @@ class BaseTransport(object):
         self._formatters['msgpack'] = msgpack.packb
         self._formatters['raw'] = raw_formatter
         self._formatters['rawjson'] = rawjson_formatter
+        self._formatters['rawjsonmsgpack'] = rawjsonmsgpack_formatter
         self._formatters['string'] = string_formatter
         self._formatters['gelf'] = gelf_formatter
 
