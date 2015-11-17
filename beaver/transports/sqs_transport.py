@@ -14,12 +14,16 @@ class SqsTransport(BaseTransport):
 
         self._access_key = beaver_config.get('sqs_aws_access_key')
         self._secret_key = beaver_config.get('sqs_aws_secret_key')
+        self._profile = beaver_config.get('sqs_aws_profile_name')
         self._region = beaver_config.get('sqs_aws_region')
         self._queue_name = beaver_config.get('sqs_aws_queue')
         self._queue_owner_acct_id = beaver_config.get('sqs_aws_queue_owner_acct_id')
         self._bulk_lines = beaver_config.get('sqs_bulk_lines')
 
         try:
+            if self._profile:
+                self._connection = boto.sqs.connect_to_region(self._region,
+                                                              profile_name=self._profile)
             if self._access_key is None and self._secret_key is None:
                 self._connection = boto.sqs.connect_to_region(self._region)
             else:
