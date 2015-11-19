@@ -100,7 +100,7 @@ class BeaverConfig():
             'sqs_aws_region': 'us-east-1',
             'sqs_aws_queue': '',
             'sqs_aws_queue_owner_acct_id': '',
-            'sqs_bulk_lines': false,
+            'sqs_bulk_lines': False,
             'kinesis_aws_access_key': '', 
             'kinesis_aws_secret_key': '', 
             'kinesis_aws_region': 'us-east-1', 
