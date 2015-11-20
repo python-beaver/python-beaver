@@ -181,6 +181,9 @@ class BeaverConfig():
             'debug': '0',
             'daemonize': '0',
             'pid': '',
+
+            # Ignore files older then n days, use 0 to disable
+            'ignore_old_files': 0
         }
 
         self._configfile = args.config
@@ -326,7 +329,8 @@ class BeaverConfig():
                 'kafka_batch_n',
                 'kafka_batch_t',
                 'kafka_ack_timeout',
-                'number_of_consumer_processes'
+                'number_of_consumer_processes',
+                'ignore_old_files'
             ]
             for key in require_int:
                 if config[key] is not None:
