@@ -86,7 +86,7 @@ Beaver can optionally get data from a ``configfile`` using the ``-c`` flag. This
 * sqs_aws_secret_key: Can be left blank to use IAM Roles or AWS_SECRET_ACCESS_KEY environment variable (see: https://github.com/boto/boto#getting-started-with-boto)
 * sqs_aws_profile_name: Can be left blank to use IAM Roles AWS_SECRET_ACCESS_KEY environment variable, or fixed keypair (above) (see: https://github.com/boto/boto#getting-started-with-boto)
 * sqs_aws_region: Default ``us-east-1``. AWS Region
-* sqs_aws_queue: SQS queue (must exist)
+* sqs_aws_queue: SQS queue, or comma delimited list of queues (must exist)
 * sqs_aws_queue_owner_acct_id: Optional. Defaults ``None``. Account ID or Principal allowed to write to queue
 * kinesis_aws_access_key: Can be left blank to use IAM roles or AWS_ACCESS_KEY_ID environment variable (see: https://github.com/boto/boto#getting-started-with-boto)
 * kinesis_aws_secret_key: Can be left blank to use IAM Roles or AWS_SECRET_ACCESS_KEY environment variable (see: https://github.com/boto/boto#getting-started-with-boto)
@@ -496,7 +496,7 @@ SQS Transport::
     # /etc/beaver/conf
     [beaver]
     sqs_aws_region: us-east-1
-    sqs_aws_queue: logstash-input
+    sqs_aws_queue: logstash-input1,logstash-input2
     sqs_aws_access_key: <access_key>
     sqs_aws_secret_key: <secret_key>
 
