@@ -10,7 +10,11 @@ from unicode_dammit import unicode_dammit
 
 
 def run_queue(queue, beaver_config, logger=None):
-    signal.signal(signal.SIGTERM, signal.SIG_DFL)
+
+    def terminate(signalnum, frame):
+        logger.debug('Catch signal SIGTERM, queue _rlock is: {0}'.format(queue._rlock))
+
+    signal.signal(signal.SIGTERM, terminate)
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     signal.signal(signal.SIGQUIT, signal.SIG_DFL)
 
