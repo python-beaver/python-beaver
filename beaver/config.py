@@ -84,6 +84,7 @@ class BeaverConfig():
             'rabbitmq_ha_queue': os.environ.get('RABBITMQ_HA_QUEUE', '0'),
             'rabbitmq_key': os.environ.get('RABBITMQ_KEY', 'logstash-key'),
             'rabbitmq_exchange': os.environ.get('RABBITMQ_EXCHANGE', 'logstash-exchange'),
+            'rabbitmq_timeout': '1',
             'rabbitmq_delivery_mode': 1,
             'redis_url': os.environ.get('REDIS_URL', 'redis://localhost:6379/0'),
             'redis_namespace': os.environ.get('REDIS_NAMESPACE', 'logstash:beaver'),
@@ -181,6 +182,9 @@ class BeaverConfig():
             'debug': '0',
             'daemonize': '0',
             'pid': '',
+
+            # Ignore files older then n days, use 0 to disable
+            'ignore_old_files': 0
         }
 
         self._configfile = args.config
@@ -313,6 +317,7 @@ class BeaverConfig():
                 'max_queue_size',
                 'queue_timeout',
                 'rabbitmq_port',
+                'rabbitmq_timeout',
                 'rabbitmq_delivery_mode',
                 'respawn_delay',
                 'subprocess_poll_sleep',
@@ -325,7 +330,8 @@ class BeaverConfig():
                 'kafka_batch_n',
                 'kafka_batch_t',
                 'kafka_ack_timeout',
-                'number_of_consumer_processes'
+                'number_of_consumer_processes',
+                'ignore_old_files'
             ]
             for key in require_int:
                 if config[key] is not None:
