@@ -294,9 +294,14 @@ class Worker(object):
                 self._logger.debug("[{0}] - getting end position for {1}".format(fid, data['file'].name))
                 for encoding in ENCODINGS:
                     try:
-                        line_count = 0
-                        while data['file'].readline():
-                            line_count += 1
+                        #line_count = 0
+                        #while data['file'].readline():
+                        #    line_count += 1
+                        wc = os.popen("/usr/bin/wc -lc "+data['file'].name).readline()
+                        line_count = int(wc.split()[0])
+                        seek_postion = int(wc.split()[1])
+                        data['file'].seek(seek_postion)
+                        self._logger.info("[{0}] - file counted {1}:{2}:{3}".format(fid, data['file'].name, line_count, seek_postion))
                         break
                     except UnicodeDecodeError:
                         self._logger.debug("[{0}] - UnicodeDecodeError raised for {1} with encoding {2}".format(fid, data['file'].name, data['encoding']))
