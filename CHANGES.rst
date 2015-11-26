@@ -1,6 +1,19 @@
 Changelog
 =========
 
+35.0.1 (2015-11-26)
+-------------------
+
+- Remove autospec attribute. [Jose Diaz-Gonzalez]
+
+  For some reason, this broke attribute setting on the mock SelectConnection.
+
+
+- Fix pika version to version with all named parameters. [Jose Diaz-
+  Gonzalez]
+
+- Peg kafka to a known-good version. [Jose Diaz-Gonzalez]
+
 35.0.0 (2015-11-26)
 -------------------
 
