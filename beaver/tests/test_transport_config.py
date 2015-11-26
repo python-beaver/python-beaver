@@ -19,11 +19,12 @@ except ImportError, e:
     else:
         raise
 
+
 class DummyTransport(BaseTransport):
     pass
 
 
-with mock.patch('pika.adapters.SelectConnection', autospec=True) as mock_pika:
+with mock.patch('pika.adapters.SelectConnection') as mock_pika:
 
     class TransportConfigTests(unittest.TestCase):
         def setUp(self):
