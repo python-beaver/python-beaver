@@ -88,6 +88,7 @@ Beaver can optionally get data from a ``configfile`` using the ``-c`` flag. This
 * sqs_aws_region: Default ``us-east-1``. AWS Region
 * sqs_aws_queue: SQS queue, or comma delimited list of queues (must exist)
 * sqs_aws_queue_owner_acct_id: Optional. Defaults ``None``. Account ID or Principal allowed to write to queue
+* sqs_bulk_lines: Optional. Send multiple log entries in a single SQS message (cost saving benefit on larger environments)
 * kinesis_aws_access_key: Can be left blank to use IAM roles or AWS_ACCESS_KEY_ID environment variable (see: https://github.com/boto/boto#getting-started-with-boto)
 * kinesis_aws_secret_key: Can be left blank to use IAM Roles or AWS_SECRET_ACCESS_KEY environment variable (see: https://github.com/boto/boto#getting-started-with-boto)
 * kinesis_aws_region: Default ``us-east-1``. AWS Region
