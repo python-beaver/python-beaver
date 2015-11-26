@@ -1,6 +1,54 @@
 Changelog
 =========
 
+35.0.0 (2015-11-26)
+-------------------
+
+- Remove gitchangelog.rc. [Jose Diaz-Gonzalez]
+
+- Merging changes. [Jamie Cressey]
+
+- Added configuration option ignore_old_files. [Ryan Steele]
+
+  Files older then n days are ignored
+
+
+- Support writes into multiple redis namespaces. [Andrei Vaduva]
+
+- Adding support for multiple SQS queues. [Jamie Cressey]
+
+- Ensure log lines confirm to utf-8 standard. [Jamie Cressey]
+
+  We've come across cases when certain characters break Beaver transmitting log lines. This PR ensures all log lines correctly conform to UTF-8 when they're formatted for transmission.
+
+- Set timeout to 1 second. [Tim Stoop]
+
+  Apparantly, it needs to be an integer, so we cannot use pika's default
+  of .25.
+
+
+- Revert "Lower the default to .25, which is pika's default." [Tim
+  Stoop]
+
+  This reverts commit 17157990a272e458cc9253666f01c6002b84bda8.
+
+
+- Lower the default to .25, which is pika's default. [Tim Stoop]
+
+  As suggested by @kitchen.
+
+
+- Pieter's patch for rabbitmq timeout. [Tim Stoop]
+
+- Typo in config variable default value. [Jamie Cressey]
+
+- Fix regressed change. [Jamie Cressey]
+
+- Ability to send multiple log entries per single SQS message. [Jamie
+  Cressey]
+
+- Adding AWS profile authentication to SQS transport. [Jamie Cressey]
+
 34.1.0 (2015-08-10)
 -------------------
 
