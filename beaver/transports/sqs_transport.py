@@ -17,7 +17,7 @@ class SqsTransport(BaseTransport):
         self._profile = beaver_config.get('sqs_aws_profile_name')
         self._region = beaver_config.get('sqs_aws_region')
         self._queue_owner_acct_id = beaver_config.get('sqs_aws_queue_owner_acct_id')
-        self._queues = beaver_config.get('sqs_aws_queue').split(',')
+        self._queue = beaver_config.get('sqs_aws_queue').split(',')
         self._bulk_lines = beaver_config.get('sqs_bulk_lines')
 
         try:
@@ -35,16 +35,16 @@ class SqsTransport(BaseTransport):
                 self._logger.warn('Unable to connect to AWS - check your AWS credentials')
                 raise TransportException('Unable to connect to AWS - check your AWS credentials')
 
-            self._queue = {}
-            for queue in self._queues:
+            self._queues = {}
+            for queue in self._queue:
                 self._logger.debug('Attempting to load SQS queue: {}'.format(queue))
                 if self._queue_owner_acct_id is None:
-                    self._queue[queue] = self._connection.get_queue(queue)
+                    self._queues[queue] = self._connection.get_queue(queue)
                 else:
-                    self._queue[queue] = self._connection.get_queue(queue, 
+                    self._queues[queue] = self._connection.get_queue(queue, 
                                                              owner_acct_id=self._queue_owner_acct_id)
 
-                if self._queue[queue] is None:
+                if self._queues[queue] is None:
                     raise TransportException('Unable to access queue with name {0}'.format(queue))
 
                 self._logger.debug('Successfully loaded SQS queue: {}'.format(queue))
@@ -85,6 +85,7 @@ class SqsTransport(BaseTransport):
                 message_batch = ''
                 message_count = 0
                 message_batch_size = 0
+
             # SQS can only handle up to 10 messages in batch send and it can not exceed 256KiB (see above)
             elif (len(message_batch) > 0) and (((message_batch_size + message_size) >= message_batch_size_max) or (len(message_batch) == 10)):
                 self._logger.debug('Flushing {0} messages to SQS queue {1} bytes'.format(len(message_batch), message_batch_size))
@@ -111,24 +112,25 @@ class SqsTransport(BaseTransport):
         return True
 
     def _send_message(self, msg):
-        try:
-            msg = '[{0}]'.format(msg.rstrip(','))
-            m = RawMessage()
-            m.set_body(msg)
-            result = self._queue.write(m)
-            if not result:
-                self._logger.error('Error occurred sending message to SQS queue {0}. result: {1}'.format(
-                    self._queue_name, result))
-                raise TransportException('Error occurred sending message to queue {0}'.format(self._queue_name))
-        except Exception, e:
-            self._logger.exception('Exception occurred sending message to SQS queue')
-            raise TransportException(e.message)
+        for queue in self._queues:
+            try:
+                msg = '[{0}]'.format(msg.rstrip(','))
+                m = RawMessage()
+                m.set_body(msg)
+                result = self._queues[queue].write(m)
+                if not result:
+                    self._logger.error('Error occurred sending message to SQS queue {0}. result: {1}'.format(
+                        self._queue_name, result))
+                    raise TransportException('Error occurred sending message to queue {0}'.format(self._queue_name))
+            except Exception, e:
+                self._logger.exception('Exception occurred sending message to SQS queue')
+                raise TransportException(e.message)
 
     def _send_message_batch(self, message_batch):
-        for queue in self._queue:
+        for queue in self._queues:
             try:
                 self._logger.debug('Attempting to push batch message to SQS queue: {}'.format(queue))
-                result = self._queue[queue].write_batch(message_batch)
+                result = self._queues[queue].write_batch(message_batch)
                 if not result:
                     self._logger.error('Error occurred sending messages to SQS queue {0}. result: {1}'.format(
                         queue, result))
