@@ -1,6 +1,12 @@
 Changelog
 =========
 
+35.0.2 (2015-12-03)
+-------------------
+
+- Write to the SQS object not the dict when using sqs_bulk_lines flag.
+  [Jamie Cressey]
+
 35.0.1 (2015-11-26)
 -------------------
 
