@@ -67,6 +67,7 @@ class Tail(BaseLog):
         self._last_activity = time.time()
         self._multiline_regex_after = beaver_config.get_field('multiline_regex_after', filename)
         self._multiline_regex_before = beaver_config.get_field('multiline_regex_before', filename)
+        self._multiline_regex_begin = beaver_config.get_field('multiline_regex_begin', filename)
 
         self._update_file()
         if self.active:
@@ -251,13 +252,14 @@ class Tail(BaseLog):
 
             self._last_activity = time.time()
 
-            if self._multiline_regex_after or self._multiline_regex_before:
+            if self._multiline_regex_after or self._multiline_regex_before or self._multiline_regex_begin:
                 # Multiline is enabled for this file.
                 events = multiline_merge(
                         lines,
                         self._current_event,
                         self._multiline_regex_after,
-                        self._multiline_regex_before)
+                        self._multiline_regex_before,
+                        self._multiline_regex_begin)
             else:
                 events = lines
 
@@ -336,13 +338,14 @@ class Tail(BaseLog):
             self._log_debug('tailing {0} lines'.format(self._tail_lines))
             lines = self.tail(self._filename, encoding=self._encoding, window=self._tail_lines, position=current_position)
             if lines:
-                if self._multiline_regex_after or self._multiline_regex_before:
+                if self._multiline_regex_after or self._multiline_regex_before or self._multiline_regex_begin:
                     # Multiline is enabled for this file.
                     events = multiline_merge(
                             lines,
                             self._current_event,
                             self._multiline_regex_after,
-                            self._multiline_regex_before)
+                            self._multiline_regex_before,
+                            self._multiline_regex_begin)
                 else:
                     events = lines
                 self._callback_wrapper(events)

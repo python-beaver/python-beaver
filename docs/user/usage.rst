@@ -139,6 +139,7 @@ The following configuration keys are for multi-line events support and are per f
 
 * multiline_regex_after: Default ``None``. If a line match this regular expression, it will be merged with next line(s).
 * multiline_regex_before: Default ``None``. If a line match this regular expression, it will be merged with previous line(s).
+* multiline_regex_begin: Default ``None``.  If a line doesn't match this regular expression, it will be merged with previous line(s).
 
 The following can also be passed via argparse. Argparse will override all options in the configfile, when specified.
 

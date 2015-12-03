@@ -155,7 +155,7 @@ def _replace_all(path, replacements):
     return path
 
 
-def multiline_merge(lines, current_event, re_after, re_before):
+def multiline_merge(lines, current_event, re_after, re_before, re_begin):
     """ Merge multi-line events based.
 
         Some event (like Python trackback or Java stracktrace) spawn
@@ -165,6 +165,8 @@ def multiline_merge(lines, current_event, re_after, re_before):
         If a line match re_after, it will be merged with next line.
 
         If a line match re_before, it will be merged with previous line.
+
+        If a line don't match re_begin, it will be merged with previous line.
 
         This function return a list of complet event. Note that because
         we don't know if an event is complet before another new event
@@ -178,6 +180,8 @@ def multiline_merge(lines, current_event, re_after, re_before):
         if re_before and re_before.match(line):
             current_event.append(line)
         elif re_after and current_event and re_after.match(current_event[-1]):
+            current_event.append(line)
+        elif re_begin and not re_begin.match(line):
             current_event.append(line)
         else:
             if current_event:

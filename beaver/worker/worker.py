@@ -158,13 +158,14 @@ class Worker(object):
 
             self._file_map[fid]['last_activity'] = time.time()
 
-            if self._file_map[fid]['multiline_regex_after'] or self._file_map[fid]['multiline_regex_before']:
+            if self._file_map[fid]['multiline_regex_after'] or self._file_map[fid]['multiline_regex_before'] or self._file_map[fid]['multiline_regex_begin']:
                 # Multiline is enabled for this file.
                 events = multiline_merge(
                         lines,
                         self._file_map[fid]['current_event'],
                         self._file_map[fid]['multiline_regex_after'],
-                        self._file_map[fid]['multiline_regex_before'])
+                        self._file_map[fid]['multiline_regex_before'],
+                        self._file_map[fid]['multiline_regex_begin'])
             else:
                 events = lines
 
@@ -331,13 +332,14 @@ class Worker(object):
 
                 lines = self.tail(data['file'].name, encoding=encoding, window=tail_lines, position=current_position)
                 if lines:
-                    if self._file_map[fid]['multiline_regex_after'] or self._file_map[fid]['multiline_regex_before']:
+                    if self._file_map[fid]['multiline_regex_after'] or self._file_map[fid]['multiline_regex_before'] or self._file_map[fid]['multiline_regex_begin']:
                         # Multiline is enabled for this file.
                         events = multiline_merge(
                                 lines,
                                 self._file_map[fid]['current_event'],
                                 self._file_map[fid]['multiline_regex_after'],
-                                self._file_map[fid]['multiline_regex_before'])
+                                self._file_map[fid]['multiline_regex_before'],
+                                self._file_map[fid]['multiline_regex_begin'])
                     else:
                         events = lines
                     self._callback_wrapper(filename=data['file'].name, lines=events)
@@ -606,6 +608,7 @@ class Worker(object):
                     'line_in_sincedb': 0,
                     'multiline_regex_after': self._beaver_config.get_field('multiline_regex_after', fname),
                     'multiline_regex_before': self._beaver_config.get_field('multiline_regex_before', fname),
+                    'multiline_regex_begin': self._beaver_config.get_field('multiline_regex_begin', fname),
                     'size_limit': self._beaver_config.get_field('size_limit', fname),
                     'update_time': None,
                     'active': True,
