@@ -38,6 +38,24 @@ optional arguments::
     -v, --version         output version and quit
     --fqdn                use the machine's FQDN for source_host
 
+Beaverctl Usage
+---------------
+
+Beaverctl allows users of beaver to monitor the running status of a beaver
+instance from the same machine. Users are avke to query the 
+current event queue length, and the log transport connection status in use. 
+
+usage::
+        beaverctl backlog       Print the current event queue size.
+        beaverctl is-connected  Print connection status of beaver transport.
+
+Optional Arguments::
+        beaverctl --help -h             Print help information
+        beaverctl [COMMAND] --help -h   Print help informaiton for COMMAND
+
+
+
+
 Configuration File Options
 --------------------------
 

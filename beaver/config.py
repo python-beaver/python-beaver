@@ -125,6 +125,9 @@ class BeaverConfig():
             'stomp_password' : None,
             'stomp_queue' : 'queue/logstash',
 
+            #beaverctl
+            'beaverctl_socket_path': '/var/run/beaverctl.sock',
+
             # exponential backoff
             'respawn_delay': '3',
             'max_failure': '7',

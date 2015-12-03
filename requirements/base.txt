@@ -7,3 +7,4 @@ msgpack-pure>=0.1.3
 pika>=0.9.14
 python-daemon>=1.5.2,<=1.6.1
 redis>=2.7.5
+click>=4.0

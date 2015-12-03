@@ -4,14 +4,12 @@ import Queue
 import signal
 import os
 import time
-import threading
 
 from beaver.config import BeaverConfig
-from beaver.runqueue import RunQueue
+from beaver.run_queue import run_queue
 from beaver.ssh_tunnel import create_ssh_tunnel
 from beaver.utils import REOPEN_FILES, setup_custom_logger
 from beaver.worker.tail_manager import TailManager
-from beaver.stubfactory import StubFactory
 
 
 def run(args=None):
@@ -29,25 +27,17 @@ def run(args=None):
     manager_proc = None
     ssh_tunnel = create_ssh_tunnel(beaver_config, logger=logger)
 
-    beaverctl = StubFactory.create_beaverctl_server()
-    beaverctl_thread = threading.Thread(target=beaverctl.start_service_loop)
-
     def queue_put(*args):
-        """Put args into back of queue, blocking"""
         return queue.put(*args)
 
     def queue_put_nowait(*args):
-        """Put args into back of queue, non-blocking"""
         return queue.put_nowait(*args)
 
     def cleanup(signalnum, frame):
-        """Cleans up resources at the end of execution"""
         if signalnum is not None:
-            sig_name = \
-                tuple((v) for v, k in signal.__dict__.iteritems() \
-                if k == signalnum)[0]
-            logger.info('{0} detected'.format(sig_name))
-            logger.info('Shutting down. Please wait...')
+            sig_name = tuple((v) for v, k in signal.__dict__.iteritems() if k == signalnum)[0]
+            logger.info("{0} detected".format(sig_name))
+            logger.info("Shutting down. Please wait...")
         else:
             logger.info('Worker process cleanup in progress...')
 
@@ -58,9 +48,6 @@ def run(args=None):
 
         if manager_proc is not None:
             try:
-                beaverctl.stop_service_loop()
-                beaverctl_thread.join()
-
                 manager_proc.terminate()
                 manager_proc.join()
             except RuntimeError:
@@ -79,20 +66,14 @@ def run(args=None):
     signal.signal(signal.SIGQUIT, cleanup)
 
     def create_queue_consumer():
-        """Creates and runs, RunQueue and starts beaverctl"""
-        run_queue = RunQueue(queue, beaver_config, logger)
-        proc = multiprocessing.Process(target=run_queue.loop)
-        beaverctl.set_dispatcher(run_queue)
-
-        if not beaverctl_thread.is_alive():
-            beaverctl_thread.start()
+        process_args = (queue, beaver_config, logger)
+        proc = multiprocessing.Process(target=run_queue, args=process_args)
 
         logger.info("Starting queue consumer")
         proc.start()
         return proc
 
     def create_queue_producer():
-        """Creates and runs TailManager queue consumer"""
         manager = TailManager(
             beaver_config=beaver_config,
             queue_consumer_function=create_queue_consumer,

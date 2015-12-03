@@ -61,9 +61,14 @@ setup(
         'beaver.dispatcher',
         'beaver.tests',
         'beaver.transports',
-        'beaver.worker'
+        'beaver.worker',
+        'beaver.beaverctlstub',
+        'beaver.stubfactory'
     ],
-    scripts=['bin/beaver'],
+    scripts=[
+        'bin/beaver',
+        'bin/beaverctl'
+    ],
     url='http://github.com/josegonzalez/beaver',
     license='LICENSE.txt',
     classifiers=[
