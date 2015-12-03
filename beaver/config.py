@@ -4,6 +4,7 @@ import os
 import re
 import socket
 import warnings
+import types
 
 from conf_d import Configuration
 from beaver.utils import eglob
@@ -40,6 +41,10 @@ class BeaverConfig():
             # multiline events support. Default is disabled
             'multiline_regex_after': '',
             'multiline_regex_before': '',
+
+            # filter regex for only include lines that appear in the regex. Default is disabled
+            'include_filter_regex': '',
+
 
             'message_format': '',
             'sincedb_write_interval': '15',
@@ -382,6 +387,11 @@ class BeaverConfig():
 
             return config
 
+        def _aslist(value):
+            if isinstance(value, types.StringType):
+                value = filter(None, [x.strip() for x in value.splitlines()])
+            return list(value)
+
         def _section_parser(config, raise_exceptions=True):
             '''Parse a given INI-style config file using ConfigParser module.
             Stanza's names match file names, and properties are defaulted as in
@@ -468,6 +478,14 @@ class BeaverConfig():
                 config['multiline_regex_after'] = re.compile(config['multiline_regex_after'])
             if config['multiline_regex_before']:
                 config['multiline_regex_before'] = re.compile(config['multiline_regex_before'])
+
+            if config['include_filter_regex']:
+                compliedPatterns = []
+                # break down the config into a list which we can pass on later
+                for pattern in _aslist(config['include_filter_regex']):
+                    self._logger.debug('Found List of Regex for include filter: %s' % pattern)
+                    compliedPatterns.append(re.compile(pattern))
+                config['include_filter_regex'] = compliedPatterns
 
             require_int = ['sincedb_write_interval', 'stat_interval', 'tail_lines']
             for k in require_int:
