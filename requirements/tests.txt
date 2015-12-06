@@ -3,3 +3,4 @@ funcsigs
 mock
 nose
 six
+unittest2
