@@ -1,5 +1,8 @@
 sudo: false
 language: python
+branches:
+  except:
+    - gh-pages
 python:
   - "2.6"
   - "2.7"
@@ -9,4 +12,7 @@ addons:
     - build-essential
     - libzmq-dev
 install: "pip install -r requirements/zeromq.txt -r requirements/tests.txt --use-mirrors"
-script: nosetests
+script:
+  nosetests --with-coverage --cover-package=beaver
+after_success:
+  coveralls

@@ -5,6 +5,9 @@ Beaver
 .. image:: https://travis-ci.org/josegonzalez/python-beaver.svg?branch=master
     :target: https://travis-ci.org/josegonzalez/python-beaver
 
+.. image:: https://coveralls.io/repos/josegonzalez/python-beaver/badge.svg?branch=coverage_tests&service=github
+    :target: https://coveralls.io/github/josegonzalez/python-beaver?branch=coverage_tests
+
 python daemon that munches on logs and sends their contents to logstash
 
 Requirements
