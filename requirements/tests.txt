@@ -4,3 +4,4 @@ mock
 nose
 six
 unittest2
+coveralls
