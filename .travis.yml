@@ -11,7 +11,7 @@ addons:
     packages:
     - build-essential
     - libzmq-dev
-install: "pip install -r requirements/zeromq.txt -r requirements/tests.txt --use-mirrors"
+install: ./install-dependencies.sh
 script:
   nosetests --with-coverage --cover-package=beaver
 after_success:
