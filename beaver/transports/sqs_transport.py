@@ -37,7 +37,7 @@ class SqsTransport(BaseTransport):
 
             self._queues = {}
             for queue in self._queue:
-                self._logger.debug('Attempting to load SQS queue: {}'.format(queue))
+                self._logger.debug('Attempting to load SQS queue: {0}'.format(queue))
                 if self._queue_owner_acct_id is None:
                     self._queues[queue] = self._connection.get_queue(queue)
                 else:
@@ -47,7 +47,7 @@ class SqsTransport(BaseTransport):
                 if self._queues[queue] is None:
                     raise TransportException('Unable to access queue with name {0}'.format(queue))
 
-                self._logger.debug('Successfully loaded SQS queue: {}'.format(queue))
+                self._logger.debug('Successfully loaded SQS queue: {0}'.format(queue))
         except Exception, e:
             raise TransportException(e.message)
 
@@ -129,13 +129,13 @@ class SqsTransport(BaseTransport):
     def _send_message_batch(self, message_batch):
         for queue in self._queues:
             try:
-                self._logger.debug('Attempting to push batch message to SQS queue: {}'.format(queue))
+                self._logger.debug('Attempting to push batch message to SQS queue: {0}'.format(queue))
                 result = self._queues[queue].write_batch(message_batch)
                 if not result:
                     self._logger.error('Error occurred sending messages to SQS queue {0}. result: {1}'.format(
                         queue, result))
                     raise TransportException('Error occurred sending message to queue {0}'.format(queue))
-                self._logger.debug('Successfully pushed batch message to SQS queue: {}'.format(queue))
+                self._logger.debug('Successfully pushed batch message to SQS queue: {0}'.format(queue))
             except Exception, e:
                 self._logger.exception('Exception occurred sending batch to SQS queue')
                 raise TransportException(e.message)
