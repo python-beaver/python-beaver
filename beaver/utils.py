@@ -45,7 +45,6 @@ def parse_args():
     parser.add_argument('-p', '--path', help='path to log files', default=None, dest='path')
     parser.add_argument('-P', '--pid', help='path to pid file', default=None, dest='pid')
     parser.add_argument('-t', '--transport', help='log transport method', dest='transport', default=None, choices=['kafka', 'mqtt', 'rabbitmq', 'redis', 'sns', 'sqs', 'kinesis', 'stdout', 'tcp', 'udp', 'zmq', 'http'])
-    parser.add_argument('-e', '--experimental', help='use experimental version of beaver', dest='experimental', default=False, action='store_true')
     parser.add_argument('-v', '--version', help='output version and quit', dest='version', default=False, action='store_true')
     parser.add_argument('--fqdn', help='use the machine\'s FQDN for source_host', dest='fqdn', default=False, action='store_true')
 

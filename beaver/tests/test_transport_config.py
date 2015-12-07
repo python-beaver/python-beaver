@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
+import sys
+if sys.version_info < (2, 7):
+    import unittest2 as unittest
+else:
+    import unittest
+
 import fakeredis
 import logging
 import mock
 import tempfile
-import unittest
 
 import beaver
 from beaver.config import BeaverConfig
@@ -19,11 +24,12 @@ except ImportError, e:
     else:
         raise
 
+
 class DummyTransport(BaseTransport):
     pass
 
 
-with mock.patch('pika.adapters.SelectConnection', autospec=True) as mock_pika:
+with mock.patch('pika.adapters.SelectConnection') as mock_pika:
 
     class TransportConfigTests(unittest.TestCase):
         def setUp(self):

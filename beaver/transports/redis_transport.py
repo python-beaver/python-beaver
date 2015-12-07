@@ -77,10 +77,12 @@ class RedisTransport(BaseTransport):
         if kwargs.get('timestamp', False):
             del kwargs['timestamp']
 
-        namespace = self._beaver_config.get_field('redis_namespace', filename)
-        if not namespace:
-            namespace = self._namespace
-        self._logger.debug('Got namespace: ' + namespace)
+        namespaces = self._beaver_config.get_field('redis_namespace', filename)
+        if not namespaces:
+            namespaces = self._namespace
+        namespaces = namespaces.split(",")
+
+        self._logger.debug('Got namespaces: '.join(namespaces))
 
         data_type = self._data_type
         self._logger.debug('Got data type: ' + data_type)
@@ -97,10 +99,11 @@ class RedisTransport(BaseTransport):
         callback_method = callback_map[data_type]
 
         for line in lines:
-            callback_method(
-                namespace,
-                self.format(filename, line, timestamp, **kwargs)
-            )
+            for namespace in namespaces:
+                callback_method(
+                    namespace.strip(),
+                    self.format(filename, line, timestamp, **kwargs)
+                )
 
         try:
             pipeline.execute()

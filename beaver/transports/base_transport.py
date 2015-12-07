@@ -116,6 +116,7 @@ class BaseTransport(object):
 
     def format(self, filename, line, timestamp, **kwargs):
         """Returns a formatted log line"""
+        line = unicode(line.encode("utf-8")[:32766], "utf-8", errors="ignore")
         formatter = self._beaver_config.get_field('format', filename)
         if formatter not in self._formatters:
             formatter = self._default_formatter

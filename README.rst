@@ -5,6 +5,9 @@ Beaver
 .. image:: https://travis-ci.org/josegonzalez/python-beaver.svg?branch=master
     :target: https://travis-ci.org/josegonzalez/python-beaver
 
+.. image:: https://coveralls.io/repos/josegonzalez/python-beaver/badge.svg?branch=master&service=github
+    :target: https://coveralls.io/github/josegonzalez/python-beaver?branch=master
+
 python daemon that munches on logs and sends their contents to logstash
 
 Requirements
@@ -20,11 +23,11 @@ Using PIP:
 
 From Github::
 
-    pip install git+git://github.com/josegonzalez/python-beaver.git@34.1.0#egg=beaver
+    pip install git+git://github.com/josegonzalez/python-beaver.git@35.0.2#egg=beaver
 
 From PyPI::
 
-    pip install beaver==34.1.0
+    pip install beaver==35.0.2
 
 Documentation
 =============

@@ -3,3 +3,6 @@ funcsigs
 mock
 nose
 six
+unittest2
+coveralls
+moto
