@@ -1,5 +1,4 @@
 fakeredis>=0.4.1
-kafka-python
 funcsigs
 mock
 nose
