@@ -327,6 +327,7 @@ class BeaverConfig():
                 'wait_timeout',
                 'zeromq_hwm',
                 'logstash_version',
+                'kafka_codec',
                 'kafka_batch_n',
                 'kafka_batch_t',
                 'kafka_ack_timeout',
