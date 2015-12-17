@@ -307,7 +307,7 @@ class BeaverConfig():
                     config[key] = None
 
             require_bool = ['debug', 'daemonize', 'fqdn', 'rabbitmq_exchange_durable', 'rabbitmq_queue_durable',
-                            'rabbitmq_ha_queue', 'rabbitmq_ssl', 'tcp_ssl_enabled', 'tcp_ssl_verify']
+                            'rabbitmq_ha_queue', 'rabbitmq_ssl', 'kafka_async', 'tcp_ssl_enabled', 'tcp_ssl_verify']
 
             for key in require_bool:
                 config[key] = bool(int(config[key]))
