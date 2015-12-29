@@ -7,7 +7,7 @@ import ast
 
 from beaver.transports.base_transport import BaseTransport
 from beaver.transports.exception import TransportException
-from redis.sentinel import Sentinel
+from redis.sentinel import *
 
 
 class SentinelTransport(BaseTransport):
