@@ -71,14 +71,14 @@ class SentinelTransport(BaseTransport):
             self._master.connection_pool.disconnect()
             return False
 
-         def callback(self, filename, lines, **kwargs):
-             """Sends log lines to redis servers"""
+        def callback(self, filename, lines, **kwargs):
+            """Sends log lines to redis servers"""
 
-             self._logger.debug('Redis transport called')
+            self._logger.debug('Redis transport called')
 
-             timestamp = self.get_timestamp(**kwargs)
-             if kwargs.get('timestamp', False):
-                 del kwargs['timestamp']
+            timestamp = self.get_timestamp(**kwargs)
+            if kwargs.get('timestamp', False):
+                del kwargs['timestamp']
 
             namespaces = self._beaver_config.get_field('redis_namespace', filename)
 
