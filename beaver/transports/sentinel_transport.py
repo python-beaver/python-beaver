@@ -17,7 +17,7 @@ class SentinelTransport(BaseTransport):
     def __init__(self, beaver_config, logger=None):
         super(SentinelTransport, self).__init__(beaver_config, logger=logger)
 
-        nodes = ast.literal_eval(beaver_config.get('sentinel_nodes'))
+        self._nodes = ast.literal_eval(beaver_config.get('sentinel_nodes'))
         self._namespace = beaver_config.get('redis_namespace')
         self._sentinel_master_name = beaver_config.get('sentinel_master_name')
 
@@ -26,7 +26,7 @@ class SentinelTransport(BaseTransport):
                                    self.CHANNEL_DATA_TYPE]:
             raise TransportException('Unknown Redis data type')
 
-        self._sentinel = Sentinel(nodes, socket_timeout=0.1)
+        self._sentinel = Sentinel(self._nodes, socket_timeout=0.1)
         self._get_master()
 
     def _get_master(self):
@@ -50,7 +50,7 @@ class SentinelTransport(BaseTransport):
     def _is_reachable(self):
         """Check if one of the given sentinel servers are reachable"""
 
-        for node in nodes:
+        for node in self._nodes:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
                 result = sock.connect_ex(node)
                 return (result == 0)
