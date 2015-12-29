@@ -42,8 +42,8 @@ class SentinelTransport(BaseTransport):
                 return True
         except MasterNotFoundError:
             self._logger.warn('Master not found')
-        except Exception:
-            self._logger.warn('Master not found')
+        except Exception, ex:
+            self._logger.warn('Error in _check_connection(): %s' %str(ex))
 
         return False
 
