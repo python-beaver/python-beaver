@@ -38,7 +38,8 @@ class SentinelTransport(BaseTransport):
 
         try:
             if self._is_reachable():
-                self._sentinel.discover_master(self._sentinel_master_name)
+                master_info = self._sentinel.discover_master(self._sentinel_master_name)
+                self._logger.info('Master found: ' + str(master_info))
                 return True
         except MasterNotFoundError:
             self._logger.warn('Master not found')
