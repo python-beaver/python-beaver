@@ -2,6 +2,7 @@ Contributing Code
 =================
 
 -  A good patch:
+
    -  is clear.
    -  works across all supported versions of Python.
    -  has comments included as needed.
