@@ -1,3 +1,9 @@
+python-beaver (36.0.0) stable; urgency=low
+
+  * Release version 36.0.0
+
+ -- Jose Diaz-Gonzalez <release@josediazgonzalez.com>  Tue, 15 Dec 2015 22:12:18 +0000
+
 python-beaver (31) stable; urgency=low
 
   * Initial public debian release

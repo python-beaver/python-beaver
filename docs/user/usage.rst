@@ -117,6 +117,7 @@ The following are used for instances when a TransportException is thrown - Trans
 
 * respawn_delay: Default ``3``. Initial respawn delay for exponential backoff
 * max_failure: Default ``7``. Max failures before exponential backoff terminates
+* max_queue_size: Default ``100``. Max log entries Beaver can store in it's queue before backing off until they have been transmitted
 
 The following configuration keys are for SinceDB support. Specifying these will enable saving the current line number in an sqlite database. This is useful for cases where you may be restarting the Beaver process, such as during a logrotate.
 

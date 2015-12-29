@@ -1,6 +1,48 @@
 Changelog
 =========
 
+36.0.0 (2015-12-15)
+-------------------
+
+- Adding max_queue_size to docs. [Jamie Cressey]
+
+- Pinning kafka-python version. [Jamie Cressey]
+
+- Ensure we test against the latest version of kafka-python. [Jamie
+  Cressey]
+
+- Attempt to reconnect to Kafka on failure. [Jamie Cressey]
+
+- Adding SQS tests. [Jamie Cressey]
+
+- Exclude gh-pages from TravisCI runs. [Jamie Cressey]
+
+- Adding coverage results to README. [Jamie Cressey]
+
+- Adding coverage tests. [Jamie Cressey]
+
+- We say Py2.6+ is a requirement, but do the tests actually pass on 2.6?
+  [Jamie Cressey]
+
+- Dont test py3, yet... [Jamie Cressey]
+
+- Testing python 3.x. [Jamie Cressey]
+
+- Using new travis config. [Jamie Cressey]
+
+- Added requests as a dependency. [Jose Diaz-Gonzalez]
+
+  Closes #304
+
+- Bump debian version on release. [David Moravek]
+
+- Support both older and newer pika. [Tim Stoop]
+
+- Make reconnecting to a lost RabbitMQ work. [Tim Stoop]
+
+- Remove old worker code in favor of the - now non-experimental -
+  TailManager. [Jose Diaz-Gonzalez]
+
 35.0.2 (2015-12-03)
 -------------------
 

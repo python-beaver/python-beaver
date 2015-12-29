@@ -19,6 +19,7 @@ class KafkaTransport(BaseTransport):
             self._kafka_config[key] = beaver_config.get('kafka_' + key)
 
         try:
+            self._connect()
             self._client = KafkaClient(self._kafka_config['hosts'], self._kafka_config['client_id'])
             self._client.ensure_topic_exists(self._kafka_config['topic'])
             self._key = self._kafka_config['key']
@@ -48,7 +49,6 @@ class KafkaTransport(BaseTransport):
         except Exception, e:
             raise TransportException(e.message)
 
-
     def callback(self, filename, lines, **kwargs):
         """publishes lines one by one to the given topic"""
         timestamp = self.get_timestamp(**kwargs)
@@ -77,6 +77,16 @@ class KafkaTransport(BaseTransport):
                     raise TransportException(e.strerror)
                 except AttributeError:
                     raise TransportException('Unspecified exception encountered')  # TRAP ALL THE THINGS!
+
+    def _connect(self):
+        try:
+            self._client = KafkaClient(self._kafka_config['hosts'], self._kafka_config['client_id'])
+            self._client.ensure_topic_exists(self._kafka_config['topic'])
+        except Exception, e:
+            raise TransportException(e.message)
+
+    def reconnect(self):
+            self._connect()
 
     def interrupt(self):
         if self._prod:
