@@ -50,13 +50,11 @@ class SentinelTransport(BaseTransport):
     def _is_reachable(self):
         """Check if one of the given sentinel servers are reachable"""
 
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-        for node in nodes:
-            result = sock.connect_ex(node)
-
-            if result == 0:
-                return True
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            for node in nodes:
+                result = sock.connect_ex(node)
+                if result == 0:
+                    return True
 
         self._logger.warn('Cannot connect to one of the given sentinel servers')
         return False
@@ -67,7 +65,7 @@ class SentinelTransport(BaseTransport):
     def invalidate(self):
         """Invalidates the current transport and disconnects all redis connections"""
 
-        super(RedisTransport, self).invalidate()
+        super(SentinelTransport, self).invalidate()
         self._master.connection_pool.disconnect()
         return False
 
