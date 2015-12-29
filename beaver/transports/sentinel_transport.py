@@ -37,7 +37,7 @@ class SentinelTransport(BaseTransport):
         """Checks if the given sentinel servers return the master"""
 
         try:
-            if self._sentinel_is_reachable():
+            if self._is_reachable():
                 self._sentinel.discover_master(self._sentinel_master_name)
                 return True
         except MasterNotFoundError:
