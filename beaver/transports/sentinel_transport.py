@@ -43,7 +43,7 @@ class SentinelTransport(BaseTransport):
         except MasterNotFoundError:
             self._logger.warn('Master not found')
         except Exception, ex:
-            self._logger.warn('Error in _check_connection(): %s' %str(ex))
+            self._logger.warn('Error in _check_connection(): %s' %traceback.print_exc())
 
         return False
 
@@ -53,8 +53,7 @@ class SentinelTransport(BaseTransport):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             for node in nodes:
                 result = sock.connect_ex(node)
-                if result == 0:
-                    return True
+                return (result == 0)
 
         self._logger.warn('Cannot connect to one of the given sentinel servers')
         return False
