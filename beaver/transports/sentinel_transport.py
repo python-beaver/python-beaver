@@ -40,12 +40,12 @@ class SentinelTransport(BaseTransport):
                 if self._sentinel_is_reachable():
                     self._sentinel.discover_master(self._sentinel_master_name)
                     return True
-                except MasterNotFoundError:
-                    self._logger.warn('Master not found')
-                except Exception:
-                    self._logger.warn('Master not found')
+            except MasterNotFoundError:
+                self._logger.warn('Master not found')
+            except Exception:
+                self._logger.warn('Master not found')
 
-                return False
+            return False
 
         def _is_reachable(self):
             """Check if one of the given sentinel servers are reachable"""
