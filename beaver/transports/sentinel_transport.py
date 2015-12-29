@@ -68,7 +68,7 @@ class SentinelTransport(BaseTransport):
             """Invalidates the current transport and disconnects all redis connections"""
 
             super(RedisTransport, self).invalidate()
-                self._master.connection_pool.disconnect()
+            self._master.connection_pool.disconnect()
             return False
 
          def callback(self, filename, lines, **kwargs):
