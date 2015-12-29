@@ -1,13 +1,10 @@
-============ Contributing ============
-
 Contributing Code
 =================
 
 -  A good patch:
-
--  is clear.
--  works across all supported versions of Python.
--  has comments included as needed.
+   -  is clear.
+   -  works across all supported versions of Python.
+   -  has comments included as needed.
 
 -  A test case that demonstrates the previous flaw that now passes with
    the included patch.
