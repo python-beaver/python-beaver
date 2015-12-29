@@ -3,6 +3,7 @@ import redis
 import traceback
 import time
 import socket
+import ast
 
 from beaver.transports.base_transport import BaseTransport
 from beaver.transports.exception import TransportException
@@ -16,7 +17,7 @@ class SentinelTransport(BaseTransport):
     def __init__(self, beaver_config, logger=None):
         super(SentinelTransport, self).__init__(beaver_config, logger=logger)
 
-        nodes = beaver_config.get('sentinel_nodes')
+        nodes = ast.literal_eval(beaver_config.get('sentinel_nodes'))
         self._namespace = beaver_config.get('redis_namespace')
         self._sentinel_master_name = beaver_config.get('sentinel_master_name')
 
@@ -28,86 +29,85 @@ class SentinelTransport(BaseTransport):
         self._sentinel = Sentinel(nodes, socket_timeout=0.1)
         self._get_master()
 
-        def _get_master(self):
-            if self._check_connection():
-                self._master = self._sentinel.master_for(self._sentinel_master_name, socket_timeout=0.1)
+    def _get_master(self):
+        if self._check_connection():
+            self._master = self._sentinel.master_for(self._sentinel_master_name, socket_timeout=0.1)
 
+    def _check_connection(self):
+        """Checks if the given sentinel servers return the master"""
 
-        def _check_connection(self):
-            """Checks if the given sentinel servers return the master"""
+        try:
+            if self._sentinel_is_reachable():
+                self._sentinel.discover_master(self._sentinel_master_name)
+                return True
+        except MasterNotFoundError:
+            self._logger.warn('Master not found')
+        except Exception:
+            self._logger.warn('Master not found')
 
-            try:
-                if self._sentinel_is_reachable():
-                    self._sentinel.discover_master(self._sentinel_master_name)
-                    return True
-            except MasterNotFoundError:
-                self._logger.warn('Master not found')
-            except Exception:
-                self._logger.warn('Master not found')
+        return False
 
-            return False
+    def _is_reachable(self):
+        """Check if one of the given sentinel servers are reachable"""
 
-        def _is_reachable(self):
-            """Check if one of the given sentinel servers are reachable"""
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        for node in nodes:
+            result = sock.connect_ex(node)
 
-            for node in nodes:
-                result = sock.connect_ex(node)
+            if result == 0:
+                return True
 
-                if result == 0:
-                    return True
+        self._logger.warn('Cannot connect to one of the given sentinel servers')
+        return False
 
-            self._logger.warn('Cannot connect to one of the given sentinel servers')
-            return False
+    def reconnect(self):
+        self._check_connections()
 
-        def reconnect(self):
-            self._check_connections()
+    def invalidate(self):
+        """Invalidates the current transport and disconnects all redis connections"""
 
-        def invalidate(self):
-            """Invalidates the current transport and disconnects all redis connections"""
+        super(RedisTransport, self).invalidate()
+        self._master.connection_pool.disconnect()
+        return False
 
-            super(RedisTransport, self).invalidate()
-            self._master.connection_pool.disconnect()
-            return False
+    def callback(self, filename, lines, **kwargs):
+        """Sends log lines to redis servers"""
 
-        def callback(self, filename, lines, **kwargs):
-            """Sends log lines to redis servers"""
+        self._logger.debug('Redis transport called')
 
-            self._logger.debug('Redis transport called')
+        timestamp = self.get_timestamp(**kwargs)
+        if kwargs.get('timestamp', False):
+            del kwargs['timestamp']
 
-            timestamp = self.get_timestamp(**kwargs)
-            if kwargs.get('timestamp', False):
-                del kwargs['timestamp']
+        namespaces = self._beaver_config.get_field('redis_namespace', filename)
 
-            namespaces = self._beaver_config.get_field('redis_namespace', filename)
+        if not namespaces:
+            namespaces = self._namespace
+            namespaces = namespaces.split(",")
 
-            if not namespaces:
-                namespaces = self._namespace
-                namespaces = namespaces.split(",")
+        self._logger.debug('Got namespaces: '.join(namespaces))
 
-            self._logger.debug('Got namespaces: '.join(namespaces))
+        data_type = self._data_type
+        self._logger.debug('Got data type: ' + data_type)
 
-            data_type = self._data_type
-            self._logger.debug('Got data type: ' + data_type)
+        pipeline = self._master.pipeline(transaction=False)
 
-            pipeline = self._master.pipeline(transaction=False)
+        callback_map = {
+            self.LIST_DATA_TYPE: pipeline.rpush,
+            self.CHANNEL_DATA_TYPE: pipeline.publish,
+        }
+        callback_method = callback_map[data_type]
 
-            callback_map = {
-                self.LIST_DATA_TYPE: pipeline.rpush,
-                self.CHANNEL_DATA_TYPE: pipeline.publish,
-            }
-            callback_method = callback_map[data_type]
+        for line in lines:
+            for namespace in namespaces:
+                callback_method(
+                    namespace.strip(),
+                    self.format(filename, line, timestamp, **kwargs)
+                )
 
-            for line in lines:
-                for namespace in namespaces:
-                    callback_method(
-                        namespace.strip(),
-                        self.format(filename, line, timestamp, **kwargs)
-                    )
-
-            try:
-                pipeline.execute()
-            except redis.exceptions.RedisError, exception:
-                self._logger.warn('Cannot push lines to redis server: ' + server['url'])
-                raise TransportException(exception)
+        try:
+            pipeline.execute()
+        except redis.exceptions.RedisError, exception:
+            self._logger.warn('Cannot push lines to redis server: ' + server['url'])
+            raise TransportException(exception)
