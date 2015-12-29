@@ -51,7 +51,7 @@ class SentinelTransport(BaseTransport):
         """Check if one of the given sentinel servers are reachable"""
 
         for node in self._nodes:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) as
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             result = sock.connect_ex(node)
             sock.close()
             return (result == 0)
