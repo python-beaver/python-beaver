@@ -50,8 +50,8 @@ class SentinelTransport(BaseTransport):
     def _is_reachable(self):
         """Check if one of the given sentinel servers are reachable"""
 
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-            for node in nodes:
+        for node in nodes:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
                 result = sock.connect_ex(node)
                 return (result == 0)
 
