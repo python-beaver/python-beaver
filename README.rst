@@ -48,6 +48,12 @@ You can also build the docs locally::
 
 HTML docs will be available in `beaver/docs/_build/html`.
 
+Contributing
+=======
+
+When contributing to Beaver, please review the full guidelines here: https://github.com/josegonzalez/python-beaver/blob/master/CONTRIBUTING.rst.
+If you would like, you can open an issue to let others know about your work in progress. Documentation must be included and tests must pass on Python 2.6 and 2.7 for pull requests to be accepted.
+
 Credits
 =======
 

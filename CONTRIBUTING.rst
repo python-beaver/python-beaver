@@ -60,6 +60,7 @@ request can be merged:
 -  All changes must be backwards compatible.
 -  Minor commits within a larger PR should be squashed to reduce noise
    in the changelog.
+-  Changes to public facing functionality should include relevant updates to the documentation
 
 The best way to help with pull requests is to comment on pull requests
 by noting if any of these key points are missing, it will both help get
