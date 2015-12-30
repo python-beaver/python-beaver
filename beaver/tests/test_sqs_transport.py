@@ -9,7 +9,7 @@ import mock
 import tempfile
 import logging
 
-import beaver
+import beaver_sqs
 from beaver.config import BeaverConfig
 from beaver.transports import create_transport
 from beaver.unicode_dammit import unicode_dammit
@@ -49,7 +49,7 @@ class SqsTests(unittest.TestCase):
 
         transport = create_transport(cls.beaver_config, logger=cls.logger)
 
-        cls.assertIsInstance(transport, beaver.transports.sqs_transport.SqsTransport)
+        cls.assertIsInstance(transport, beaver_sqs.Transport)
         transport.interrupt()
 
     @mock_sqs
@@ -62,7 +62,7 @@ class SqsTests(unittest.TestCase):
 
         transport = create_transport(cls.beaver_config, logger=cls.logger)
 
-        cls.assertIsInstance(transport, beaver.transports.sqs_transport.SqsTransport)
+        cls.assertIsInstance(transport, beaver_sqs.Transport)
 
     @mock_sqs
     def test_sqs_auth_key(cls):
@@ -74,7 +74,7 @@ class SqsTests(unittest.TestCase):
 
         transport = create_transport(cls.beaver_config, logger=cls.logger)
 
-        cls.assertIsInstance(transport, beaver.transports.sqs_transport.SqsTransport)
+        cls.assertIsInstance(transport, beaver_sqs.Transport)
         transport.interrupt()
 
     @mock_sqs
@@ -88,7 +88,7 @@ class SqsTests(unittest.TestCase):
 
         transport = create_transport(cls.beaver_config, logger=cls.logger)
 
-        cls.assertIsInstance(transport, beaver.transports.sqs_transport.SqsTransport)
+        cls.assertIsInstance(transport, beaver_sqs.Transport)
         transport.interrupt()
 
     @mock_sqs
@@ -101,7 +101,7 @@ class SqsTests(unittest.TestCase):
 
         transport = create_transport(cls.beaver_config, logger=cls.logger)
 
-        cls.assertIsInstance(transport, beaver.transports.sqs_transport.SqsTransport)
+        cls.assertIsInstance(transport, beaver_sqs.Transport)
         transport.interrupt()
 
     @mock_sqs
@@ -115,7 +115,7 @@ class SqsTests(unittest.TestCase):
 
         transport = create_transport(cls.beaver_config, logger=cls.logger)
 
-        cls.assertIsInstance(transport, beaver.transports.sqs_transport.SqsTransport)
+        cls.assertIsInstance(transport, beaver_sqs.Transport)
         transport.interrupt()
 
     @mock_sqs
@@ -129,7 +129,7 @@ class SqsTests(unittest.TestCase):
 
         transport = create_transport(cls.beaver_config, logger=cls.logger)
 
-        cls.assertIsInstance(transport, beaver.transports.sqs_transport.SqsTransport)
+        cls.assertIsInstance(transport, beaver_sqs.Transport)
         transport.interrupt()
 
     @mock_sqs
@@ -143,7 +143,7 @@ class SqsTests(unittest.TestCase):
 
         transport = create_transport(cls.beaver_config, logger=cls.logger)
 
-        cls.assertIsInstance(transport, beaver.transports.sqs_transport.SqsTransport)
+        cls.assertIsInstance(transport, beaver_sqs.Transport)
         transport.interrupt()
 
     @mock_sqs
@@ -157,7 +157,7 @@ class SqsTests(unittest.TestCase):
 
         transport = create_transport(cls.beaver_config, logger=cls.logger)
 
-        cls.assertIsInstance(transport, beaver.transports.sqs_transport.SqsTransport)
+        cls.assertIsInstance(transport, beaver_sqs.Transport)
 
         data = {}
         lines = []
@@ -185,7 +185,7 @@ class SqsTests(unittest.TestCase):
 
         transport = create_transport(cls.beaver_config, logger=cls.logger)
 
-        cls.assertIsInstance(transport, beaver.transports.sqs_transport.SqsTransport)
+        cls.assertIsInstance(transport, beaver_sqs.Transport)
 
         data = {}
         lines = []
@@ -213,7 +213,7 @@ class SqsTests(unittest.TestCase):
 
         transport = create_transport(cls.beaver_config, logger=cls.logger)
 
-        cls.assertIsInstance(transport, beaver.transports.sqs_transport.SqsTransport)
+        cls.assertIsInstance(transport, beaver_sqs.Transport)
 
         data = {}
         lines = []
@@ -241,7 +241,7 @@ class SqsTests(unittest.TestCase):
 
         transport = create_transport(cls.beaver_config, logger=cls.logger)
 
-        cls.assertIsInstance(transport, beaver.transports.sqs_transport.SqsTransport)
+        cls.assertIsInstance(transport, beaver_sqs.Transport)
 
         data = {}
         lines = []
