@@ -38,19 +38,19 @@ Get the Code
 ------------
 
 Beaver is actively developed on GitHub, where the code is
-`always available <https://github.com/josegonzalez/beaver>`_.
+`always available <https://github.com/python-beaver/beaver>`_.
 
 You can either clone the public repository::
 
-    git clone git://github.com/josegonzalez/beaver.git
+    git clone git://github.com/python-beaver/beaver.git
 
-Download the `tarball <https://github.com/josegonzalez/beaver/tarball/master>`_::
+Download the `tarball <https://github.com/python-beaver/beaver/tarball/master>`_::
 
-    $ curl -OL https://github.com/josegonzalez/beaver/tarball/master
+    $ curl -OL https://github.com/python-beaver/beaver/tarball/master
 
-Or, download the `zipball <https://github.com/josegonzalez/beaver/zipball/master>`_::
+Or, download the `zipball <https://github.com/python-beaver/beaver/zipball/master>`_::
 
-    $ curl -OL https://github.com/josegonzalez/beaver/zipball/master
+    $ curl -OL https://github.com/python-beaver/beaver/zipball/master
 
 
 Once you have a copy of the source, you can embed it in your Python package,

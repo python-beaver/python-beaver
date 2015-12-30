@@ -1,6 +1,6 @@
 # Contributing to Python-Beaver
 
-♥ [Beaver](https://github.com/josegonzalez/python-beaver) and want to get involved?
+♥ [Beaver](https://github.com/python-beaver/python-beaver) and want to get involved?
 Thanks! There are plenty of ways you can help!
 
 Please take a moment to review this document in order to make the contribution
@@ -13,7 +13,7 @@ patches and features.
 
 ## Using the issue tracker
 
-The [issue tracker](https://github.com/josegonzalez/python-beaver/issues) is
+The [issue tracker](https://github.com/python-beaver/python-beaver/issues) is
 the preferred channel for [bug reports](#bugs), [features requests](#features)
 and [submitting pull requests](#pull-requests).
 
@@ -95,7 +95,7 @@ included in the project:
    # Navigate to the newly cloned directory
    cd python-beaver
    # Assign the original repo to a remote called "upstream"
-   git remote add upstream https://github.com/josegonzalez/python-beaver.git
+   git remote add upstream https://github.com/python-beaver/python-beaver.git
    ```
 
 2. If you cloned a while ago, get the latest changes from upstream:
