@@ -64,7 +64,7 @@ setup(
         'beaver.worker'
     ],
     scripts=['bin/beaver'],
-    url='http://github.com/josegonzalez/beaver',
+    url='http://github.com/python-beaver/python-beaver',
     license='LICENSE.txt',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
