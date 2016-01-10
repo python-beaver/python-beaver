@@ -3,6 +3,7 @@ import argparse
 import glob2
 import itertools
 import logging
+from logging.handlers import RotatingFileHandler
 import platform
 import re
 import os
@@ -47,11 +48,18 @@ def parse_args():
     parser.add_argument('-t', '--transport', help='log transport method', dest='transport', default=None, choices=['kafka', 'mqtt', 'rabbitmq', 'redis', 'sns', 'sqs', 'kinesis', 'stdout', 'tcp', 'udp', 'zmq', 'http'])
     parser.add_argument('-v', '--version', help='output version and quit', dest='version', default=False, action='store_true')
     parser.add_argument('--fqdn', help='use the machine\'s FQDN for source_host', dest='fqdn', default=False, action='store_true')
+    parser.add_argument('--max-bytes', action='store', dest='max_bytes', type=int, default=64 * 1024 * 1024, help='Maximum bytes per a logfile.')
+    parser.add_argument('--backup-count', action='store', dest='backup_count', type=int, default=1, help='Maximum number of logfiles to backup.')
 
-    return parser.parse_args()
+    args = parser.parse_args()
+
+    if args.config != "/dev/null":
+        args.config = os.path.realpath(args.config)
+
+    return args
 
 
-def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None, config=None):
+def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None, config=None, max_bytes=None, backup_count=None):
     logger = logging.getLogger(name)
     logger.propagate = False
     if logger.handlers:
@@ -65,7 +73,6 @@ def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None
         if formatter is None:
             formatter = logging.Formatter('[%(asctime)s] %(levelname)-7s %(message)s')
 
-        handler = logging.StreamHandler()
         if output is None and has_args:
             if config and config.get('output'):
                 output = config.get('output')
@@ -76,15 +83,31 @@ def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None
             output = os.path.realpath(output)
 
         if output is not None:
-            file_handler = logging.FileHandler(output)
+            if has_args and backup_count is None:
+                backup_count = args.backup_count
+
+            if has_args and max_bytes is None:
+                max_bytes = args.max_bytes
+
+            if backup_count is not None and max_bytes is not None:
+                assert backup_count > 0
+                assert max_bytes > 0
+                ch = RotatingFileHandler(output, 'a', max_bytes, backup_count)
+                if formatter is not False:
+                    ch.setFormatter(formatter)
+                logger.addHandler(ch)
+            else:
+                file_handler = logging.FileHandler(output)
+                if formatter is not False:
+                    file_handler.setFormatter(formatter)
+                logger.addHandler(file_handler)
+        else:
+            handler = logging.StreamHandler()
+
             if formatter is not False:
-                file_handler.setFormatter(formatter)
-            logger.addHandler(file_handler)
+                handler.setFormatter(formatter)
 
-        if formatter is not False:
-            handler.setFormatter(formatter)
-
-        logger.addHandler(handler)
+            logger.addHandler(handler)
 
     if debug:
         logger.setLevel(logging.DEBUG)
