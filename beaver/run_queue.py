@@ -76,13 +76,14 @@ def run_queue(queue, beaver_config, logger=None):
                         count += 1
                         logger.debug("Number of transports: " + str(count))
                         break
-                    except TransportException:
+                    except TransportException, e:
                         failure_count = failure_count + 1
                         if failure_count > beaver_config.get('max_failure'):
                             failure_count = beaver_config.get('max_failure')
 
                         sleep_time = beaver_config.get('respawn_delay') ** failure_count
-                        logger.info('Caught transport exception, reconnecting in %d seconds' % sleep_time)
+                        logger.info('Caught transport exception: %s', e)
+                        logger.info('Reconnecting in %d seconds' % sleep_time)
 
                         try:
                             transport.invalidate()
