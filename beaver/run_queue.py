@@ -30,10 +30,6 @@ def run_queue(queue, beaver_config, logger=None):
                 logger.info('Transport connection issues, stopping queue')
                 break
 
-            if int(time.time()) - last_update_time > queue_timeout:
-                logger.info('Queue timeout of "{0}" seconds exceeded, stopping queue'.format(queue_timeout))
-                break
-
             command = None
             try:
                 if queue.full():
@@ -53,6 +49,10 @@ def run_queue(queue, beaver_config, logger=None):
                     break
                 else:
                     logger.debug('No data')
+
+            if int(time.time()) - last_update_time > queue_timeout:
+                logger.info('Queue timeout of "{0}" seconds exceeded, stopping queue'.format(queue_timeout))
+                break
 
             if command == 'callback':
                 if data.get('ignore_empty', False):
@@ -76,13 +76,14 @@ def run_queue(queue, beaver_config, logger=None):
                         count += 1
                         logger.debug("Number of transports: " + str(count))
                         break
-                    except TransportException:
+                    except TransportException, e:
                         failure_count = failure_count + 1
                         if failure_count > beaver_config.get('max_failure'):
                             failure_count = beaver_config.get('max_failure')
 
                         sleep_time = beaver_config.get('respawn_delay') ** failure_count
-                        logger.info('Caught transport exception, reconnecting in %d seconds' % sleep_time)
+                        logger.info('Caught transport exception: %s', e)
+                        logger.info('Reconnecting in %d seconds' % sleep_time)
 
                         try:
                             transport.invalidate()

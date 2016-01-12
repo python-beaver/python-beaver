@@ -44,6 +44,7 @@ with mock.patch('pika.adapters.SelectConnection') as mock_pika:
             beaver_config = self._get_config(transport='rabbitmq')
             transport = create_transport(beaver_config, logger=self.logger)
             self.assertIsInstance(transport, beaver.transports.rabbitmq_transport.RabbitmqTransport)
+            transport.interrupt()
 
         @mock.patch('redis.StrictRedis', fakeredis.FakeStrictRedis)
         def test_builtin_redis(self):
