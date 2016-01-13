@@ -1,6 +1,30 @@
 Changelog
 =========
 
+36.0.1 (2016-01-13)
+-------------------
+
+- Fix README.rst formatting for rst-lint. [Jose Diaz-Gonzalez]
+
+- Remove tabs and use "except .. as .." [EYJ]
+
+- Try to fix hanging test by joining leftover thread. [EYJ]
+
+- Fix Queue timeout occurring after successful reconnect. [EYJ]
+
+- Fix rabbitmq reconnection behaviour to use the beaver reconnect
+  mechanism. [EYJ]
+
+- Migrating repo locations. [Jamie Cressey]
+
+- Fixups for CONTRIBUTING. [Jamie Cressey]
+
+- Fixing formatting. [Jamie Cressey]
+
+- Changes to guidelines and adding reference to README. [Jamie Cressey]
+
+- Adding contributing guidelines. [Jamie Cressey]
+
 36.0.0 (2015-12-15)
 -------------------
 
