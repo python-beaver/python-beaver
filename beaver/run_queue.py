@@ -76,7 +76,7 @@ def run_queue(queue, beaver_config, logger=None):
                         count += 1
                         logger.debug("Number of transports: " + str(count))
                         break
-                    except TransportException, e:
+                    except TransportException as e:
                         failure_count = failure_count + 1
                         if failure_count > beaver_config.get('max_failure'):
                             failure_count = beaver_config.get('max_failure')

@@ -99,8 +99,8 @@ class RabbitmqTransport(BaseTransport):
         self._logger.debug("RabbitMQ: Reconnecting...")
         self.interrupt()
 
-	self._thread = Thread(target=self._connection_start)
-	self._thread.start()
+        self._thread = Thread(target=self._connection_start)
+        self._thread.start()
         while self._thread.is_alive() and not self._connection_ok:
             time.sleep(1)
         if self._connection_ok:
@@ -122,7 +122,7 @@ class RabbitmqTransport(BaseTransport):
             )
             if not self._connection.is_closed:
                 self._connection.ioloop.start()
-        except Exception, e:
+        except Exception as e:
             self._logger.error('RabbitMQ: Failed to connect: %s', e)
 
     def _connect(self):
