@@ -1,7 +1,7 @@
 Changelog
 =========
 
-36.0.1 (2016-01-13)
+36.1.0 (2016-02-14)
 -------------------
 
 - Fix README.rst formatting for rst-lint. [Jose Diaz-Gonzalez]
