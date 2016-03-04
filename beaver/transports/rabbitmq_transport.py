@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from Queue import Queue
 import pika
+import pika.credentials
 import ssl
 from threading import Thread
 import time
@@ -18,7 +19,7 @@ class RabbitmqTransport(BaseTransport):
         config_to_store = [
             'key', 'exchange', 'username', 'password', 'host', 'port', 'vhost',
             'queue', 'queue_durable', 'ha_queue', 'exchange_type', 'exchange_durable',
-            'ssl', 'ssl_key', 'ssl_cert', 'ssl_cacert', 'timeout', 'delivery_mode'
+            'ssl', 'ssl_key', 'ssl_cert', 'ssl_cacert', 'timeout', 'delivery_mode', 'external_creds'
         ]
 
         for key in config_to_store:
@@ -126,10 +127,13 @@ class RabbitmqTransport(BaseTransport):
             self._logger.error('RabbitMQ: Failed to connect: %s', e)
 
     def _connect(self):
-        credentials = pika.PlainCredentials(
-            self._rabbitmq_config['username'],
-            self._rabbitmq_config['password']
-        )
+        if self._rabbitmq_config['external_creds']:
+            credentials = pika.credentials.ExternalCredentials()
+        else:
+            credentials = pika.PlainCredentials(
+                self._rabbitmq_config['username'],
+                self._rabbitmq_config['password']
+            )
         ssl_options = {
             'keyfile': self._rabbitmq_config['ssl_key'],
             'certfile': self._rabbitmq_config['ssl_cert'],
