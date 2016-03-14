@@ -32,7 +32,7 @@ From PyPI::
 Documentation
 =============
 
-Full documentation is available online at http://beaver.readthedocs.org/
+Full documentation is available online at http://python-beaver.readthedocs.org/
 
 You can also build the docs locally::
 
