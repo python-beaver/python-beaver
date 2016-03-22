@@ -36,6 +36,7 @@ def parse_args():
     parser.add_argument('-c', '--configfile', help='ini config file path', dest='config', default='/dev/null')
     parser.add_argument('-C', '--confd-path', help='path to conf.d directory', dest='confd_path', default='/etc/beaver/conf.d')
     parser.add_argument('-d', '--debug', help='enable debug mode', dest='debug', default=False, action='store_true')
+    parser.add_argument('-V', '--verbose', help='enable verbose output', dest='verbose', default=False, action='store_true')
     parser.add_argument('-D', '--daemonize', help='daemonize in the background', dest='daemonize', default=False, action='store_true')
     parser.add_argument('-f', '--files', help='space-separated filelist to watch, can include globs (*.log). Overrides --path argument', dest='files', default=None, nargs='+')
     parser.add_argument('-F', '--format', help='format to use when sending to transport', default=None, dest='format', choices=['json', 'msgpack', 'raw', 'rawjson', 'string', 'gelf'])
@@ -51,7 +52,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None, config=None):
+def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None, verbose=None, config=None):
     logger = logging.getLogger(name)
     logger.propagate = False
     if logger.handlers:
@@ -60,6 +61,8 @@ def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None
     has_args = args is not None and type(args) == argparse.Namespace
     if debug is None:
         debug = has_args and args.debug is True
+    if verbose is None:
+        verbose = has_args and args.verbose is True
 
     if not logger.handlers:
         if formatter is None:
@@ -90,8 +93,12 @@ def setup_custom_logger(name, args=None, output=None, formatter=None, debug=None
         logger.setLevel(logging.DEBUG)
         if hasattr(logging, 'captureWarnings'):
             logging.captureWarnings(True)
+    elif verbose:
+        logger.setLevel(loggin.INFO)
+        if hasattr(logging, 'captureWarnings'):
+            logging.captureWarnings(True)
     else:
-        logger.setLevel(logging.INFO)
+        logger.setLevel(logging.WARN)
         if hasattr(logging, 'captureWarnings'):
             logging.captureWarnings(False)
 
