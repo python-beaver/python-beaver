@@ -41,7 +41,7 @@ optional arguments::
 Configuration File Options
 --------------------------
 
-Beaver can optionally get data from a ``configfile`` using the ``-c`` flag. This file is in ``ini`` format. Global configuration will be under the ``beaver`` stanza. The following are global beaver configuration keys with their respective meanings:
+Beaver can optionally get data from the ``ENVIRONMENT``  (option names in all caps) or a ``configfile`` using the ``-c`` flag. This file is in ``ini`` format. Global configuration will be under the ``beaver`` stanza. The following are global beaver configuration keys with their respective meanings:
 
 * kafka_client_id: Default ``beaver-kafka``. Kafka client id
 * kafka_hosts: Default ``localhost:9092``. Seed list of hosts (host:port)separated by commas for kafka cluster
