@@ -63,7 +63,7 @@ class BeaverConfig():
             'kafka_batch_n': os.environ.get('KAFKA_BATCH_N', 10),
             'kafka_batch_t': os.environ.get('KAFKA_BATCH_T', 10),
             'kafka_round_robin': os.environ.get('KAFKA_ROUND_ROBIN', False),
-            'mqtt_clientid': 'mosquitto',
+            'mqtt_clientid': 'paho',
             'mqtt_host': 'localhost',
             'mqtt_port': '1883',
             'mqtt_topic': '/logstash',

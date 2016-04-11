@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from mosquitto import Mosquitto
+import paho.mqtt.client as paho
 
 from beaver.transports.base_transport import BaseTransport
 from beaver.transports.exception import TransportException
@@ -9,12 +9,12 @@ class MqttTransport(BaseTransport):
 
     def __init__(self, beaver_config, logger=None):
         """
-        Mosquitto client initilization. Once this this transport is initialized
+        Paho client initialization. Once this this transport is initialized
         it has invoked a connection to the server
         """
         super(MqttTransport, self).__init__(beaver_config, logger=logger)
 
-        self._client = Mosquitto(beaver_config.get('mqtt_clientid'), clean_session=True)
+        self._client = paho.Client(beaver_config.get('mqtt_clientid'), clean_session=True)
         self._topic = beaver_config.get('mqtt_topic')
         self._client.connect(
             host=beaver_config.get('mqtt_host'),
@@ -24,9 +24,9 @@ class MqttTransport(BaseTransport):
 
         def on_disconnect(mosq, obj, rc):
             if rc == 0:
-                logger.debug('Mosquitto has successfully disconnected')
+                logger.debug('Paho has successfully disconnected')
             else:
-                logger.debug('Mosquitto unexpectedly disconnected')
+                logger.debug('Paho unexpectedly disconnected')
 
         self._client.on_disconnect = on_disconnect
 
