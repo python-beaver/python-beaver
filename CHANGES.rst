@@ -1,10 +1,18 @@
 Changelog
 =========
 
-36.1.0 (2016-02-14)
+36.2.0 (2016-04-12)
 -------------------
 
-- Replaced Mosquitto library with Paho-mqtt for mqtt transport. [Justin van Heerde]
+- Replaced Mosquitto with Paho-mqtt for mqtt transport. [Justin van
+  Heerde]
+
+- Add log file rotate in limit size. [soarpenguin]
+
+- Fix README.rst docs link. [Andrew Grigorev]
+
+36.0.1 (2016-01-13)
+-------------------
 
 - Fix README.rst formatting for rst-lint. [Jose Diaz-Gonzalez]
 
@@ -233,6 +241,9 @@ Changelog
   Nektarios]
 
   See at #312
+
+33.3.0 (2015-04-08)
+-------------------
 
 - Basic docs for GELF formatter. [Oleg Rekutin]
 
