@@ -9,7 +9,7 @@ class StompTransport(BaseTransport):
 
     def __init__(self, beaver_config, logger=None):
         """
-        Mosquitto client initilization. Once this this transport is initialized
+        Stomp client initialization. Once this this transport is initialized
         it has invoked a connection to the server
         """
         super(StompTransport, self).__init__(beaver_config, logger=logger)

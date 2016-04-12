@@ -54,7 +54,7 @@ Beaver can optionally get data from a ``configfile`` using the ``-c`` flag. This
 * kafka_batch_t: Default ``10``. Batch log message timeout
 * mqtt_host: Default ``localhost``. Host for mosquitto
 * mqtt_port: Default ``1883``. Port for mosquitto
-* mqtt_clientid: Default ``mosquitto``. Mosquitto client id
+* mqtt_clientid: Default ``paho``. Paho client id
 * mqtt_keepalive: Default ``60``. mqtt keepalive ping
 * mqtt_topic: Default ``/logstash``. Topic to publish to
 * rabbitmq_host: Defaults ``localhost``. Host for RabbitMQ
@@ -531,7 +531,7 @@ Kinesis Transport::
     # From the commandline
     beaver -c /etc/beaver/conf -t kinesis
 
-Mqtt transport using Mosquitto::
+Mqtt transport using Paho::
 
     # /etc/beaver/conf
     [beaver]

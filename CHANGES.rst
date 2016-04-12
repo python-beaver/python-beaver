@@ -4,6 +4,8 @@ Changelog
 36.1.0 (2016-02-14)
 -------------------
 
+- Replaced Mosquitto library with Paho-mqtt for mqtt transport. [Justin van Heerde]
+
 - Fix README.rst formatting for rst-lint. [Jose Diaz-Gonzalez]
 
 - Remove tabs and use "except .. as .." [EYJ]
