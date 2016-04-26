@@ -197,6 +197,8 @@ def multiline_merge(lines, current_event, re_after, re_before):
     """
     events = []
     for line in lines:
+        if line == '':
+            break
         if re_before and re_before.match(line):
             current_event.append(line)
         elif re_after and current_event and re_after.match(current_event[-1]):
