@@ -8,3 +8,4 @@ pika>=0.9.14
 python-daemon>=1.5.2,<=1.6.1
 redis>=2.7.5
 requests
+dogpile.cache>=0.5.4

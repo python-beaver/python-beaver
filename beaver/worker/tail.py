@@ -46,6 +46,7 @@ class Tail(BaseLog):
         self._tail_lines = beaver_config.get_field('tail_lines', filename)
         self._tags = beaver_config.get_field('tags', filename)
         self._type = beaver_config.get_field('type', filename)
+        self._bytes_to_read = int(beaver_config.get('bytes_to_read'))
 
         # The following is for the buffered tokenization
         # Store the specified delimiter
@@ -233,7 +234,7 @@ class Tail(BaseLog):
         """Read lines from a file and performs a callback against them"""
         while True:
             try:
-                data = self._file.read(4096)
+                data = self._file.read(self._bytes_to_read)
             except IOError, e:
                 if e.errno == errno.ESTALE:
                     self.active = False

@@ -20,6 +20,7 @@ class BeaverConfig():
             'add_field_env': '',
             'debug': '0',
             'discover_interval': '15',
+            'inter_pass_interval': '0.1',
             'encoding': 'utf_8',
 
             # should be a python regex of files to remove
@@ -132,12 +133,16 @@ class BeaverConfig():
             # consumer processes
             'number_of_consumer_processes': '1',
 
+            # bytes to read from a file at a time
+            'bytes_to_read': '4096',
+
             # interprocess queue max size before puts block
             'max_queue_size': '100',
 
             # time in seconds before updating the file mapping
             'update_file_mapping_time': '',  # deprecated
             'discover_interval': '15',
+            'inter_pass_interval': '0.1',
 
             # time in seconds from last command sent before a queue kills itself
             'queue_timeout': '60',
@@ -185,6 +190,7 @@ class BeaverConfig():
 
             # Ignore files older then n days, use 0 to disable
             'ignore_old_files': 0
+
         }
 
         self._configfile = args.config
@@ -331,6 +337,7 @@ class BeaverConfig():
                 'kafka_batch_t',
                 'kafka_ack_timeout',
                 'number_of_consumer_processes',
+                'bytes_to_read',
                 'ignore_old_files'
             ]
             for key in require_int:
@@ -340,6 +347,7 @@ class BeaverConfig():
             require_float = [
                 'update_file_mapping_time',
                 'discover_interval',
+                'inter_pass_interval',
             ]
 
             for key in require_float:
