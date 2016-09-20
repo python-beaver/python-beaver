@@ -1,6 +1,17 @@
 Changelog
 =========
 
+36.2.1 (2016-09-20)
+-------------------
+
+- Avoid unreference variable 'st' error if file was removed. Raise
+  exception if unrecognized environment error from os.stat. [Greg
+  Sterin]
+
+- Fix GitHub links. [Robin Baumgartner]
+
+  The project was renamed to 'python-beaver', but the links do not reflect that change.
+
 36.2.0 (2016-04-12)
 -------------------
 
