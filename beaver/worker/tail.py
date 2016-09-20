@@ -207,6 +207,8 @@ class Tail(BaseLog):
             if err.errno == errno.ENOENT:
                 self._log_info('file removed')
                 self.close()
+                return
+            raise
 
         fid = self.get_file_id(st)
         if fid != self._fid:
