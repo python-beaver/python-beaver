@@ -57,6 +57,7 @@ Beaver can optionally get data from a ``configfile`` using the ``-c`` flag. This
 * mqtt_clientid: Default ``paho``. Paho client id
 * mqtt_keepalive: Default ``60``. mqtt keepalive ping
 * mqtt_topic: Default ``/logstash``. Topic to publish to
+* number_of_consumer_processes: Default ``1``. Number of parallel consumer processes that read and process messages from the beaver queue.
 * rabbitmq_host: Defaults ``localhost``. Host for RabbitMQ
 * rabbitmq_port: Defaults ``5672``. Port for RabbitMQ
 * rabbitmq_ssl: Defaults ``0``. Connect using SSL/TLS
