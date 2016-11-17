@@ -20,6 +20,9 @@ class KinesisTransport(BaseTransport):
         # self-imposed max batch size to minimize the number of records in a given call to Kinesis
         self._batch_size_max = beaver_config.get('kinesis_aws_batch_size_max', '512000')
 
+        # Kinesis Limit http://docs.aws.amazon.com/kinesis/latest/APIReference/API_PutRecords.html#API_PutRecords_RequestSyntax
+        self._max_records_per_batch = 500
+
         try:
             if self._access_key is None and self._secret_key is None:
                 self._connection = boto.kinesis.connect_to_region(self._region)
@@ -55,7 +58,7 @@ class KinesisTransport(BaseTransport):
                 continue
 
             # Check the self-enforced/declared batch size and flush before moving forward if we've eclipsed the max
-            if (len(message_batch) > 0) and ((message_batch_size + message_size) >= self._batch_size_max):
+            if len(message_batch) > 0 and ((message_batch_size + message_size) >= self._batch_size_max or len(message_batch) == self._max_records_per_batch):
                 self._logger.debug('Flushing {0} messages to Kinesis stream {1} bytes'.format(
                     len(message_batch), message_batch_size))
                 self._send_message_batch(message_batch)
