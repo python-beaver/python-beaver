@@ -422,7 +422,7 @@ class Tail(BaseLog):
 
         conn = sqlite3.connect(self._sincedb_path, isolation_level=None)
         cursor = conn.cursor()
-        query = 'insert or ignore into sincedb (fid, filename) values (:fid, :filename);'
+        query = 'insert or replace into sincedb (fid, filename) values (:fid, :filename);'
         cursor.execute(query, {
             'fid': self._fid,
             'filename': self._filename
