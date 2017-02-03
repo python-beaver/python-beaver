@@ -80,7 +80,8 @@ def run(args=None):
             callback=queue_put,
             logger=logger
         )
-        manager.run()
+        inter_pass_interval = beaver_config.get('inter_pass_interval')
+        manager.run(interval=inter_pass_interval)
 
     while 1:
 
