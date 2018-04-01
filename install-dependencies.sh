@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-pip install -r requirements/zeromq.txt -r requirements/tests.txt --use-mirrors
+pip install -r requirements/zeromq.txt -r requirements/tests.txt
 
 mkdir ~/.aws/
 cat > ~/.aws/credentials << EOL
