@@ -68,6 +68,10 @@ class Tail(BaseLog):
         self._multiline_regex_after = beaver_config.get_field('multiline_regex_after', filename)
         self._multiline_regex_before = beaver_config.get_field('multiline_regex_before', filename)
 
+        # Logfilter attributes
+        self._logfilter_regex = beaver_config.get_field('logfilter_regex', filename)
+        self._logfilter_exclude = int(beaver_config.get_field('logfilter_exclude', filename))
+
         self._update_file()
         if self.active:
             self._log_info("watching logfile")
@@ -262,6 +266,13 @@ class Tail(BaseLog):
                         self._multiline_regex_before)
             else:
                 events = lines
+
+            # Applying logfilter. Log gets removed when regex doesnt match AND excluding is
+            # deactivated (0) or when regex matches AND excluding is activated (1)
+            if self._logfilter_regex:
+                for current_log in list(events):
+                    if (self._logfilter_regex.match(current_log) != None) == self._logfilter_exclude:
+                        events.remove(current_log)
 
             if events:
                 self._callback_wrapper(events)
