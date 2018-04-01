@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-import fcntl
+# import fcntl
+from beaver.portalocker import Locker as locker
 import os
 
 
@@ -20,7 +21,7 @@ class PidFile(object):
         """Writes the pid of the current process to the path"""
         self.pidfile = open(self.path, 'a+')
         try:
-            fcntl.flock(self.pidfile.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+            locker.lock(self.pidfile.fileno(), locker.LOCK_EX | locker.LOCK_NB)
         except IOError:
             raise SystemExit('Already running according to {0}'.format(self.path))
         self.pidfile.seek(0)

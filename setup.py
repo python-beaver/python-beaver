@@ -63,7 +63,7 @@ setup(
         'beaver.transports',
         'beaver.worker'
     ],
-    scripts=['bin/beaver'],
+    scripts=['bin/beaver', 'bin/beaver_win_service_runner'],
     url='http://github.com/python-beaver/python-beaver',
     license='LICENSE.txt',
     classifiers=[

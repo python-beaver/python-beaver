@@ -11,98 +11,106 @@ from beaver.ssh_tunnel import create_ssh_tunnel
 from beaver.utils import REOPEN_FILES, setup_custom_logger
 from beaver.worker.tail_manager import TailManager
 
+class TailRunner(object):
+    def __init__(self, args):
+        self.logger = setup_custom_logger('beaver', args)
+        self.beaver_config = BeaverConfig(args, logger=self.logger)
 
-def run(args=None):
+        # so the config file can override the logger
+        self.logger = setup_custom_logger('beaver', args, config=self.beaver_config)
 
-    logger = setup_custom_logger('beaver', args)
-    beaver_config = BeaverConfig(args, logger=logger)
-    # so the config file can override the logger
-    logger = setup_custom_logger('beaver', args, config=beaver_config)
+        if self.beaver_config.get('logstash_version') not in [0, 1]:
+            raise LookupError("Invalid logstash_version")
 
-    if beaver_config.get('logstash_version') not in [0, 1]:
-        raise LookupError("Invalid logstash_version")
+        self.queue = multiprocessing.Queue(self.beaver_config.get('max_queue_size'))
 
-    queue = multiprocessing.JoinableQueue(beaver_config.get('max_queue_size'))
+        self.manager_proc = None
+        self.ssh_tunnel = create_ssh_tunnel(self.beaver_config)
+        signal.signal(signal.SIGTERM, self.cleanup)
+        signal.signal(signal.SIGINT, self.cleanup)
+        if os.name != 'nt':
+            signal.signal(signal.SIGQUIT, self.cleanup)
 
-    manager_proc = None
-    ssh_tunnel = create_ssh_tunnel(beaver_config, logger=logger)
+    def __getstate__(self):
+        orig_dict = self.__dict__.copy()
+        orig_dict['logger'] = self.logger.name
+        return orig_dict
+
+    def __setstate__(self, orig_dict):
+        self.__dict__.update(orig_dict)
+        self.logger = setup_custom_logger(orig_dict['logger'])
 
     def queue_put(*args):
-        return queue.put(*args)
+        return self.queue.put(*args)
 
     def queue_put_nowait(*args):
-        return queue.put_nowait(*args)
+        return self.queue.put_nowait(*args)
 
     def cleanup(signalnum, frame):
         if signalnum is not None:
             sig_name = tuple((v) for v, k in signal.__dict__.iteritems() if k == signalnum)[0]
-            logger.info("{0} detected".format(sig_name))
-            logger.info("Shutting down. Please wait...")
+            self.logger.info("{0} detected".format(sig_name))
+            self.logger.info("Shutting down. Please wait...")
         else:
-            logger.info('Worker process cleanup in progress...')
+            self.logger.info('Worker process cleanup in progress...')
 
         try:
-            queue_put_nowait(("exit", ()))
+            self.queue_put_nowait(("exit", ()))
         except Queue.Full:
             pass
 
-        if manager_proc is not None:
+        if self.manager_proc is not None:
             try:
-                manager_proc.terminate()
-                manager_proc.join()
+                self.manager_proc.terminate()
+                self.manager_proc.join()
             except RuntimeError:
                 pass
 
-        if ssh_tunnel is not None:
-            logger.info("Closing ssh tunnel...")
-            ssh_tunnel.close()
+        if self.ssh_tunnel is not None:
+            self.logger.info("Closing ssh tunnel...")
+            self.ssh_tunnel.close()
 
         if signalnum is not None:
-            logger.info("Shutdown complete.")
+            self.logger.info("Shutdown complete.")
             return os._exit(signalnum)
 
-    signal.signal(signal.SIGTERM, cleanup)
-    signal.signal(signal.SIGINT, cleanup)
-    signal.signal(signal.SIGQUIT, cleanup)
 
     def create_queue_consumer():
-        process_args = (queue, beaver_config, logger)
+        process_args = (self.queue, self.beaver_config, self.logger.name)
         proc = multiprocessing.Process(target=run_queue, args=process_args)
 
-        logger.info("Starting queue consumer")
+        self.logger.info("Starting queue consumer")
         proc.start()
         return proc
 
     def create_queue_producer():
         manager = TailManager(
-            beaver_config=beaver_config,
-            queue_consumer_function=create_queue_consumer,
-            callback=queue_put,
-            logger=logger
+            beaver_config=self.beaver_config,
+            queue_consumer_function=self.create_queue_consumer,
+            callback=self.queue_put,
+            logger=self.logger
         )
         manager.run()
 
-    while 1:
+    def run(self):
+        while 1:
+            try:
+                if REOPEN_FILES:
+                    self.logger.debug("Detected non-linux platform. Files will be reopened for tailing")
 
-        try:
+                t = time.time()
+                while True:
+                    if self.manager_proc is None or not self.manager_proc.is_alive():
+                        self.logger.info('Starting worker...')
+                        t = time.time()
+                        self.manager_proc = multiprocessing.Process(target=self.create_queue_producer)
+                        self.manager_proc.start()
+                        self.logger.info('Working...')
+                    self.manager_proc.join(10)
 
-            if REOPEN_FILES:
-                logger.debug("Detected non-linux platform. Files will be reopened for tailing")
-
-            t = time.time()
-            while True:
-                if manager_proc is None or not manager_proc.is_alive():
-                    logger.info('Starting worker...')
-                    t = time.time()
-                    manager_proc = multiprocessing.Process(target=create_queue_producer)
-                    manager_proc.start()
-                    logger.info('Working...')
-                manager_proc.join(10)
-
-                if beaver_config.get('refresh_worker_process'):
-                    if beaver_config.get('refresh_worker_process') < time.time() - t:
-                        logger.info('Worker has exceeded refresh limit. Terminating process...')
-                        cleanup(None, None)
-
-        except KeyboardInterrupt:
-            pass
+                    if self.beaver_config.get('refresh_worker_process'):
+                        if self.beaver_config.get('refresh_worker_process') < time.time() - t:
+                            self.logger.info('Worker has exceeded refresh limit. Terminating process...')
+                            self.cleanup(None, None)
+            except KeyboardInterrupt:
+                pass

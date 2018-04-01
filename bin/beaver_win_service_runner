@@ -1,0 +1,5 @@
+import beaver.win_installer as installer
+from beaver.beaver_service import BeaverWindowsService as bws
+
+if installer.stop_delete_service("Beaver Service"):
+    installer.install_start_service(bws, "Beaver Service", "Beaver Service", True)
