@@ -82,6 +82,7 @@ class BeaverConfig():
             'rabbitmq_exchange_durable': os.environ.get('RABBITMQ_EXCHANGE_DURABLE', '0'),
             'rabbitmq_queue_durable': os.environ.get('RABBITMQ_QUEUE_DURABLE', '0'),
             'rabbitmq_ha_queue': os.environ.get('RABBITMQ_HA_QUEUE', '0'),
+            'rabbitmq_arguments': os.environ.get('RABBITMQ_ARGUMENTS', {}),
             'rabbitmq_key': os.environ.get('RABBITMQ_KEY', 'logstash-key'),
             'rabbitmq_exchange': os.environ.get('RABBITMQ_EXCHANGE', 'logstash-exchange'),
             'rabbitmq_timeout': '1',
@@ -248,6 +249,7 @@ class BeaverConfig():
 
     def _check_for_deprecated_usage(self):
         env_vars = [
+            'RABBITMQ_ARGUMENTS'
             'RABBITMQ_HOST',
             'RABBITMQ_PORT',
             'RABBITMQ_VHOST',

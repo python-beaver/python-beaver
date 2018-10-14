@@ -58,6 +58,7 @@ Beaver can optionally get data from a ``configfile`` using the ``-c`` flag. This
 * mqtt_keepalive: Default ``60``. mqtt keepalive ping
 * mqtt_topic: Default ``/logstash``. Topic to publish to
 * number_of_consumer_processes: Default ``1``. Number of parallel consumer processes that read and process messages from the beaver queue.
+* rabbitmq_arguments: Defaults ``{}``. RabbitMQ arguments comma separated, colon separated key value pairs. i.e ``rabbitmq_arguments: x-max-length:750000,x-max-length-bytes:1073741824``
 * rabbitmq_host: Defaults ``localhost``. Host for RabbitMQ
 * rabbitmq_port: Defaults ``5672``. Port for RabbitMQ
 * rabbitmq_ssl: Defaults ``0``. Connect using SSL/TLS
