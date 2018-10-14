@@ -18,11 +18,17 @@ class RabbitmqTransport(BaseTransport):
         config_to_store = [
             'key', 'exchange', 'username', 'password', 'host', 'port', 'vhost',
             'queue', 'queue_durable', 'ha_queue', 'exchange_type', 'exchange_durable',
-            'ssl', 'ssl_key', 'ssl_cert', 'ssl_cacert', 'timeout', 'delivery_mode'
+            'ssl', 'ssl_key', 'ssl_cert', 'ssl_cacert', 'timeout', 'delivery_mode', 'arguments'
         ]
 
         for key in config_to_store:
             self._rabbitmq_config[key] = beaver_config.get('rabbitmq_' + key)
+        if self._rabbitmq_config['arguments']:
+            self._rabbitmq_config['arguments'] = self.get_rabbitmq_args()
+        if self._rabbitmq_config['ha_queue']:
+            self._rabbitmq_config['arguments']['x-ha-policy'] = 'all'
+
+
 
         self._connection = None
         self._channel = None
@@ -32,6 +38,20 @@ class RabbitmqTransport(BaseTransport):
         self._thread = None
         self._is_valid = True
         self._connect()
+
+    def get_rabbitmq_args(self):
+        res = {}
+        args = self._rabbitmq_config['arguments'].split(',')
+        for x in args:
+            k, v = x.split(':')
+            try:
+                # convert str to int if not a str
+                v = int(v)
+            except ValueError:
+                pass  # is a str, not an int
+            res[k] = v
+        return res
+
 
     def _on_connection_open(self,connection):
         self._logger.debug("RabbitMQ: Connection Created")
@@ -49,7 +69,7 @@ class RabbitmqTransport(BaseTransport):
         self._channel.queue_declare(self._on_queue_declareok,
                                     queue=self._rabbitmq_config['queue'],
                                     durable=self._rabbitmq_config['queue_durable'],
-                                    arguments={'x-ha-policy': 'all'} if self._rabbitmq_config['ha_queue'] else {})
+                                    arguments=self._rabbitmq_config['arguments'])
 
     def _on_queue_declareok(self,unused):
         self._logger.debug("RabbitMQ: Queue Declared")
