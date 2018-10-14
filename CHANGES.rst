@@ -1,8 +1,73 @@
 Changelog
 =========
 
-36.2.1 (2016-09-20)
+36.3.0 (2018-10-14)
 -------------------
+
+Fix
+~~~
+
+- Correct release process. [Jose Diaz-Gonzalez]
+
+Other
+~~~~~
+
+- Fix typo in RABBITMQ_ARGUMENT system property. [eroberts]
+
+- Add arbitrary RabbitMQ arguments - Updated transport to parse
+  arguments -Updated config.py to add system property - Updated user
+  usage documentation - Confirmed no change in functionality if args are
+  not passed. [eroberts]
+
+- Usage fix. [Scott Brenner]
+
+  Fixed missing/incorrect TCP option.
+
+- Remove truncating of logline after 32766 chars (#422) [Robert
+  Wunderer]
+
+  * Remove truncating of logline after 32766 chars
+
+  It is not necessary to limit unicode()'s input to 32766 chars, while
+  doing puts an arbitrary limit on the length of lines beaver can
+  handle.
+
+  * Pin moto version to fix tests
+
+  * multiline_regex_before won't work when logfile ends with empty line
+
+  * Revert "multiline_regex_before won't work when logfile ends with empty line"
+
+  This reverts commit 5196789916afa184beb71a0ef86344d7580d9136.
+
+  * Fix README link
+
+  * Remove truncating of logline after 32766 chars
+
+  It is not necessary to limit unicode()'s input to 32766 chars, while
+  doing puts an arbitrary limit on the length of lines beaver can
+  handle.
+
+
+- Fix README link. [Jamie Cressey]
+
+- Revert "multiline_regex_before won't work when logfile ends with empty
+  line" [Jamie Cressey]
+
+  This reverts commit 5196789916afa184beb71a0ef86344d7580d9136.
+
+
+- Multiline_regex_before won't work when logfile ends with empty line.
+  [jeroenmaelbrancke]
+
+- Pin moto version to fix tests. [Jamie Cressey]
+
+- Fixing primary key reuse issues. [Javier Villar]
+
+- Limiting number of records in batch to 500 as this is the kinesis
+  limit. [Greg Sterin]
+
+- Updating docs for number_of_consumer_processes config. [Greg Sterin]
 
 - Avoid unreference variable 'st' error if file was removed. Raise
   exception if unrecognized environment error from os.stat. [Greg
