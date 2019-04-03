@@ -1,3 +1,9 @@
+python-beaver (36.3.1) stable; urgency=low
+
+  * Release version 36.3.1
+
+ -- Jose Diaz-Gonzalez <release@josediazgonzalez.com>  Wed, 03 Apr 2019 16:48:10 +0000
+
 python-beaver (36.3.0) stable; urgency=low
 
   * Release version 36.3.0
