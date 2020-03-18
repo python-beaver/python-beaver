@@ -1,6 +1,6 @@
 boto>=2.18.0
 conf_d>=0.0.4
-glob2==0.3
+glob2==0.7
 kafka-python==0.9.5
 paho-mqtt==1.1
 msgpack-pure>=0.1.3
