@@ -118,7 +118,7 @@ included in the project:
    [interactive rebase](https://help.github.com/articles/about-git-rebase/)
    feature to tidy up your commits before making them public.
    - Test cases should accompany any change in functionality to the code-base
-   - Any change to end-user functionality should include corrosponding documentation
+   - Any change to end-user functionality should include corresponding documentation
 
 5. Locally merge (or rebase) the upstream development branch into your topic branch:
 
